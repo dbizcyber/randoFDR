@@ -19,7 +19,12 @@ const temp = txt("meteoTemp")
 const vent = txt("meteoVent")
 const raf = txt("meteoRafales")
 
-const parkingCovoit = val("parkingCovoiturage","Non renseigné")
+/* parking covoiturage : saisie manuelle si "Autre" sélectionné */
+const parkingCovoitVal = val("parkingCovoiturage", "Non renseigné")
+const parkingCovoitAutre = val("nouveauParking", "")
+const parkingCovoit = (parkingCovoitVal === "__autre__" && parkingCovoitAutre)
+  ? parkingCovoitAutre
+  : (parkingCovoitVal === "__autre__" ? "Non renseigné" : parkingCovoitVal)
 
 const rv = val("heureRV","--")
 const depart = txt("heureDepart")
