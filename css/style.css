@@ -101,6 +101,9 @@ body {
   background: rgba(100,30,0,0.96);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid rgba(255,255,255,0.08);
+  position: sticky;
+  top: 57px; /* hauteur du header */
+  z-index: 199;
 }
 
 .app-nav ul {
