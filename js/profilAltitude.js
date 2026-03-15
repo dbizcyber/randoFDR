@@ -280,11 +280,23 @@ const colors=slopes.map(p=>couleurPente(p))
 
 if(chartProfil) chartProfil.destroy()
 
+/* ── Légende dynamique ── */
+const nomRando   = document.getElementById("nomRando")?.value   || "Randonnée"
+const dateRando  = document.getElementById("dateRando")?.value  || ""
+const animateur  = document.getElementById("animateur")?.value  || ""
+
+const dateStr = dateRando
+  ? new Date(dateRando).toLocaleDateString("fr-FR")
+  : ""
+
+const labelParts = [nomRando, dateStr, animateur].filter(Boolean)
+const labelProfil = labelParts.join("  •  ")
+
 chartProfil = new Chart(ctx,{
 type:"line",
 data:{
 datasets:[{
-label:"Profil altimétrique",
+label: labelProfil,
 data:data,
 borderColor:"black",
 segment:{
@@ -299,6 +311,15 @@ options:{
 parsing:false,
 
 plugins:{
+legend:{
+display: true,
+labels:{
+color: "#2c1a0e",
+font:{ size:13, weight:"600" },
+boxWidth: 0,
+padding: 16
+}
+},
 tooltip:{
 callbacks:{
 label:function(ctx){
