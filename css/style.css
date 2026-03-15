@@ -269,6 +269,15 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 #nomRando { background: var(--sand); color: var(--stone); cursor: not-allowed; border-color: transparent; }
 #rando { display: none; }
 
+/* lieuRecherche : même habillage que les selects */
+#lieuRecherche {
+  background-color: var(--cream);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238a7560' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
 /* ── AUTOCOMPLETE ── */
 .search-rando { position: relative; }
 
