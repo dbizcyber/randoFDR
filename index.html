@@ -265,7 +265,6 @@
     </div>
     <div class="btn-row">
       <button id="btnResume">✨ Générer le résumé</button>
-      <button id="btnCopier" style="background:linear-gradient(135deg,var(--stone),#8a9070)">📋 Copier</button>
     </div>
     <pre id="resumeRando"></pre>
   </section>
@@ -313,15 +312,6 @@ if (dropZone) {
     }
   });
 }
-
-/* Copier résumé */
-document.getElementById('btnCopier')?.addEventListener('click', () => {
-  const texte = document.getElementById('resumeRando')?.textContent;
-  if (!texte) { alert('Générez d\'abord le résumé.'); return; }
-  navigator.clipboard.writeText(texte)
-    .then(() => { const b=document.getElementById('btnCopier'); b.textContent='✅ Copié !'; setTimeout(()=>b.textContent='📋 Copier',2000); })
-    .catch(() => alert('Impossible de copier automatiquement'));
-});
 
 /* Active nav au scroll */
 const sections = document.querySelectorAll('.card[id]');
