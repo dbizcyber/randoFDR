@@ -1,6 +1,6 @@
 /* ==============================================
    METEORANDO — Design system
-   Thème : Nature / Montagne / Trail
+   Thème : Chaleur / Automne / Trail
    Mobile-first, responsive PC/Mac/Mobile
    ============================================== */
 
@@ -8,24 +8,24 @@
 
 /* ── VARIABLES ── */
 :root {
-  --pine:       #1a3c2e;
-  --forest:     #2d6a4f;
-  --sage:       #52b788;
-  --mist:       #b7e4c7;
-  --trail:      #d4a84b;
-  --sunset:     #e76f51;
-  --sky:        #457b9d;
-  --stone:      #6b705c;
-  --snow:       #f8f9fa;
-  --fog:        #eef2ef;
-  --ink:        #1d2521;
+  --ember:      #7c2d00;
+  --flame:      #c1440e;
+  --orange:     #e8621a;
+  --amber:      #f49d37;
+  --gold:       #f4c430;
+  --honey:      #fad165;
+  --cream:      #fff8ee;
+  --sand:       #f5ead8;
+  --stone:      #8a7560;
+  --ink:        #2c1a0e;
+  --mid:        #6b4f35;
 
   --radius-sm:  8px;
   --radius-md:  14px;
   --radius-lg:  20px;
 
-  --shadow-sm:  0 2px 8px rgba(0,0,0,0.07);
-  --shadow-md:  0 6px 24px rgba(0,0,0,0.10);
+  --shadow-sm:  0 2px 8px rgba(120,60,0,0.08);
+  --shadow-md:  0 6px 24px rgba(120,60,0,0.13);
 
   --trans:      0.22s cubic-bezier(.4,0,.2,1);
 }
@@ -35,7 +35,7 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: 'Outfit', sans-serif;
-  background: var(--fog);
+  background: var(--sand);
   color: var(--ink);
   font-size: 15px;
   line-height: 1.6;
@@ -43,7 +43,7 @@ body {
 
 /* ── HEADER ── */
 .app-header {
-  background: linear-gradient(160deg, var(--pine) 0%, var(--forest) 60%, var(--sage) 100%);
+  background: linear-gradient(160deg, var(--ember) 0%, var(--flame) 55%, var(--amber) 100%);
   color: white;
   position: sticky;
   top: 0;
@@ -84,7 +84,7 @@ body {
 /* ── HAMBURGER ── */
 .nav-toggle {
   display: none;
-  background: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.18);
   border: none;
   border-radius: var(--radius-sm);
   color: white;
@@ -94,11 +94,11 @@ body {
   line-height: 1;
   transition: background var(--trans);
 }
-.nav-toggle:hover { background: rgba(255,255,255,0.25); }
+.nav-toggle:hover { background: rgba(255,255,255,0.28); }
 
 /* ── NAV ── */
 .app-nav {
-  background: rgba(26,60,46,0.97);
+  background: rgba(100,30,0,0.96);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
@@ -128,7 +128,11 @@ body {
   border-bottom: 2px solid transparent;
   transition: color var(--trans), border-color var(--trans);
 }
-.app-nav li a:hover { color: var(--mist); border-bottom-color: var(--sage); }
+.app-nav li a:hover,
+.app-nav li a.active {
+  color: var(--honey);
+  border-bottom-color: var(--amber);
+}
 
 /* ── LAYOUT ── */
 .app-main {
@@ -146,7 +150,7 @@ body {
   border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: var(--shadow-sm);
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(180,100,0,0.08);
   position: relative;
   overflow: hidden;
   transition: box-shadow var(--trans), transform var(--trans);
@@ -163,16 +167,16 @@ body {
 
 .card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 
-.card:nth-of-type(1)::before  { background: var(--forest); }
-.card:nth-of-type(2)::before  { background: var(--sky); }
-.card:nth-of-type(3)::before  { background: var(--trail); }
-.card:nth-of-type(4)::before  { background: var(--sunset); }
-.card:nth-of-type(5)::before  { background: var(--stone); }
-.card:nth-of-type(6)::before  { background: var(--sage); }
-.card:nth-of-type(7)::before  { background: var(--pine); }
-.card:nth-of-type(8)::before  { background: var(--sky); }
-.card:nth-of-type(9)::before  { background: var(--trail); }
-.card:nth-of-type(10)::before { background: var(--forest); }
+.card:nth-of-type(1)::before  { background: var(--flame); }
+.card:nth-of-type(2)::before  { background: var(--amber); }
+.card:nth-of-type(3)::before  { background: var(--gold); }
+.card:nth-of-type(4)::before  { background: var(--orange); }
+.card:nth-of-type(5)::before  { background: var(--ember); }
+.card:nth-of-type(6)::before  { background: var(--amber); }
+.card:nth-of-type(7)::before  { background: var(--flame); }
+.card:nth-of-type(8)::before  { background: var(--gold); }
+.card:nth-of-type(9)::before  { background: var(--orange); }
+.card:nth-of-type(10)::before { background: var(--ember); }
 
 /* ── CARD HEADER ── */
 .card-header {
@@ -181,7 +185,7 @@ body {
   gap: 10px;
   margin-bottom: 20px;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--fog);
+  border-bottom: 1px solid var(--sand);
 }
 
 .card-header .section-icon {
@@ -195,7 +199,7 @@ body {
 .card-header h2 {
   font-size: 16px;
   font-weight: 600;
-  color: var(--pine);
+  color: var(--ember);
   letter-spacing: -0.2px;
 }
 
@@ -228,12 +232,12 @@ select,
 textarea {
   width: 100%;
   padding: 10px 14px;
-  border: 1.5px solid #e0e5e0;
+  border: 1.5px solid #e8d8c4;
   border-radius: var(--radius-sm);
   font-family: 'Outfit', sans-serif;
   font-size: 14px;
   color: var(--ink);
-  background: var(--snow);
+  background: var(--cream);
   transition: border-color var(--trans), box-shadow var(--trans), background var(--trans);
   appearance: none;
   -webkit-appearance: none;
@@ -241,20 +245,20 @@ textarea {
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: var(--sage);
+  border-color: var(--amber);
   background: white;
-  box-shadow: 0 0 0 3px rgba(82,183,136,0.15);
+  box-shadow: 0 0 0 3px rgba(244,157,55,0.18);
 }
 
 input[readonly] {
-  background: var(--fog);
+  background: var(--sand);
   color: var(--stone);
   cursor: default;
   border-color: transparent;
 }
 
 select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b705c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 36px;
@@ -262,7 +266,7 @@ select {
 
 textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 
-#nomRando { background: var(--fog); color: var(--stone); cursor: not-allowed; border-color: transparent; }
+#nomRando { background: var(--sand); color: var(--stone); cursor: not-allowed; border-color: transparent; }
 #rando { display: none; }
 
 /* ── AUTOCOMPLETE ── */
@@ -273,14 +277,14 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
   top: calc(100% + 4px);
   left: 0; right: 0;
   background: white;
-  border: 1.5px solid var(--mist);
+  border: 1.5px solid var(--honey);
   border-radius: var(--radius-md);
   max-height: 220px;
   overflow-y: auto;
   z-index: 500;
   box-shadow: var(--shadow-md);
   scrollbar-width: thin;
-  scrollbar-color: var(--mist) transparent;
+  scrollbar-color: var(--honey) transparent;
 }
 
 .suggestion {
@@ -288,10 +292,10 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
   cursor: pointer;
   font-size: 14px;
   transition: background var(--trans);
-  border-bottom: 1px solid var(--fog);
+  border-bottom: 1px solid var(--sand);
 }
 .suggestion:last-child { border-bottom: none; }
-.suggestion:hover, .suggestion.highlight { background: var(--fog); color: var(--forest); }
+.suggestion:hover, .suggestion.highlight { background: var(--cream); color: var(--flame); }
 
 /* ── STATS BADGES ── */
 .stat-row {
@@ -302,9 +306,10 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 }
 
 .stat-badge {
-  background: var(--fog);
+  background: var(--cream);
   border-radius: var(--radius-sm);
   padding: 10px 14px;
+  border: 1px solid #f0ddc0;
 }
 .stat-badge .stat-label {
   font-size: 11px;
@@ -316,12 +321,12 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 .stat-badge .stat-value {
   font-size: 16px;
   font-weight: 700;
-  color: var(--pine);
+  color: var(--ember);
 }
 
 /* ── MÉTÉO ── */
 #meteoRando {
-  background: linear-gradient(135deg, #e8f4fd 0%, #d4edda 100%);
+  background: linear-gradient(135deg, #fff4e0 0%, #fde8c0 100%);
   border-radius: var(--radius-md);
   padding: 14px;
   display: grid;
@@ -330,7 +335,7 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 }
 
 #meteoRando p {
-  background: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.75);
   border-radius: var(--radius-sm);
   padding: 8px 12px;
   margin: 0;
@@ -340,14 +345,14 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 
 #meteoEtat, #meteoTemp, #meteoPluie, #meteoVent, #meteoRafales {
   font-weight: 700;
-  color: var(--pine);
+  color: var(--ember);
 }
 
 /* ── CARTE ── */
 #map {
   height: 380px;
   border-radius: var(--radius-md);
-  border: 1.5px solid #e0e5e0;
+  border: 1.5px solid #e8d8c4;
   margin-top: 10px;
   overflow: hidden;
 }
@@ -365,23 +370,22 @@ button {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  background: linear-gradient(135deg, var(--forest), var(--sage));
+  background: linear-gradient(135deg, var(--flame), var(--amber));
   color: white;
-  box-shadow: 0 3px 10px rgba(45,106,79,0.25);
+  box-shadow: 0 3px 10px rgba(193,68,14,0.28);
   transition: all var(--trans);
   margin-top: 10px;
 }
 
 button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(45,106,79,0.35);
+  box-shadow: 0 6px 18px rgba(193,68,14,0.36);
 }
 
 button:active { transform: translateY(0); }
 
 #btnEnvoyer {
-  background: linear-gradient(135deg, var(--trail), var(--sunset));
-  box-shadow: 0 3px 10px rgba(212,168,75,0.3);
+  background: linear-gradient(135deg, var(--ember), var(--flame));
 }
 
 .btn-row {
@@ -393,18 +397,18 @@ button:active { transform: translateY(0); }
 
 /* ── UPLOAD GPX ── */
 .gpx-drop-zone {
-  border: 2px dashed var(--mist);
+  border: 2px dashed var(--honey);
   border-radius: var(--radius-md);
   padding: 24px;
   text-align: center;
-  background: var(--fog);
+  background: var(--cream);
   cursor: pointer;
   transition: all var(--trans);
   position: relative;
   margin-bottom: 12px;
 }
 
-.gpx-drop-zone:hover { border-color: var(--sage); background: #f0faf5; }
+.gpx-drop-zone:hover { border-color: var(--amber); background: #fff4e0; }
 
 .gpx-drop-zone input[type="file"] {
   position: absolute;
@@ -437,9 +441,10 @@ button:active { transform: translateY(0); }
 }
 
 .cout-item {
-  background: var(--fog);
+  background: var(--cream);
   border-radius: var(--radius-sm);
   padding: 10px 14px;
+  border: 1px solid #f0ddc0;
 }
 
 .cout-item .cout-label {
@@ -453,14 +458,14 @@ button:active { transform: translateY(0); }
 .cout-item .cout-value {
   font-size: 20px;
   font-weight: 700;
-  color: var(--forest);
+  color: var(--flame);
   margin-top: 2px;
 }
 
 /* ── RÉSUMÉ ── */
 #resumeRando {
-  background: var(--fog);
-  border-left: 4px solid var(--forest);
+  background: var(--cream);
+  border-left: 4px solid var(--amber);
   border-radius: var(--radius-md);
   padding: 18px;
   white-space: pre-wrap;
@@ -471,19 +476,20 @@ button:active { transform: translateY(0); }
   max-height: 400px;
   overflow-y: auto;
   scrollbar-width: thin;
+  scrollbar-color: var(--honey) transparent;
 }
 
 /* ── CANVAS ── */
 canvas { margin-top: 16px; max-height: 280px; border-radius: var(--radius-sm); }
 
 /* ── SPAN (valeurs calculées) ── */
-span { font-weight: 600; color: var(--pine); }
+span { font-weight: 600; color: var(--flame); }
 
 /* ── SIMUL ── */
 #dureeMarcheSim, #heureArriveeSim {
   font-size: 15px;
   font-weight: 700;
-  color: var(--forest);
+  color: var(--flame);
   padding: 6px 0;
 }
 
@@ -534,7 +540,11 @@ span { font-weight: 600; color: var(--pine); }
     border-left: 3px solid transparent;
     font-size: 14px;
   }
-  .app-nav li a:hover { border-left-color: var(--sage); background: rgba(255,255,255,0.06); }
+  .app-nav li a:hover,
+  .app-nav li a.active {
+    border-left-color: var(--amber);
+    background: rgba(255,255,255,0.06);
+  }
 
   .card { padding: 18px 16px; }
   .card-header h2 { font-size: 15px; }
