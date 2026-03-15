@@ -21,7 +21,7 @@
       <span class="logo-icon">🥾</span>
       <div>
         <h1>Feuille de route - La Marmotte</h1>
-        <div class="tagline">Préparez vos randonnées v1503_1155_bibi</div>
+        <div class="tagline">Préparez vos randonnées</div>
       </div>
     </div>
     <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
@@ -126,12 +126,12 @@
       <div class="section-icon" style="background:#f3e5f5">🅿️</div>
       <h2>Parking départ randonnée</h2>
     </div>
-    <div class="form-row" style="align-items:flex-end">
-      <div class="form-group" style="margin-bottom:0">
-        <label>Rechercher un lieu</label>
-        <input id="lieuRecherche" placeholder="Commune, lieu-dit…">
+    <div class="form-group">
+      <label>Rechercher un lieu</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="lieuRecherche" placeholder="Commune, lieu-dit…" style="flex:1;background-image:none">
+        <button id="btnGeocoder" style="margin-top:0;flex-shrink:0;height:42px;padding:0 16px">🔍 Localiser</button>
       </div>
-      <button id="btnGeocoder" style="margin-top:0;height:42px">🔍 Localiser</button>
     </div>
     <div id="map"></div>
     <div class="stat-row" style="margin-top:14px">
