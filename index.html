@@ -274,12 +274,8 @@
   <section class="card" id="envoi">
     <div class="card-header">
       <div class="section-icon" style="background:#fce4ec">✉️</div>
-      <h2>Export PDF &amp; Envoi</h2>
+      <h2>PDF &amp; Envoi</h2>
     </div>
-    <div class="btn-row">
-      <button id="btnPDF" style="background:linear-gradient(135deg,#c0392b,var(--sunset))">📥 Exporter PDF</button>
-    </div>
-    <hr style="border:none;border-top:1px solid var(--fog);margin:20px 0">
     <div class="form-group">
       <label>Email pour copie</label>
       <input type="email" id="emailUser" placeholder="votre@email.com">
@@ -325,50 +321,6 @@ document.getElementById('btnCopier')?.addEventListener('click', () => {
   navigator.clipboard.writeText(texte)
     .then(() => { const b=document.getElementById('btnCopier'); b.textContent='✅ Copié !'; setTimeout(()=>b.textContent='📋 Copier',2000); })
     .catch(() => alert('Impossible de copier automatiquement'));
-});
-
-/* Export PDF amélioré */
-document.getElementById('btnPDF')?.addEventListener('click', async () => {
-  const resume = document.getElementById('resumeRando')?.textContent?.trim();
-  if (!resume) { alert('Veuillez d\'abord générer le résumé.'); return; }
-
-  const nomRando  = document.getElementById('nomRando')?.value || 'Randonnée';
-  const dateRando = document.getElementById('dateRando')?.value || '';
-  const dateStr   = dateRando ? new Date(dateRando).toLocaleDateString('fr-FR') : '';
-
-  let profilImg = '';
-  if (window.chartProfil) profilImg = `<img src="${window.chartProfil.toBase64Image()}" style="width:100%;border-radius:8px;margin-top:16px">`;
-
-  const html = `<div style="font-family:Arial,sans-serif;padding:28px;color:#1d2521;max-width:680px;margin:auto">
-    <div style="background:linear-gradient(135deg,#1a3c2e,#2d6a4f);color:white;padding:22px 26px;border-radius:10px;margin-bottom:22px">
-      <div style="font-size:10px;opacity:0.7;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Feuille de route</div>
-      <div style="font-size:20px;font-weight:bold;margin-bottom:3px">${nomRando}</div>
-      <div style="font-size:13px;opacity:0.85">📆 ${dateStr}</div>
-    </div>
-    <pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:12px;line-height:1.8;color:#1d2521;background:#f5f7f5;padding:18px;border-radius:8px;border-left:4px solid #2d6a4f">${resume}</pre>
-    ${profilImg}
-    <div style="margin-top:18px;text-align:center;font-size:10px;color:#aaa">Généré par Météorando • Météo : open-meteo.com</div>
-  </div>`;
-
-  const el = document.createElement('div');
-  el.innerHTML = html;
-  document.body.appendChild(el);
-
-  const filename = `rando-${nomRando.replace(/[\s\/]/g,'-').toLowerCase()}-${dateRando||'sans-date'}.pdf`;
-
-  const btn = document.getElementById('btnPDF');
-  btn.textContent = '⏳ Génération…'; btn.disabled = true;
-
-  await html2pdf().set({
-    margin: 0,
-    filename,
-    image: { type:'jpeg', quality:0.95 },
-    html2canvas: { scale:2, useCORS:true },
-    jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
-  }).from(el).save();
-
-  document.body.removeChild(el);
-  btn.textContent = '📥 Exporter PDF'; btn.disabled = false;
 });
 
 /* Active nav au scroll */
