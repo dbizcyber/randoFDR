@@ -276,7 +276,6 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 36px;
-  height: 42px;
   width: 100%;
 }
 
