@@ -15,6 +15,7 @@
 </head>
 <body>
 
+<div class="topbar" id="topbar">
 <header class="app-header">
   <div class="header-inner">
     <div class="header-brand">
@@ -42,6 +43,7 @@
     <li><a href="#envoi">✉️ Envoi</a></li>
   </ul>
 </nav>
+</div>
 
 <main class="app-main">
 
@@ -290,13 +292,25 @@
 /* Hamburger */
 const navToggle = document.getElementById('navToggle');
 const appNav    = document.getElementById('appNav');
+
+function ajusterPaddingMain() {
+  const topbar = document.getElementById('topbar');
+  const main   = document.querySelector('.app-main');
+  if (topbar && main) main.style.paddingTop = topbar.offsetHeight + 16 + 'px';
+}
+
 navToggle.addEventListener('click', () => {
   appNav.classList.toggle('open');
   navToggle.textContent = appNav.classList.contains('open') ? '✕' : '☰';
+  setTimeout(ajusterPaddingMain, 360);
 });
 document.querySelectorAll('.app-nav a').forEach(link => {
-  link.addEventListener('click', () => { appNav.classList.remove('open'); navToggle.textContent = '☰'; });
+  link.addEventListener('click', () => { appNav.classList.remove('open'); navToggle.textContent = '☰'; setTimeout(ajusterPaddingMain, 360); });
 });
+
+window.addEventListener('load',   ajusterPaddingMain);
+window.addEventListener('resize', ajusterPaddingMain);
+ajusterPaddingMain();
 
 /* Drag & drop GPX */
 const dropZone = document.getElementById('gpxDropZone');
