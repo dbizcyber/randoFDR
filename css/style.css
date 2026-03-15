@@ -150,7 +150,10 @@ body {
   gap: 18px;
 }
 
-/* ── CARDS ── */
+/* ── SCROLL OFFSET pour topbar fixe ── */
+.card {
+  scroll-margin-top: 120px;
+}
 .card {
   background: white;
   border-radius: var(--radius-lg);
