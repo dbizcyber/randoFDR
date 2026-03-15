@@ -35,14 +35,17 @@ async function envoyerRando() {
       return;
     }
 
-    /* récupération du profil */
+    /* récupération du profil export fixe */
 
 let profilPNG = null;
 
-if(chartProfil){
+if(window.profilExportBase64){
+  profilPNG = window.profilExportBase64;
+  console.log("profil export capturé (canvas fixe 1200x450)");
+} else if(chartProfil){
   profilPNG = chartProfil.toBase64Image();
-  console.log("profil capturé :", profilPNG.substring(0,40));
-}else{
+  console.log("profil fallback Chart.js");
+} else {
   console.warn("profil non disponible");
 }
 
