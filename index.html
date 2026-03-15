@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Création de fiches randonnée avec météo, GPX, covoiturage et export PDF">
+<title>Météorando — Fiche Randonnée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <span class="logo-icon">🥾</span>
+      <div>
+        <h1>Météorando</h1>
+        <div class="tagline">Préparez vos randonnées</div>
+      </div>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<nav class="app-nav" id="appNav">
+  <ul>
+    <li><a href="#infos">📋 Infos</a></li>
+    <li><a href="#meteo">🌤 Météo</a></li>
+    <li><a href="#covoit">🚗 Covoit</a></li>
+    <li><a href="#parking">🅿️ Parking</a></li>
+    <li><a href="#couts">💶 Coûts</a></li>
+    <li><a href="#gpx">🗺 GPX</a></li>
+    <li><a href="#profil">📈 Profil</a></li>
+    <li><a href="#remarques">📝 Notes</a></li>
+    <li><a href="#resume">📄 Résumé</a></li>
+    <li><a href="#envoi">✉️ Envoi</a></li>
+  </ul>
+</nav>
+
+<main class="app-main">
+
+  <!-- 1. INFORMATIONS GÉNÉRALES -->
+  <section class="card" id="infos">
+    <div class="card-header">
+      <div class="section-icon" style="background:#e8f5e9">📋</div>
+      <h2>Informations générales</h2>
+    </div>
+    <div class="form-group">
+      <label>Rechercher une randonnée</label>
+      <div class="search-rando">
+        <input id="rechercheRando" type="text" placeholder="Tapez quelques lettres…" autocomplete="off">
+        <div id="suggestions"></div>
+      </div>
+      <select id="rando"></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nom de la randonnée</label>
+        <input id="nomRando" placeholder="Nom de la randonnée" readonly>
+      </div>
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="dateRando">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Animateur·trice</label>
+      <select id="animateur"></select>
+      <input id="nouvelAnimateur" placeholder="Nom animateur" style="display:none;margin-top:8px">
+    </div>
+  </section>
+
+  <!-- 2. MÉTÉO -->
+  <section class="card" id="meteo">
+    <div class="card-header">
+      <div class="section-icon" style="background:#e3f2fd">🌤</div>
+      <h2>Météo prévue</h2>
+    </div>
+    <div id="meteoRando">
+      <p>☀️ État<br><span id="meteoEtat">—</span></p>
+      <p>🌡 Température<br><span id="meteoTemp">—</span></p>
+      <p>🌧 Pluie<br><span id="meteoPluie">—</span></p>
+      <p>🧭 Vent<br><span id="meteoVent">—</span></p>
+      <p>💨 Rafales<br><span id="meteoRafales">—</span></p>
+    </div>
+  </section>
+
+  <!-- 3. COVOITURAGE -->
+  <section class="card" id="covoit">
+    <div class="card-header">
+      <div class="section-icon" style="background:#fff3e0">🚗</div>
+      <h2>Covoiturage</h2>
+    </div>
+    <div class="form-group">
+      <label>Parking covoiturage</label>
+      <select id="parkingCovoiturage"></select>
+      <input id="nouveauParking" placeholder="Nom du parking" style="display:none;margin-top:8px">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Heure de rendez-vous</label>
+        <input type="time" id="heureRV">
+      </div>
+      <div class="form-group">
+        <label>Heure de départ</label>
+        <div style="padding:10px 14px;background:var(--fog);border-radius:var(--radius-sm);font-weight:700;color:var(--forest);min-height:42px">
+          <span id="heureDepart">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Trajet suggéré</label>
+      <textarea id="itineraire" placeholder="Décrivez l'itinéraire de covoiturage…"></textarea>
+    </div>
+  </section>
+
+  <!-- 4. PARKING RANDO -->
+  <section class="card" id="parking">
+    <div class="card-header">
+      <div class="section-icon" style="background:#f3e5f5">🅿️</div>
+      <h2>Parking départ randonnée</h2>
+    </div>
+    <div class="form-row" style="align-items:flex-end">
+      <div class="form-group" style="margin-bottom:0">
+        <label>Rechercher un lieu</label>
+        <input id="lieuRecherche" placeholder="Commune, lieu-dit…">
+      </div>
+      <button id="btnGeocoder" style="margin-top:0;height:42px">🔍 Localiser</button>
+    </div>
+    <div id="map"></div>
+    <div class="stat-row" style="margin-top:14px">
+      <div class="stat-badge">
+        <div class="stat-label">Distance A/R</div>
+        <div class="stat-value"><span id="distanceAR">0</span> km</div>
+      </div>
+      <div class="stat-badge">
+        <div class="stat-label">Adresse</div>
+        <div style="font-size:12px;font-weight:500;color:var(--pine);margin-top:2px"><span id="parkingRandoAdresse">—</span></div>
+      </div>
+      <div class="stat-badge">
+        <div class="stat-label">GPS</div>
+        <div class="stat-value" style="font-size:13px"><span id="latParking">—</span>, <span id="lonParking">—</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. COÛTS -->
+  <section class="card" id="couts">
+    <div class="card-header">
+      <div class="section-icon" style="background:#fce4ec">💶</div>
+      <h2>Coût du trajet</h2>
+    </div>
+    <div class="form-group">
+      <label>Autoroute (€)</label>
+      <input type="number" id="autoroute" value="0" min="0" step="0.5">
+    </div>
+    <div class="cout-grid">
+      <div class="cout-item">
+        <div class="cout-label">Coût km</div>
+        <div class="cout-value"><span id="coutKm">0.00 €</span></div>
+      </div>
+      <div class="cout-item">
+        <div class="cout-label">Total trajet</div>
+        <div class="cout-value"><span id="coutTotal">0.00 €</span></div>
+      </div>
+      <div class="cout-item">
+        <div class="cout-label">Par 4 (covoit)</div>
+        <div class="cout-value"><span id="cout4">0.00 €</span></div>
+      </div>
+      <div class="cout-item">
+        <div class="cout-label">Par 5 (covoit)</div>
+        <div class="cout-value"><span id="cout5">0.00 €</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. GPX -->
+  <section class="card" id="gpx">
+    <div class="card-header">
+      <div class="section-icon" style="background:#e8f5e9">🗺</div>
+      <h2>Analyse GPX</h2>
+    </div>
+    <div class="gpx-drop-zone" id="gpxDropZone">
+      <div class="drop-icon">📂</div>
+      <div class="drop-text">Glissez votre fichier GPX ici</div>
+      <div class="drop-sub">ou cliquez pour sélectionner (.gpx)</div>
+      <input type="file" id="gpxFile" accept=".gpx">
+    </div>
+    <div id="gpx-status"></div>
+    <div class="stat-row">
+      <div class="stat-badge">
+        <div class="stat-label">Distance</div>
+        <div class="stat-value"><span id="distanceGPX">—</span> km</div>
+      </div>
+      <div class="stat-badge">
+        <div class="stat-label">Dénivelé +</div>
+        <div class="stat-value"><span id="denivele">—</span> m</div>
+      </div>
+      <div class="stat-badge">
+        <div class="stat-label">Durée marche</div>
+        <div class="stat-value"><span id="dureeMarche">—</span></div>
+      </div>
+      <div class="stat-badge">
+        <div class="stat-label">IBP</div>
+        <div class="stat-value"><span id="ibp">—</span></div>
+      </div>
+      <div class="stat-badge">
+        <div class="stat-label">Effort</div>
+        <div class="stat-value"><span id="effort">—</span></div>
+      </div>
+    </div>
+    <div class="form-row" style="margin-top:14px">
+      <div class="form-group">
+        <label>Technicité (1–5)</label>
+        <input id="technicite" type="number" min="1" max="5">
+      </div>
+      <div class="form-group">
+        <label>Risque (1–5)</label>
+        <input id="risque" type="number" min="1" max="5">
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. PROFIL ALTIMÉTRIQUE -->
+  <section class="card" id="profil">
+    <div class="card-header">
+      <div class="section-icon" style="background:#e8eaf6">📈</div>
+      <h2>Profil altimétrique</h2>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Heure départ marche</label>
+        <input type="time" id="heureDepartMarche">
+      </div>
+      <div class="form-group">
+        <label>Vitesse moyenne (km/h)</label>
+        <input type="number" id="vitesse" value="4" min="1" max="10" step="0.5">
+      </div>
+    </div>
+    <div id="dureeMarcheSim"></div>
+    <div id="heureArriveeSim"></div>
+    <canvas id="profilAltitude"></canvas>
+  </section>
+
+  <!-- 8. REMARQUES -->
+  <section class="card" id="remarques">
+    <div class="card-header">
+      <div class="section-icon" style="background:#fff8e1">📝</div>
+      <h2>Remarques</h2>
+    </div>
+    <textarea id="remarques" placeholder="Particularités du parcours, points d'attention, équipements conseillés…" style="min-height:110px"></textarea>
+  </section>
+
+  <!-- 9. RÉSUMÉ -->
+  <section class="card" id="resume">
+    <div class="card-header">
+      <div class="section-icon" style="background:#e0f7fa">📄</div>
+      <h2>Résumé</h2>
+    </div>
+    <div class="btn-row">
+      <button id="btnResume">✨ Générer le résumé</button>
+      <button id="btnCopier" style="background:linear-gradient(135deg,var(--stone),#8a9070)">📋 Copier</button>
+    </div>
+    <pre id="resumeRando"></pre>
+  </section>
+
+  <!-- 10. EXPORT PDF & ENVOI -->
+  <section class="card" id="envoi">
+    <div class="card-header">
+      <div class="section-icon" style="background:#fce4ec">✉️</div>
+      <h2>Export PDF &amp; Envoi</h2>
+    </div>
+    <div class="btn-row">
+      <button id="btnPDF" style="background:linear-gradient(135deg,#c0392b,var(--sunset))">📥 Exporter PDF</button>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--fog);margin:20px 0">
+    <div class="form-group">
+      <label>Email pour copie</label>
+      <input type="email" id="emailUser" placeholder="votre@email.com">
+    </div>
+    <button type="button" id="btnEnvoyer">✉️ Créer PDF et envoyer</button>
+  </section>
+
+</main>
+
+<script type="module" src="js/app.js"></script>
+
+<script>
+/* Hamburger */
+const navToggle = document.getElementById('navToggle');
+const appNav    = document.getElementById('appNav');
+navToggle.addEventListener('click', () => {
+  appNav.classList.toggle('open');
+  navToggle.textContent = appNav.classList.contains('open') ? '✕' : '☰';
+});
+document.querySelectorAll('.app-nav a').forEach(link => {
+  link.addEventListener('click', () => { appNav.classList.remove('open'); navToggle.textContent = '☰'; });
+});
+
+/* Drag & drop GPX */
+const dropZone = document.getElementById('gpxDropZone');
+if (dropZone) {
+  ['dragenter','dragover'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.style.borderColor='var(--sage)'; }));
+  ['dragleave','drop'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.style.borderColor=''; }));
+  dropZone.addEventListener('drop', ev => {
+    const file = ev.dataTransfer.files[0];
+    if (file && file.name.endsWith('.gpx')) {
+      const input = document.getElementById('gpxFile');
+      const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files;
+      input.dispatchEvent(new Event('change'));
+    }
+  });
+}
+
+/* Copier résumé */
+document.getElementById('btnCopier')?.addEventListener('click', () => {
+  const texte = document.getElementById('resumeRando')?.textContent;
+  if (!texte) { alert('Générez d\'abord le résumé.'); return; }
+  navigator.clipboard.writeText(texte)
+    .then(() => { const b=document.getElementById('btnCopier'); b.textContent='✅ Copié !'; setTimeout(()=>b.textContent='📋 Copier',2000); })
+    .catch(() => alert('Impossible de copier automatiquement'));
+});
+
+/* Export PDF amélioré */
+document.getElementById('btnPDF')?.addEventListener('click', async () => {
+  const resume = document.getElementById('resumeRando')?.textContent?.trim();
+  if (!resume) { alert('Veuillez d\'abord générer le résumé.'); return; }
+
+  const nomRando  = document.getElementById('nomRando')?.value || 'Randonnée';
+  const dateRando = document.getElementById('dateRando')?.value || '';
+  const dateStr   = dateRando ? new Date(dateRando).toLocaleDateString('fr-FR') : '';
+
+  let profilImg = '';
+  if (window.chartProfil) profilImg = `<img src="${window.chartProfil.toBase64Image()}" style="width:100%;border-radius:8px;margin-top:16px">`;
+
+  const html = `<div style="font-family:Arial,sans-serif;padding:28px;color:#1d2521;max-width:680px;margin:auto">
+    <div style="background:linear-gradient(135deg,#1a3c2e,#2d6a4f);color:white;padding:22px 26px;border-radius:10px;margin-bottom:22px">
+      <div style="font-size:10px;opacity:0.7;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Feuille de route</div>
+      <div style="font-size:20px;font-weight:bold;margin-bottom:3px">${nomRando}</div>
+      <div style="font-size:13px;opacity:0.85">📆 ${dateStr}</div>
+    </div>
+    <pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:12px;line-height:1.8;color:#1d2521;background:#f5f7f5;padding:18px;border-radius:8px;border-left:4px solid #2d6a4f">${resume}</pre>
+    ${profilImg}
+    <div style="margin-top:18px;text-align:center;font-size:10px;color:#aaa">Généré par Météorando • Météo : open-meteo.com</div>
+  </div>`;
+
+  const el = document.createElement('div');
+  el.innerHTML = html;
+  document.body.appendChild(el);
+
+  const filename = `rando-${nomRando.replace(/[\s\/]/g,'-').toLowerCase()}-${dateRando||'sans-date'}.pdf`;
+
+  const btn = document.getElementById('btnPDF');
+  btn.textContent = '⏳ Génération…'; btn.disabled = true;
+
+  await html2pdf().set({
+    margin: 0,
+    filename,
+    image: { type:'jpeg', quality:0.95 },
+    html2canvas: { scale:2, useCORS:true },
+    jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
+  }).from(el).save();
+
+  document.body.removeChild(el);
+  btn.textContent = '📥 Exporter PDF'; btn.disabled = false;
+});
+
+/* Active nav au scroll */
+const sections = document.querySelectorAll('.card[id]');
+const navLinks  = document.querySelectorAll('.app-nav a');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`.app-nav a[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { threshold:0.3 });
+sections.forEach(s => obs.observe(s));
+</script>
+
+</body>
+</html>
