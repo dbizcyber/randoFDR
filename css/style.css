@@ -489,8 +489,34 @@ button:active { transform: translateY(0); }
   scrollbar-color: var(--honey) transparent;
 }
 
-/* ── CANVAS ── */
-canvas { margin-top: 16px; max-height: 280px; border-radius: var(--radius-sm); }
+/* ── CANVAS / PROFIL ── */
+.profil-container {
+  position: relative;
+  width: 100%;
+  /* ratio 16:6 — lisible sur mobile et large sur PC */
+  aspect-ratio: 16 / 6;
+  min-height: 200px;
+  margin-top: 16px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.profil-container canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none;
+  border-radius: var(--radius-sm);
+}
+
+/* Sur mobile : ratio un peu plus haut pour la lisibilité */
+@media (max-width: 600px) {
+  .profil-container {
+    aspect-ratio: 4 / 3;
+    min-height: 240px;
+  }
+}
 
 /* ── SPAN (valeurs calculées) ── */
 span { font-weight: 600; color: var(--flame); }
