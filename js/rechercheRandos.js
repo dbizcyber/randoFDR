@@ -2,7 +2,7 @@ import { randos } from "../data/randos.js";
 
 export function activerRecherche() {
 
-  const input = document.gxetElementById("rechercheRando");
+  const input = document.getElementById("rechercheRando");
   const suggestionsDiv = document.getElementById("suggestions");
   const nomRando = document.getElementById("nomRando");
 
