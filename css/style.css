@@ -275,7 +275,27 @@ select {
 
 textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 
-#nomRando { background: var(--sand); color: var(--stone); cursor: not-allowed; border-color: transparent; }
+/* ── CHAMP SAISIE LIBRE (Autre parking / animateur) ── */
+.input-autre {
+  display: none;
+  margin-top: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e8d8c4;
+  border-radius: var(--radius-sm);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--cream);
+  transition: border-color var(--trans), box-shadow var(--trans);
+}
+
+.input-autre:focus {
+  outline: none;
+  border-color: var(--amber);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(244,157,55,0.18);
+}
 #rando { display: none; }
 
 /* lieuRecherche : même habillage que les selects */
