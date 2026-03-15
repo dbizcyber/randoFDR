@@ -81,7 +81,11 @@ slopes.push(pente)
 
 }
 
-dessinerProfil(distances,altitudes,slopes)
+/* sous-échantillonnage : max 300 points quelle que soit la plateforme */
+const MAX_POINTS = 300
+const { d: distR, a: altR, s: slopR } = souséchantillonner(distances, altitudes, slopes, MAX_POINTS)
+
+dessinerProfil(distR, altR, slopR)
 
 /* calcul temps marche avec distance GPX locale */
 
@@ -89,6 +93,20 @@ calculDuree(totalDist)
   
 /* calcul temps marche simulée */
 calculSimulation(totalDist) 
+}
+
+/* ── Sous-échantillonnage uniforme ── */
+function souséchantillonner(dist, alt, slopes, max) {
+  if (dist.length <= max) return { d: dist, a: alt, s: slopes }
+  const step = dist.length / max
+  const d=[], a=[], s=[]
+  for (let i = 0; i < max; i++) {
+    const idx = Math.min(Math.round(i * step), dist.length - 1)
+    d.push(dist[idx])
+    a.push(alt[idx])
+    s.push(slopes[idx])
+  }
+  return { d, a, s }
 }
 
 /* distance haversine */
@@ -264,6 +282,19 @@ return "rgb(0,60,200)"
 
 }
 
+/* plugin fond blanc global */
+Chart.register({
+  id: 'fondBlanc',
+  beforeDraw(chart) {
+    const ctx = chart.canvas.getContext('2d')
+    ctx.save()
+    ctx.globalCompositeOperation = 'destination-over'
+    ctx.fillStyle = 'white'
+    ctx.fillRect(0, 0, chart.width, chart.height)
+    ctx.restore()
+  }
+})
+
 /* profil altimétrique */
 
 function dessinerProfil(dist,alt,slopes){
@@ -313,7 +344,8 @@ tension:0
 options:{
 responsive: true,
 maintainAspectRatio: false,
-devicePixelRatio: window.devicePixelRatio * 2, /* haute résolution export */
+/* résolution identique sur toutes les plateformes */
+devicePixelRatio: 2,
 parsing:false,
 
 plugins:{
@@ -325,6 +357,9 @@ font:{ size:13, weight:"600" },
 boxWidth: 0,
 padding: 16
 }
+},
+/* fond blanc pour l'export */
+beforeDraw: undefined
 },
 tooltip:{
 callbacks:{
