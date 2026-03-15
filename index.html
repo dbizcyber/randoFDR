@@ -305,7 +305,20 @@ navToggle.addEventListener('click', () => {
   setTimeout(ajusterPaddingMain, 360);
 });
 document.querySelectorAll('.app-nav a').forEach(link => {
-  link.addEventListener('click', () => { appNav.classList.remove('open'); navToggle.textContent = '☰'; setTimeout(ajusterPaddingMain, 360); });
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    appNav.classList.remove('open');
+    navToggle.textContent = '☰';
+    setTimeout(ajusterPaddingMain, 360);
+
+    const targetId = link.getAttribute('href').replace('#', '');
+    const target   = document.getElementById(targetId);
+    if (!target) return;
+
+    const topbarH  = document.getElementById('topbar').offsetHeight;
+    const offsetY  = target.getBoundingClientRect().top + window.scrollY - topbarH - 12;
+    window.scrollTo({ top: offsetY, behavior: 'smooth' });
+  });
 });
 
 window.addEventListener('load',   ajusterPaddingMain);
