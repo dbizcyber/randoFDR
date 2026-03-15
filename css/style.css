@@ -41,13 +41,19 @@ body {
   line-height: 1.6;
 }
 
+/* ── TOPBAR WRAPPER (header + nav fixés en haut) ── */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 300;
+}
+
 /* ── HEADER ── */
 .app-header {
   background: linear-gradient(160deg, var(--ember) 0%, var(--flame) 55%, var(--amber) 100%);
   color: white;
-  position: sticky;
-  top: 0;
-  z-index: 200;
   box-shadow: var(--shadow-md);
 }
 
@@ -101,9 +107,6 @@ body {
   background: rgba(100,30,0,0.96);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid rgba(255,255,255,0.08);
-  position: sticky;
-  top: 57px; /* hauteur du header */
-  z-index: 199;
 }
 
 .app-nav ul {
