@@ -1,5 +1,10 @@
 const PRIX_KM = 0.30
 
+/* arrondi à la dizaine de centimes supérieure ex: 3.66 → 3.70 */
+function arrondir(val){
+  return (Math.ceil(val * 10) / 10).toFixed(2)
+}
+
 export function calculCovoiturage(){
 
 const km = parseFloat(
@@ -25,15 +30,15 @@ const par5 = total / 5
 /* affichage */
 
 document.getElementById("coutKm").textContent =
-coutKm.toFixed(2) + " €"
+arrondir(coutKm) + " €"
 
 document.getElementById("coutTotal").textContent =
-total.toFixed(2) + " €"
+arrondir(total) + " €"
 
 document.getElementById("cout4").textContent =
-par4.toFixed(2) + " €"
+arrondir(par4) + " €"
 
 document.getElementById("cout5").textContent =
-par5.toFixed(2) + " €"
+arrondir(par5) + " €"
 
 }
