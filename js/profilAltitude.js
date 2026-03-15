@@ -281,9 +281,12 @@ const colors=slopes.map(p=>couleurPente(p))
 if(chartProfil) chartProfil.destroy()
 
 /* ── Légende dynamique ── */
-const nomRando   = document.getElementById("nomRando")?.value   || "Randonnée"
-const dateRando  = document.getElementById("dateRando")?.value  || ""
-const animateur  = document.getElementById("animateur")?.value  || ""
+const nomRando  = document.getElementById("nomRando")?.value?.trim()  || "Randonnée"
+const dateRando = document.getElementById("dateRando")?.value?.trim() || ""
+const animRaw   = document.getElementById("animateur")?.value?.trim() || ""
+
+/* exclure la valeur placeholder "Cliquez!" et les valeurs vides */
+const animateur = (animRaw === "" || animRaw === "Cliquez!") ? "" : animRaw
 
 const dateStr = dateRando
   ? new Date(dateRando).toLocaleDateString("fr-FR")
