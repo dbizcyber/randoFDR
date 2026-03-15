@@ -311,6 +311,9 @@ tension:0
 },
 
 options:{
+responsive: true,
+maintainAspectRatio: false,
+devicePixelRatio: window.devicePixelRatio * 2, /* haute résolution export */
 parsing:false,
 
 plugins:{
