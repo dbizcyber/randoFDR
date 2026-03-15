@@ -97,11 +97,12 @@ calculSimulation(totalDist)
 
 /* ── Sous-échantillonnage uniforme ── */
 function souséchantillonner(dist, alt, slopes, max) {
-  if (dist.length <= max) return { d: dist, a: alt, s: slopes }
-  const step = dist.length / max
+  const n = dist.length
+  if (n <= max) return { d: dist, a: alt, s: slopes }
   const d=[], a=[], s=[]
   for (let i = 0; i < max; i++) {
-    const idx = Math.min(Math.round(i * step), dist.length - 1)
+    /* distribution uniforme de 0 au dernier index inclus */
+    const idx = Math.round(i * (n - 1) / (max - 1))
     d.push(dist[idx])
     a.push(alt[idx])
     s.push(slopes[idx])
