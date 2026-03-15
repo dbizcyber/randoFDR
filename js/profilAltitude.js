@@ -358,9 +358,6 @@ boxWidth: 0,
 padding: 16
 }
 },
-/* fond blanc pour l'export */
-beforeDraw: undefined
-},
 tooltip:{
 callbacks:{
 label:function(ctx){
