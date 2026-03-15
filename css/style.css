@@ -275,7 +275,17 @@ select {
 
 textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 
-/* ── CHAMP SAISIE LIBRE (Autre parking / animateur) ── */
+/* ── MESSAGES D'ERREUR CHAMPS ── */
+.erreur-champ {
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: #fde8e8;
+  border: 1px solid #f5a0a0;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  color: #a01010;
+}
 .input-autre {
   display: none;
   margin-top: 8px;
