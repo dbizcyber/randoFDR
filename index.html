@@ -200,26 +200,47 @@
       <input type="file" id="gpxFile" accept=".gpx">
     </div>
     <div id="gpx-status"></div>
+
+    <p id="gpx-manuel-hint" style="font-size:12px;color:var(--stone);margin:8px 0 4px;font-style:italic">
+      Sans fichier GPX, saisissez les valeurs manuellement ci-dessous :
+    </p>
+
     <div class="stat-row">
       <div class="stat-badge">
-        <div class="stat-label">Distance</div>
-        <div class="stat-value"><span id="distanceGPX">—</span> km</div>
+        <div class="stat-label">Distance (km)</div>
+        <div class="stat-value stat-editable">
+          <span id="distanceGPX" class="stat-span">—</span>
+          <input id="distanceGPX_manuel" type="number" min="0" step="0.1"
+            class="stat-input" placeholder="ex: 12.5" style="display:none">
+        </div>
       </div>
       <div class="stat-badge">
-        <div class="stat-label">Dénivelé +</div>
-        <div class="stat-value"><span id="denivele">—</span> m</div>
+        <div class="stat-label">Dénivelé + (m)</div>
+        <div class="stat-value stat-editable">
+          <span id="denivele" class="stat-span">—</span>
+          <input id="denivele_manuel" type="number" min="0" step="1"
+            class="stat-input" placeholder="ex: 450" style="display:none">
+        </div>
       </div>
       <div class="stat-badge">
         <div class="stat-label">Durée marche</div>
-        <div class="stat-value"><span id="dureeMarche">—</span></div>
+        <div class="stat-value stat-editable">
+          <span id="dureeMarche" class="stat-span">—</span>
+          <input id="dureeMarche_manuel" type="text"
+            class="stat-input" placeholder="ex: 3h30" style="display:none">
+        </div>
       </div>
       <div class="stat-badge">
         <div class="stat-label">IBP</div>
         <div class="stat-value"><span id="ibp">—</span></div>
       </div>
       <div class="stat-badge">
-        <div class="stat-label">Effort</div>
-        <div class="stat-value"><span id="effort">—</span></div>
+        <div class="stat-label">Effort (1–5)</div>
+        <div class="stat-value stat-editable">
+          <span id="effort" class="stat-span">—</span>
+          <input id="effort_manuel" type="number" min="1" max="5" step="1"
+            class="stat-input" placeholder="1–5" style="display:none">
+        </div>
       </div>
     </div>
     <div class="form-row" style="margin-top:14px">
