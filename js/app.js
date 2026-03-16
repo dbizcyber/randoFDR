@@ -10,6 +10,7 @@ import { initProfilGPX } from "./profilAltitude.js";
 import { afficherMeteo } from "./meteoRando.js";
 import { initResume } from "./resumeRando.js";
 import { initEnvoi } from "./envoiRando.js";
+import { initSauvegarde, initIndicateurs, majIndicateurs, validerFormulaire, effacerSauvegarde } from "./formManager.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Application MeteoRando initialisée");
@@ -54,6 +55,15 @@ document.addEventListener("DOMContentLoaded", () => {
   /* résumé + envoi */
   initResume();
   initEnvoi();
+
+  /* sauvegarde auto + indicateurs + validation */
+  initSauvegarde();
+  initIndicateurs();
+
+  /* exposer validerFormulaire pour envoiRando.js */
+  window._validerFormulaire = validerFormulaire;
+  window._majIndicateurs    = majIndicateurs;
+  window._effacerSauvegarde = effacerSauvegarde;
 
   /* mise à jour météo si date change */
   if (dateInput) {
