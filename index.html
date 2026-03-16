@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Création de fiches randonnée avec météo, GPX, covoiturage et export PDF">
+<meta name="theme-color" content="#c1440e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="La Marmotte">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>Feuille de route - La Marmotte</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -359,6 +365,15 @@ function validerIntervalle(inputId, erreurId) {
 }
 validerIntervalle('technicite', 'erreur-technicite');
 validerIntervalle('risque',     'erreur-risque');
+
+/* Enregistrement Service Worker PWA */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/randoFDR/sw.js')
+      .then(reg => console.log('[PWA] Service Worker enregistré:', reg.scope))
+      .catch(err => console.warn('[PWA] Erreur SW:', err));
+  });
+}
 
 /* Active nav au scroll */
 const sections = document.querySelectorAll('.card[id]');
