@@ -1,9 +1,7 @@
 /* ============================================================
    randosCoords.js — Coordonnées GPS des randonnées
-   Exposé en variable globale window.randosCoords
-   ET en export ES module pour compatibilité maximale
    ============================================================ */
-export const randosCoords = window.randosCoords = [
+window.randosCoords = [
   { nom:"Aiguebelle",                                         lat:45.54,         lon:6.35 },
   { nom:"Alleins",                                            lat:43.7043862,   lon:5.1622362 },
   { nom:"Alpes de Haute Provence",                            lat:44.1,         lon:6.2 },
