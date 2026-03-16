@@ -27,11 +27,6 @@ autre.textContent = "Autre... (saisir manuellement)";
 select.appendChild(autre);
 
 /* Afficher/masquer le champ de saisie libre */
-/* Appliquer l'état initial du marker selon la valeur par défaut */
-if(typeof window._onParkingChange === 'function'){
-  window._onParkingChange()
-}
-
 select.addEventListener("change", () => {
 if(select.value === "__autre__"){
 champAutre.style.display = "block";
