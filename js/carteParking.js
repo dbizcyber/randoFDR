@@ -40,10 +40,11 @@ export function initCarte(){
 
   /* écouter le changement de parking covoiturage —
      le listener est attaché dans app.js après peuplement du select */
-  window._activerMarkerLibre   = activerMarkerLibre
+  window._activerMarkerLibre    = activerMarkerLibre
   window._desactiverMarkerLibre = desactiverMarkerLibre
 
   /* si le user saisit manuellement le parking */
+  const champAutre = document.getElementById("nouveauParking")
   if(champAutre){
     champAutre.addEventListener("keydown", e => {
       if(e.key === "Enter") geocoderParkingAutre(champAutre.value)
