@@ -286,7 +286,39 @@ select {
 
 textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
 
-/* ── MESSAGES D'ERREUR CHAMPS ── */
+/* ── BOUTON CARTE RANDOS (header) ── */
+.btn-carte-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.5);
+  border-radius: var(--radius-sm);
+  color: white;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--trans);
+}
+
+.btn-carte-header:hover {
+  background: rgba(255,255,255,0.30);
+}
+
+/* ── LIEN CARTE RANDOS (nav) ── */
+.nav-carte {
+  border-left: 2px solid rgba(255,255,255,0.25) !important;
+  margin-left: 4px;
+  color: var(--honey) !important;
+  font-weight: 600 !important;
+}
+
+@media (max-width: 600px) {
+  .btn-carte-header { font-size: 12px; padding: 6px 8px; }
+}
 .erreur-champ {
   margin-top: 6px;
   padding: 6px 10px;
