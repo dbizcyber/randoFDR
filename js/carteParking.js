@@ -6,8 +6,7 @@ const CHATEAURENARD = [43.88808, 4.84882];
 let map
 let marker
 let routeLine
-let pointDepart = CHATEAURENARD  /* point de départ du calcul de route */
-
+let pointDepart = CHATEAURENARD
 
 /* ══════════════════════════════════════
    INITIALISATION CARTE
@@ -20,30 +19,26 @@ export function initCarte(){
     maxZoom: 19
   }).addTo(map)
 
-  marker = L.marker(CHATEAURENARD, { draggable: false }).addTo(map)
-
-  /* forcer le verrouillage après ajout à la carte */
-  marker.dragging.disable()
-  marker.setIcon(markerIconBleu())
+  /* marker TOUJOURS draggable — l'utilisateur positionne librement le parking départ rando */
+  marker = L.marker(CHATEAURENARD, { draggable: true }).addTo(map)
 
   window.coordsParking = CHATEAURENARD[0] + "," + CHATEAURENARD[1]
 
   calculRoute(CHATEAURENARD)
   afficherMeteo(CHATEAURENARD[0], CHATEAURENARD[1])
 
-  /* déplacement marqueur (actif uniquement si draggable) */
+  /* déplacement marker → recalcul route et météo */
   marker.on("dragend", () => {
     const pos = marker.getLatLng()
     calculRoute([pos.lat, pos.lng])
     afficherMeteo(pos.lat, pos.lng)
   })
 
-  /* écouter le changement de parking covoiturage —
-     le listener est attaché dans app.js après peuplement du select */
-  window._activerMarkerLibre    = activerMarkerLibre
-  window._desactiverMarkerLibre = desactiverMarkerLibre
+  /* écouter le select parking covoiturage
+     → si "Autre" : géocoder le lieu saisi + repositionner pointDepart
+     → si parking connu : pointDepart = Châteaurenard */
+  window._majPointDepart = majPointDepart
 
-  /* si le user saisit manuellement le parking */
   const champAutre = document.getElementById("nouveauParking")
   if(champAutre){
     champAutre.addEventListener("keydown", e => {
@@ -55,34 +50,22 @@ export function initCarte(){
   }
 }
 
-
 /* ══════════════════════════════════════
-   MODE MARKER LIBRE (Autre parking)
+   MISE À JOUR POINT DE DÉPART COVOIT
 ══════════════════════════════════════ */
-function activerMarkerLibre(){
-  marker.dragging.enable()
-  marker.setIcon(markerIconOrange())
-
-  /* message indicatif sur la carte */
-  document.getElementById("lieuRecherche").placeholder =
-    "Rechercher le lieu de départ ou déplacer le marker sur la carte"
+function majPointDepart(valeurSelect) {
+  if(valeurSelect === "__autre__"){
+    /* le point de départ sera mis à jour par geocoderParkingAutre */
+  } else {
+    /* parking connu → départ = Châteaurenard */
+    pointDepart = CHATEAURENARD
+    /* recalcul route depuis Châteaurenard vers position actuelle du marker */
+    const pos = marker.getLatLng()
+    calculRoute([pos.lat, pos.lng])
+  }
 }
 
-function desactiverMarkerLibre(){
-  marker.dragging.disable()
-  marker.setIcon(markerIconBleu())
-  marker.setLatLng(CHATEAURENARD)
-  map.setView(CHATEAURENARD, 10)
-  pointDepart = CHATEAURENARD
-
-  document.getElementById("lieuRecherche").placeholder =
-    "Rechercher un lieu, village, département"
-
-  calculRoute(CHATEAURENARD)
-  afficherMeteo(CHATEAURENARD[0], CHATEAURENARD[1])
-}
-
-/* geocoder le parking saisi manuellement pour repositionner le marker */
+/* geocoder le parking "Autre" saisi manuellement */
 function geocoderParkingAutre(texte){
   if(!texte.trim()) return
   fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(texte)}`)
@@ -91,32 +74,13 @@ function geocoderParkingAutre(texte){
       if(!data.length) return
       const lat = parseFloat(data[0].lat)
       const lon = parseFloat(data[0].lon)
+      /* nouveau point de départ covoit */
       pointDepart = [lat, lon]
-      marker.setLatLng([lat, lon])
-      map.setView([lat, lon], 13)
+      /* recalcul route depuis ce nouveau point vers position actuelle marker */
+      const pos = marker.getLatLng()
+      calculRoute([pos.lat, pos.lng])
     })
 }
-
-
-/* ══════════════════════════════════════
-   ICÔNES MARKER
-══════════════════════════════════════ */
-function markerIconOrange(){
-  return L.icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-    iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34]
-  })
-}
-
-function markerIconBleu(){
-  return L.icon({
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-    iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34]
-  })
-}
-
 
 /* ══════════════════════════════════════
    RECHERCHE LIEU (bouton Localiser)
@@ -145,7 +109,6 @@ export function chercherLieu(){
   })
 }
 
-
 /* ══════════════════════════════════════
    REVERSE GEOCODING
 ══════════════════════════════════════ */
@@ -158,11 +121,10 @@ function majAdresse(lat, lon){
   })
 }
 
-
 /* ══════════════════════════════════════
    CALCUL ITINÉRAIRE
-   Départ = pointDepart (Châteaurenard ou parking "Autre")
-   Arrivée = dest (parking de départ rando)
+   Départ = pointDepart (Châteaurenard ou parking Autre)
+   Arrivée = dest (marker parking départ rando)
 ══════════════════════════════════════ */
 function calculRoute(dest){
 
