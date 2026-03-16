@@ -1,10 +1,9 @@
 /* ============================================================
    randosCoords.js — Coordonnées GPS des randonnées
-   lat/lon renseignés = coords connues
-   lat/lon null       = géocodé automatiquement par carte-randos.html
-   Pour compléter : renseigner lat et lon (décimal WGS84)
+   Exposé en variable globale window.randosCoords
+   ET en export ES module pour compatibilité maximale
    ============================================================ */
-export const randosCoords = [
+export const randosCoords = window.randosCoords = [
   { nom:"Aiguebelle",                                         lat:45.54,         lon:6.35 },
   { nom:"Alleins",                                            lat:43.7043862,   lon:5.1622362 },
   { nom:"Alpes de Haute Provence",                            lat:44.1,         lon:6.2 },
@@ -60,6 +59,8 @@ export const randosCoords = [
   { nom:"Concluses de Lussan",                                lat:44.1819192,   lon:4.4031802 },
   { nom:"Côte bleue au départ de Port Mejean",                lat:43.3340000,   lon:5.1800000 },
   { nom:"Crête du Grand Luberon",                             lat:43.8154835,   lon:5.4695503 },
+  { nom:"Crêtes Arfuyen et le Saint Amand",                   lat:44.15,         lon:5.05 },
+  { nom:"Crêtes d'Arfuyen et Saint Amand",                    lat:44.15,         lon:5.05 },
   { nom:"Crêtes de Romanin",                                  lat:43.79,         lon:4.87 },
   { nom:"Crêtes des Alpilles",                                lat:43.76,         lon:4.92 },
   { nom:"Crêtes du Barroux",                                  lat:44.1142355,   lon:5.0820096 },
@@ -77,18 +78,18 @@ export const randosCoords = [
   { nom:"Falaise de Lioux",                                   lat:43.9464210,   lon:5.3028987 },
   { nom:"Fond de l'Orme. Mérindol",                           lat:43.735,         lon:5.205 },
   { nom:"Fontaine de Vaucluse",                               lat:43.9221229,   lon:5.1272914 },
-  { nom:"Forgeassoud",                                        lat:45.92434,         lon:6.39180 },
+  { nom:"Forgeassoud",                                        lat:44.12,         lon:5.25 },
   { nom:"Gard",                                               lat:44.0,         lon:4.4 },
   { nom:"Gardon rive droite, Chapelle l'Ermitage",            lat:43.97,         lon:4.42 },
   { nom:"Gorges d'Oppedette",                                 lat:43.9331911,   lon:5.5873231 },
   { nom:"Goult lumieres",                                     lat:43.8639733,   lon:5.2401309 },
   { nom:"Guidon du Bouquet",                                  lat:44.1331404,   lon:4.2856482 },
-  { nom:"Hameaux ruinés de Tarlan et Poitevin",               lat:44.10717,,         lon:4.98279 },
+  { nom:"Hameaux ruinés de Tarlan et Poitevin",               lat:44.0248,         lon:5.3219 },
   { nom:"Hauts de Gordes",                                    lat:43.9001870,   lon:5.1663086 },
   { nom:"Hivernale dans le Ventoux",                          lat:44.1739649,   lon:5.2783976 },
   { nom:"Ile de la Barthelasse",                              lat:43.9706865,   lon:4.8374519 },
   { nom:"La Baume Martin",                                    lat:44.05,         lon:5.22 },
-  { nom:"La bombine",                                         lat:44.52650,         lon:4.02704 },
+  { nom:"La bombine",                                         lat:43.94,         lon:5.32 },
   { nom:"La garde d'Apt. Oppidum",                            lat:43.895,         lon:5.445 },
   { nom:"La montagne de Bluye. St Léger",                     lat:44.08,         lon:5.31 },
   { nom:"Lacau. et le camp de César",                         lat:44.03,         lon:5.28 },
@@ -100,8 +101,8 @@ export const randosCoords = [
   { nom:"Lagnes, Fontaine de Vaucluse par l'aqueduc",         lat:43.8934491,   lon:5.1153284 },
   { nom:"Lagon bleu Maussane",                                lat:43.7120000,   lon:4.8570000 },
   { nom:"Lamanon. Roquemartine",                              lat:43.727,         lon:5.115 },
-  { nom:"La Lance. face Nord",                                lat:444.20240,         lon:3.99468 },
-  { nom:"La Lance. par le rocher des aures",                  lat:444.20240,         lon:3.99468 },
+  { nom:"La Lance. face Nord",                                lat:44.35,         lon:5.3 },
+  { nom:"La Lance. par le rocher des aures",                  lat:44.35,         lon:5.3 },
   { nom:"Lauris",                                             lat:43.7466047,   lon:5.3126795 },
   { nom:"Lauris. Cap de Serre",                               lat:43.7466,         lon:5.3127 },
   { nom:"Les Baux de Provence. Baumeyrane",                   lat:43.7440000,   lon:4.7950000 },
@@ -204,6 +205,6 @@ export const randosCoords = [
   { nom:"Viens. hameaux et chapelles",                        lat:43.8952255,   lon:5.5670137 },
   { nom:"Village des Bories. étangs Senancole",               lat:43.92,         lon:5.18 },
   { nom:"Villages des dentelles. Lafare",                     lat:44.1463143,   lon:5.0516128 },
-  { nom:"Villes-sur-Auzon. combe des Escampeaux",             lat:44.0554,         lon:5.2162 },
+  { nom:"Villes sur Auzon. combe des Escampeaux",             lat:44.0554,         lon:5.2162 },
   { nom:"Villes-sur-Auzon. Bergeries",                        lat:44.0554,         lon:5.2162 },
 ];
