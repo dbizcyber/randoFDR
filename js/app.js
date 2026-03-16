@@ -11,6 +11,7 @@ import { afficherMeteo } from "./meteoRando.js";
 import { initResume } from "./resumeRando.js";
 import { initEnvoi } from "./envoiRando.js";
 import { initSauvegarde, initIndicateurs, majIndicateurs, validerFormulaire, effacerSauvegarde } from "./formManager.js";
+import { initGPXManuel } from "./gpxManuel.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Application MeteoRando initialisée");
@@ -59,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* sauvegarde auto + indicateurs + validation */
   initSauvegarde();
   initIndicateurs();
+  initGPXManuel();
 
   /* exposer validerFormulaire pour envoiRando.js */
   window._validerFormulaire = validerFormulaire;
