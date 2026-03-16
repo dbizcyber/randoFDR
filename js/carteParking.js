@@ -22,6 +22,10 @@ export function initCarte(){
 
   marker = L.marker(CHATEAURENARD, { draggable: false }).addTo(map)
 
+  /* forcer le verrouillage après ajout à la carte */
+  marker.dragging.disable()
+  marker.setIcon(markerIconBleu())
+
   window.coordsParking = CHATEAURENARD[0] + "," + CHATEAURENARD[1]
 
   calculRoute(CHATEAURENARD)
@@ -34,20 +38,22 @@ export function initCarte(){
     afficherMeteo(pos.lat, pos.lng)
   })
 
-  /* écouter le changement de parking covoiturage */
+  /* écouter le changement de parking covoiturage
+     → utiliser 'input' en plus de 'change' pour couvrir tous les cas */
   const selectParking = document.getElementById("parkingCovoiturage")
   const champAutre    = document.getElementById("nouveauParking")
 
   if(selectParking){
-    selectParking.addEventListener("change", () => {
+    const onParkingChange = () => {
       if(selectParking.value === "__autre__"){
-        /* mode libre : marker draggable, départ = position actuelle marker */
         activerMarkerLibre()
       } else {
-        /* mode fixe : marker verrouillé, départ = Châteaurenard */
         desactiverMarkerLibre()
       }
-    })
+    }
+    selectParking.addEventListener("change", onParkingChange)
+    /* exposer pour que menuParkings.js puisse le déclencher après peuplement */
+    window._onParkingChange = onParkingChange
   }
 
   /* si le user saisit manuellement le parking et appuie sur Entrée */
