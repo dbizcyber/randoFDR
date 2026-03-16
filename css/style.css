@@ -308,6 +308,33 @@ textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
   background: rgba(255,255,255,0.30);
 }
 
+/* ── BOUTON RESET (header) ── */
+.btn-reset-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.35);
+  border-radius: var(--radius-sm);
+  color: rgba(255,255,255,0.85);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--trans);
+  margin-top: 0;
+  box-shadow: none;
+}
+
+.btn-reset-header:hover {
+  background: rgba(200,50,50,0.35);
+  border-color: rgba(255,255,255,0.6);
+  transform: none;
+  box-shadow: none;
+}
+
 /* ── LIEN CARTE RANDOS (nav) ── */
 .nav-carte {
   border-left: 2px solid rgba(255,255,255,0.25) !important;
