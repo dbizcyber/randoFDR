@@ -31,6 +31,7 @@
         <div class="tagline">Préparez vos randonnées bibi_1503_1155</div>
       </div>
     </div>
+    <a href="carteRandos.html" class="btn-carte-header" title="Carte des randonnées">🗺 Carte</a>
     <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
   </div>
 </header>
@@ -47,6 +48,7 @@
     <li><a href="#section-remarques">📝 Notes</a></li>
     <li><a href="#resume">📄 Résumé</a></li>
     <li><a href="#envoi">✉️ Envoi</a></li>
+    <li><a href="carteRandos.html" class="nav-carte">🗺 Carte randos</a></li>
   </ul>
 </nav>
 </div>
@@ -366,8 +368,8 @@ function validerIntervalle(inputId, erreurId) {
 validerIntervalle('technicite', 'erreur-technicite');
 validerIntervalle('risque',     'erreur-risque');
 
-/* Enregistrement Service Worker PWA */
-if ('serviceWorker' in navigator) {
+/* Enregistrement Service Worker PWA — uniquement sur GitHub Pages */
+if ('serviceWorker' in navigator && location.hostname === 'dbizcyber.github.io') {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/randoFDR/sw.js')
       .then(reg => console.log('[PWA] Service Worker enregistré:', reg.scope))
