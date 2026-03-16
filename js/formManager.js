@@ -10,7 +10,8 @@ const CHAMPS_SAVE = [
   "rechercheRando", "nomRando", "dateRando", "animateur",
   "parkingCovoiturage", "nouveauParking", "heureRV", "itineraire",
   "autoroute", "technicite", "risque", "remarques",
-  "heureDepartMarche", "vitesse", "emailUser"
+  "heureDepartMarche", "vitesse", "emailUser",
+  "distanceGPX_manuel", "denivele_manuel", "dureeMarche_manuel", "effort_manuel"
 ];
 
 /* ── CHAMPS OBLIGATOIRES ── */
