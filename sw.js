@@ -3,7 +3,7 @@
    Cache les ressources essentielles pour usage hors ligne
    ============================================================ */
 
-const CACHE_NAME = 'randofdr-v2';
+const CACHE_NAME = 'randofdr-v3';
 
 /* Fichiers à mettre en cache au démarrage */
 const CACHE_STATIC = [
@@ -23,6 +23,7 @@ const CACHE_STATIC = [
   '/randoFDR/js/profilAltitude.js',
   '/randoFDR/js/resumeRando.js',
   '/randoFDR/js/envoiRando.js',
+  '/randoFDR/js/formManager.js',
   '/randoFDR/data/randos.js',
   '/randoFDR/data/animateurs.js',
   '/randoFDR/data/parkings.js',
