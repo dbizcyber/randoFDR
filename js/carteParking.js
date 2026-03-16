@@ -38,25 +38,12 @@ export function initCarte(){
     afficherMeteo(pos.lat, pos.lng)
   })
 
-  /* écouter le changement de parking covoiturage
-     → utiliser 'input' en plus de 'change' pour couvrir tous les cas */
-  const selectParking = document.getElementById("parkingCovoiturage")
-  const champAutre    = document.getElementById("nouveauParking")
+  /* écouter le changement de parking covoiturage —
+     le listener est attaché dans app.js après peuplement du select */
+  window._activerMarkerLibre   = activerMarkerLibre
+  window._desactiverMarkerLibre = desactiverMarkerLibre
 
-  if(selectParking){
-    const onParkingChange = () => {
-      if(selectParking.value === "__autre__"){
-        activerMarkerLibre()
-      } else {
-        desactiverMarkerLibre()
-      }
-    }
-    selectParking.addEventListener("change", onParkingChange)
-    /* exposer pour que menuParkings.js puisse le déclencher après peuplement */
-    window._onParkingChange = onParkingChange
-  }
-
-  /* si le user saisit manuellement le parking et appuie sur Entrée */
+  /* si le user saisit manuellement le parking */
   if(champAutre){
     champAutre.addEventListener("keydown", e => {
       if(e.key === "Enter") geocoderParkingAutre(champAutre.value)
