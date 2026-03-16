@@ -17,6 +17,11 @@ async function envoyerRando() {
 
   console.log("envoyerRando déclenché");
 
+  /* Validation des champs obligatoires */
+  if (window._validerFormulaire && !window._validerFormulaire()) {
+    return;
+  }
+
   try {
 
     const resume =
@@ -74,6 +79,8 @@ if(window.profilExportBase64){
 
     if (data.success) {
       alert("Email envoyé avec profil");
+      /* Effacer la sauvegarde après envoi réussi */
+      window._effacerSauvegarde && window._effacerSauvegarde();
     } else {
       alert("Erreur serveur : " + data.error);
     }
