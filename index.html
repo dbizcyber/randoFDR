@@ -32,6 +32,7 @@
       </div>
     </div>
     <a href="carteRandos.html" class="btn-carte-header" title="Carte des randonnées">🗺 Carte</a>
+    <button class="btn-reset-header" id="btnReset" title="Réinitialiser le formulaire">🔄 Reset</button>
     <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
   </div>
 </header>
@@ -396,6 +397,17 @@ if ('serviceWorker' in navigator && location.hostname === 'dbizcyber.github.io')
       .catch(err => console.warn('[PWA] Erreur SW:', err));
   });
 }
+
+/* Bouton Reset */
+document.getElementById('btnReset')?.addEventListener('click', () => {
+  if (!confirm('Réinitialiser tout le formulaire ?\nToutes les données saisies seront effacées.')) return;
+
+  /* Effacer localStorage */
+  localStorage.removeItem('randoFDR_form');
+
+  /* Recharger la page proprement */
+  window.location.reload();
+});
 
 /* Active nav au scroll */
 const sections = document.querySelectorAll('.card[id]');
