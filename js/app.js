@@ -35,6 +35,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnGeocoder = document.getElementById("btnGeocoder");
   if (btnGeocoder) btnGeocoder.addEventListener("click", chercherLieu);
 
+  /* liaison parking covoiturage ↔ marker carte
+     appelé ici car select peuplé ET carte initialisée */
+  const selectParking = document.getElementById("parkingCovoiturage");
+  if(selectParking) {
+    selectParking.addEventListener("change", () => {
+      if(selectParking.value === "__autre__"){
+        window._activerMarkerLibre && window._activerMarkerLibre()
+      } else {
+        window._desactiverMarkerLibre && window._desactiverMarkerLibre()
+      }
+    });
+  }
+
   /* coût covoiturage */
   const autoroute = document.getElementById("autoroute");
   if (autoroute) autoroute.addEventListener("input", calculCovoiturage);
