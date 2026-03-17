@@ -3,7 +3,7 @@
    Cache les ressources essentielles pour usage hors ligne
    ============================================================ */
 
-const CACHE_NAME = 'randofdr-v3';
+const CACHE_NAME = 'randofdr-v4';
 
 /* Fichiers à mettre en cache au démarrage */
 const CACHE_STATIC = [
