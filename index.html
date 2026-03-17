@@ -423,7 +423,6 @@ document.getElementById('btnReset')?.addEventListener('click', () => {
   box.querySelector('#resetAnnuler').addEventListener('click', () => overlay.remove());
   box.querySelector('#resetConfirmer').addEventListener('click', () => {
     localStorage.removeItem('randoFDR_form');
-    sessionStorage.removeItem('parkingChoisi');
     window.location.reload();
   });
 });
