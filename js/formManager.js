@@ -127,6 +127,10 @@ function restaurerFormulaire() {
       const el = document.getElementById(id);
       if (el) el.textContent = data[k];
     });
+    /* Restaurer le flag parking si coordonnées valides sauvegardées */
+    if (data["_span_latParking"] && data["_span_latParking"] !== "—" && data["_span_latParking"] !== "") {
+      sessionStorage.setItem("parkingChoisi", "1");
+    }
     /* Afficher le champ nouveauParking si Autre */
     const selPark = document.getElementById("parkingCovoiturage");
     const champAutre = document.getElementById("nouveauParking");
@@ -192,6 +196,11 @@ export function majIndicateurs() {
 
     const tousRemplis = obligDeCette.every(c => {
       const val = getValeur(c.id, c.isSpan);
+      /* Cas spécial : parking départ — doit avoir été choisi explicitement */
+      if (c.id === "latParking") {
+        return sessionStorage.getItem("parkingChoisi") === "1" &&
+               val !== "" && val !== "—";
+      }
       /* Exclure valeurs vides ou placeholder */
       return val !== "" && val !== "—" && val !== "0" &&
              val !== "Cliquez!" && val !== "— Choisir un animateur —";
@@ -209,6 +218,13 @@ export function validerFormulaire() {
 
   CHAMPS_OBLIGATOIRES.forEach(champ => {
     const val = getValeur(champ.id, champ.isSpan);
+    /* Cas spécial : parking départ — doit avoir été choisi explicitement */
+    if (champ.id === "latParking") {
+      if (sessionStorage.getItem("parkingChoisi") !== "1" || val === "" || val === "—") {
+        manquants.push(champ);
+      }
+      return;
+    }
     const vide = val === "" || val === "—" || val === "0" ||
                  val === "Cliquez!" || val === "— Choisir un animateur —";
     if (vide) manquants.push(champ);
