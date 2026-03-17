@@ -127,9 +127,10 @@ function restaurerFormulaire() {
       const el = document.getElementById(id);
       if (el) el.textContent = data[k];
     });
-    /* Restaurer le flag parking si coordonnées valides sauvegardées */
+    /* Restaurer le flag data-user-set sur le span latParking si coordonnées valides sauvegardées */
     if (data["_span_latParking"] && data["_span_latParking"] !== "—" && data["_span_latParking"] !== "") {
-      sessionStorage.setItem("parkingChoisi", "1");
+      const elLat = document.getElementById("latParking");
+      if (elLat) elLat.dataset.userSet = "1";
     }
     /* Afficher le champ nouveauParking si Autre */
     const selPark = document.getElementById("parkingCovoiturage");
@@ -145,7 +146,11 @@ function restaurerFormulaire() {
 
 export function effacerSauvegarde() {
   localStorage.removeItem(STORAGE_KEY);
-  sessionStorage.removeItem("parkingChoisi");
+  /* Réinitialiser le flag data-user-set du parking */
+  const elLat = document.getElementById("latParking");
+  if (elLat) { elLat.dataset.userSet = ""; elLat.textContent = "—"; }
+  const elLon = document.getElementById("lonParking");
+  if (elLon) elLon.textContent = "—";
   console.log("[FormManager] Sauvegarde effacée");
 }
 
@@ -197,10 +202,10 @@ export function majIndicateurs() {
 
     const tousRemplis = obligDeCette.every(c => {
       const val = getValeur(c.id, c.isSpan);
-      /* Cas spécial : parking départ — doit avoir été choisi explicitement */
+      /* Cas spécial : parking départ — doit avoir été choisi explicitement par l'utilisateur */
       if (c.id === "latParking") {
-        return sessionStorage.getItem("parkingChoisi") === "1" &&
-               val !== "" && val !== "—";
+        const el = document.getElementById("latParking");
+        return el?.dataset.userSet === "1" && val !== "" && val !== "—";
       }
       /* Exclure valeurs vides ou placeholder */
       return val !== "" && val !== "—" && val !== "0" &&
@@ -219,9 +224,10 @@ export function validerFormulaire() {
 
   CHAMPS_OBLIGATOIRES.forEach(champ => {
     const val = getValeur(champ.id, champ.isSpan);
-    /* Cas spécial : parking départ — doit avoir été choisi explicitement */
+    /* Cas spécial : parking départ — doit avoir été choisi explicitement par l'utilisateur */
     if (champ.id === "latParking") {
-      if (sessionStorage.getItem("parkingChoisi") !== "1" || val === "" || val === "—") {
+      const el = document.getElementById("latParking");
+      if (el?.dataset.userSet !== "1" || val === "" || val === "—") {
         manquants.push(champ);
       }
       return;
