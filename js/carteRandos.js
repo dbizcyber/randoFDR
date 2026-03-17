@@ -33,6 +33,9 @@ var iconKnown    = makeIcon('#1978c8');
 var iconAuto     = makeIcon('#28a745');
 var iconNotFound = makeIcon('#d9534f');
 
+/* ══ ZOOM seuil pour afficher les étiquettes ══ */
+var ZOOM_LABELS = 11;
+
 /* ══ AJOUT MARKER ══ */
 function ajouterMarker(item, cluster, icon, geocoded) {
   var badge = geocoded
@@ -40,9 +43,21 @@ function ajouterMarker(item, cluster, icon, geocoded) {
     : '';
   var coords = '<br><span style="font-size:11px;color:#888">'
     + item.lat.toFixed(5) + ', ' + item.lon.toFixed(5) + '</span>';
-  L.marker([item.lat, item.lon], { icon: icon })
-    .bindPopup('<strong>' + item.nom + '</strong>' + coords + badge)
-    .addTo(cluster);
+
+  var marker = L.marker([item.lat, item.lon], { icon: icon });
+
+  /* Popup au clic */
+  marker.bindPopup('<strong>' + item.nom + '</strong>' + coords + badge);
+
+  /* Tooltip permanent (étiquette) — affiché selon zoom */
+  marker.bindTooltip(item.nom, {
+    permanent: true,
+    direction: 'right',
+    offset: [8, 0],
+    className: 'label-rando'
+  });
+
+  marker.addTo(cluster);
 }
 
 /* ══ STATS ══ */
@@ -57,6 +72,17 @@ function majStats() {
   document.getElementById('stat-geocoded').textContent = nbGeocoded;
   document.getElementById('stat-nok').textContent      = nbNok;
 }
+
+/* ══ AFFICHAGE / MASQUAGE étiquettes selon zoom ══ */
+function majLabels() {
+  var zoom = map.getZoom();
+  var afficher = zoom >= ZOOM_LABELS;
+  document.querySelectorAll('.label-rando').forEach(function(el) {
+    el.style.display = afficher ? '' : 'none';
+  });
+}
+
+map.on('zoomend', majLabels);
 
 /* ══ TRAITEMENT : coords connues ══ */
 var connus    = randosCoords.filter(function(r) { return r.lat !== null; });
@@ -78,6 +104,7 @@ if (bounds.length > 0) {
 }
 
 majStats();
+majLabels(); /* état initial */
 
 /* ══ GÉOCODAGE automatique (Promises chainées) ══ */
 function sleep(ms) {
@@ -125,6 +152,7 @@ async function lancerGeocodage() {
         .addTo(clusterNotFound);
     }
     majStats();
+    majLabels();
     await sleep(1100);
   }
 
