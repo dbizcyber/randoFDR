@@ -127,11 +127,6 @@ function restaurerFormulaire() {
       const el = document.getElementById(id);
       if (el) el.textContent = data[k];
     });
-    /* Restaurer le flag data-user-set sur le span latParking si coordonnées valides sauvegardées */
-    if (data["_span_latParking"] && data["_span_latParking"] !== "—" && data["_span_latParking"] !== "") {
-      const elLat = document.getElementById("latParking");
-      if (elLat) elLat.dataset.userSet = "1";
-    }
     /* Afficher le champ nouveauParking si Autre */
     const selPark = document.getElementById("parkingCovoiturage");
     const champAutre = document.getElementById("nouveauParking");
@@ -146,11 +141,6 @@ function restaurerFormulaire() {
 
 export function effacerSauvegarde() {
   localStorage.removeItem(STORAGE_KEY);
-  /* Réinitialiser le flag data-user-set du parking */
-  const elLat = document.getElementById("latParking");
-  if (elLat) { elLat.dataset.userSet = ""; elLat.textContent = "—"; }
-  const elLon = document.getElementById("lonParking");
-  if (elLon) elLon.textContent = "—";
   console.log("[FormManager] Sauvegarde effacée");
 }
 
@@ -202,14 +192,10 @@ export function majIndicateurs() {
 
     const tousRemplis = obligDeCette.every(c => {
       const val = getValeur(c.id, c.isSpan);
-      /* Cas spécial : parking départ — doit avoir été choisi explicitement par l'utilisateur */
-      if (c.id === "latParking") {
-        const el = document.getElementById("latParking");
-        return el?.dataset.userSet === "1" && val !== "" && val !== "—";
-      }
       /* Exclure valeurs vides ou placeholder */
       return val !== "" && val !== "—" && val !== "0" &&
-             val !== "Cliquez!" && val !== "— Choisir un animateur —";
+             val !== "Cliquez!" && val !== "— Choisir un animateur —" &&
+             val !== "— Choisir un parking —";
     });
 
     badge.textContent = tousRemplis ? "✅" : "⚠️";
@@ -224,16 +210,9 @@ export function validerFormulaire() {
 
   CHAMPS_OBLIGATOIRES.forEach(champ => {
     const val = getValeur(champ.id, champ.isSpan);
-    /* Cas spécial : parking départ — doit avoir été choisi explicitement par l'utilisateur */
-    if (champ.id === "latParking") {
-      const el = document.getElementById("latParking");
-      if (el?.dataset.userSet !== "1" || val === "" || val === "—") {
-        manquants.push(champ);
-      }
-      return;
-    }
     const vide = val === "" || val === "—" || val === "0" ||
-                 val === "Cliquez!" || val === "— Choisir un animateur —";
+                 val === "Cliquez!" || val === "— Choisir un animateur —" ||
+                 val === "— Choisir un parking —";
     if (vide) manquants.push(champ);
   });
 
