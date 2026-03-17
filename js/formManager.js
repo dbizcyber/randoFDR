@@ -57,10 +57,8 @@ function getValeur(id, isSpan = false) {
 const STORAGE_KEY = "randoFDR_form";
 
 export function initSauvegarde() {
-  /* Restaurer au chargement */
   restaurerFormulaire();
 
-  /* Sauvegarder à chaque modification */
   CHAMPS_SAVE.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -71,9 +69,10 @@ export function initSauvegarde() {
     });
   });
 
-  /* Sauvegarder aussi quand les spans GPX changent (via MutationObserver) */
-  ["distanceGPX", "denivele", "dureeMarche", "distanceAR", "latParking",
-   "meteoEtat", "ibp", "effort", "heureDepart"].forEach(id => {
+  [
+    "distanceGPX", "denivele", "dureeMarche", "distanceAR", "latParking",
+    "meteoEtat", "ibp", "effort", "heureDepart"
+  ].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     new MutationObserver(() => {
@@ -87,18 +86,30 @@ export function initSauvegarde() {
 
 function sauvegarderFormulaire() {
   const data = {};
+
+  /* Champs input/select */
   CHAMPS_SAVE.forEach(id => {
     const el = document.getElementById(id);
     if (el) data[id] = el.value || "";
   });
-  /* Sauvegarder aussi les spans */
-  ["distanceGPX","denivele","dureeMarche","distanceAR","latParking",
-   "lonParking","ibp","effort","heureDepart","meteoEtat","meteoTemp",
-   "meteoPluie","meteoVent","meteoRafales","parkingRandoAdresse",
-   "coutKm","coutTotal","cout4","cout5"].forEach(id => {
+
+  /* Spans cosmétiques — toujours restaurés */
+  ["distanceAR", "meteoEtat", "meteoTemp", "meteoPluie", "meteoVent", "meteoRafales",
+   "parkingRandoAdresse", "coutKm", "coutTotal", "cout4", "cout5",
+   "ibp", "effort", "heureDepart"].forEach(id => {
     const el = document.getElementById(id);
     if (el) data["_span_" + id] = el.textContent || "";
   });
+
+  /* Spans "validants" — restaurés seulement si l'utilisateur les a explicitement remplis */
+  ["latParking", "lonParking", "distanceGPX", "denivele", "dureeMarche"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) data["_val_" + id] = el.textContent || "";
+  });
+
+  /* Mémoriser si le parking départ rando a été choisi explicitement */
+  data["_userSet"] = document.getElementById("latParking")?.dataset.userSet || "";
+
   data["_ts"] = Date.now();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
@@ -108,31 +119,45 @@ function restaurerFormulaire() {
   if (!raw) return;
   try {
     const data = JSON.parse(raw);
-    /* Vérifier que la sauvegarde a moins de 7 jours */
     if (data._ts && Date.now() - data._ts > 7 * 24 * 3600 * 1000) {
       localStorage.removeItem(STORAGE_KEY);
       return;
     }
+
+    /* Champs input/select */
     CHAMPS_SAVE.forEach(id => {
       const el = document.getElementById(id);
       if (el && data[id] !== undefined) {
         el.value = data[id];
-        /* Déclencher change pour les selects */
         if (el.tagName === "SELECT") el.dispatchEvent(new Event("change"));
       }
     });
-    /* Restaurer les spans */
+
+    /* Spans cosmétiques */
     Object.keys(data).filter(k => k.startsWith("_span_")).forEach(k => {
       const id = k.replace("_span_", "");
       const el = document.getElementById(id);
       if (el) el.textContent = data[k];
     });
+
+    /* Spans validants — SEULEMENT si le parking avait été choisi explicitement */
+    if (data["_userSet"] === "1") {
+      Object.keys(data).filter(k => k.startsWith("_val_")).forEach(k => {
+        const id = k.replace("_val_", "");
+        const el = document.getElementById(id);
+        if (el) el.textContent = data[k];
+      });
+      const latEl = document.getElementById("latParking");
+      if (latEl) latEl.dataset.userSet = "1";
+    }
+
     /* Afficher le champ nouveauParking si Autre */
     const selPark = document.getElementById("parkingCovoiturage");
     const champAutre = document.getElementById("nouveauParking");
     if (selPark?.value === "__autre__" && champAutre) {
       champAutre.style.display = "block";
     }
+
     console.log("[FormManager] Formulaire restauré");
   } catch(e) {
     console.warn("[FormManager] Erreur restauration:", e);
@@ -148,14 +173,11 @@ export function effacerSauvegarde() {
    2. INDICATEURS VISUELS ✅ / ⚠️
 ══════════════════════════════════════ */
 export function initIndicateurs() {
-  /* Créer les badges sur chaque card-header */
   Object.keys(SECTIONS_CHAMPS).forEach(sectionId => {
     const section = document.getElementById(sectionId);
     if (!section) return;
     const header = section.querySelector(".card-header h2");
     if (!header) return;
-
-    /* Éviter les doublons */
     if (header.querySelector(".section-badge")) return;
 
     const badge = document.createElement("span");
@@ -179,20 +201,13 @@ export function majIndicateurs() {
     const badge = section.querySelector(".section-badge");
     if (!badge) return;
 
-    if (champs.length === 0) {
-      badge.textContent = "";
-      return;
-    }
+    if (champs.length === 0) { badge.textContent = ""; return; }
 
     const obligDeCette = CHAMPS_OBLIGATOIRES.filter(c => c.section === sectionId);
-    if (obligDeCette.length === 0) {
-      badge.textContent = "";
-      return;
-    }
+    if (obligDeCette.length === 0) { badge.textContent = ""; return; }
 
     const tousRemplis = obligDeCette.every(c => {
       const val = getValeur(c.id, c.isSpan);
-      /* Exclure valeurs vides ou placeholder */
       return val !== "" && val !== "—" && val !== "0" &&
              val !== "Cliquez!" && val !== "— Choisir un animateur —" &&
              val !== "— Choisir un parking —";
@@ -218,35 +233,26 @@ export function validerFormulaire() {
 
   if (manquants.length === 0) return true;
 
-  /* Afficher le message d'erreur */
   afficherErreurValidation(manquants);
   return false;
 }
 
 function afficherErreurValidation(manquants) {
-  /* Supprimer l'ancien message */
   document.getElementById("validation-overlay")?.remove();
 
   const overlay = document.createElement("div");
   overlay.id = "validation-overlay";
   overlay.style.cssText = `
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background: rgba(44,26,14,0.55);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
+    z-index: 9999; display: flex;
+    align-items: center; justify-content: center; padding: 16px;
   `;
 
   const box = document.createElement("div");
   box.style.cssText = `
-    background: white;
-    border-radius: 16px;
-    padding: 24px;
-    max-width: 420px;
-    width: 100%;
+    background: white; border-radius: 16px; padding: 24px;
+    max-width: 420px; width: 100%;
     box-shadow: 0 8px 40px rgba(0,0,0,0.25);
     font-family: 'Outfit', Arial, sans-serif;
   `;
@@ -269,58 +275,37 @@ function afficherErreurValidation(manquants) {
     li.innerHTML = `<strong style="color:#c1440e">${c.label}</strong>`;
     liste.appendChild(li);
 
-    /* Mettre en évidence le champ */
     const el = document.getElementById(c.id);
     if (el && !c.isSpan) {
       el.style.borderColor = "#c1440e";
       el.style.boxShadow = "0 0 0 3px rgba(193,68,14,0.2)";
-      el.addEventListener("input", () => {
-        el.style.borderColor = "";
-        el.style.boxShadow = "";
-      }, { once: true });
-      el.addEventListener("change", () => {
-        el.style.borderColor = "";
-        el.style.boxShadow = "";
-      }, { once: true });
+      el.addEventListener("input", () => { el.style.borderColor = ""; el.style.boxShadow = ""; }, { once: true });
+      el.addEventListener("change", () => { el.style.borderColor = ""; el.style.boxShadow = ""; }, { once: true });
     }
   });
   box.appendChild(liste);
 
-  /* Bouton OK */
   const btn = document.createElement("button");
   btn.textContent = "OK, je complète";
   btn.style.cssText = `
-    width:100%;
-    padding:12px;
+    width:100%; padding:12px;
     background:linear-gradient(135deg,#c1440e,#f49d37);
-    color:white;
-    border:none;
-    border-radius:8px;
-    font-size:15px;
-    font-weight:600;
-    font-family:'Outfit',Arial,sans-serif;
-    cursor:pointer;
-    margin-top:0;
+    color:white; border:none; border-radius:8px;
+    font-size:15px; font-weight:600;
+    font-family:'Outfit',Arial,sans-serif; cursor:pointer;
   `;
   btn.addEventListener("click", () => {
     overlay.remove();
-    /* Scroller vers le premier champ manquant */
-    const premier = manquants[0];
-    const el = document.getElementById(premier.section);
+    const el = document.getElementById(manquants[0].section);
     if (el) {
       const topbar = document.getElementById("topbar");
       const offset = topbar ? topbar.offsetHeight + 12 : 120;
-      const y = el.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top: y, behavior: "smooth" });
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset, behavior: "smooth" });
     }
   });
   box.appendChild(btn);
 
   overlay.appendChild(box);
   document.body.appendChild(overlay);
-
-  /* Fermer en cliquant en dehors */
-  overlay.addEventListener("click", e => {
-    if (e.target === overlay) overlay.remove();
-  });
+  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
 }
