@@ -400,13 +400,31 @@ if ('serviceWorker' in navigator && location.hostname === 'dbizcyber.github.io')
 
 /* Bouton Reset */
 document.getElementById('btnReset')?.addEventListener('click', () => {
-  if (!confirm('Réinitialiser tout le formulaire ?\nToutes les données saisies seront effacées.')) return;
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(44,26,14,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
 
-  /* Effacer localStorage */
-  localStorage.removeItem('randoFDR_form');
+  const box = document.createElement('div');
+  box.style.cssText = 'background:white;border-radius:16px;padding:28px 24px;max-width:380px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.25);font-family:Outfit,Arial,sans-serif;text-align:center';
 
-  /* Recharger la page proprement */
-  window.location.reload();
+  box.innerHTML = `
+    <div style="font-size:36px;margin-bottom:12px">🔄</div>
+    <div style="font-size:17px;font-weight:700;color:#c1440e;margin-bottom:10px">Réinitialiser tout le formulaire ?</div>
+    <div style="font-size:14px;color:#2c1a0e;margin-bottom:24px">Toutes les données saisies seront effacées.</div>
+    <div style="display:flex;gap:10px">
+      <button id="resetAnnuler" style="flex:1;padding:11px;background:#f5ead8;color:#2c1a0e;border:1.5px solid #e8d8c4;border-radius:8px;font-size:14px;font-weight:600;font-family:Outfit,Arial,sans-serif;cursor:pointer;margin-top:0;box-shadow:none">Annuler</button>
+      <button id="resetConfirmer" style="flex:1;padding:11px;background:linear-gradient(135deg,#c1440e,#f49d37);color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;font-family:Outfit,Arial,sans-serif;cursor:pointer;margin-top:0">Oui, effacer</button>
+    </div>
+  `;
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+  box.querySelector('#resetAnnuler').addEventListener('click', () => overlay.remove());
+  box.querySelector('#resetConfirmer').addEventListener('click', () => {
+    localStorage.removeItem('randoFDR_form');
+    window.location.reload();
+  });
 });
 
 /* Active nav au scroll */
