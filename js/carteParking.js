@@ -22,10 +22,11 @@ export function initCarte(){
   /* marker TOUJOURS draggable — l'utilisateur positionne librement le parking départ rando */
   marker = L.marker(CHATEAURENARD, { draggable: true }).addTo(map)
 
-  window.coordsParking = CHATEAURENARD[0] + "," + CHATEAURENARD[1]
+  window.coordsParking = ""
 
-  calculRoute(CHATEAURENARD)
-  afficherMeteo(CHATEAURENARD[0], CHATEAURENARD[1])
+  /* NE PAS appeler calculRoute ni afficherMeteo ici :
+     latParking / lonParking restent "—" tant que l'utilisateur
+     n'a pas explicitement choisi un lieu (recherche ou drag). */
 
   /* déplacement marker → recalcul route et météo */
   marker.on("dragend", () => {
@@ -144,6 +145,8 @@ function calculRoute(dest){
     document.getElementById("lonParking").textContent = dest[1].toFixed(5)
 
     window.coordsParking = dest[0].toFixed(5) + "," + dest[1].toFixed(5)
+    /* Marquer que le parking a été choisi explicitement par l'utilisateur */
+    sessionStorage.setItem("parkingChoisi", "1")
 
     majAdresse(dest[0], dest[1])
 
