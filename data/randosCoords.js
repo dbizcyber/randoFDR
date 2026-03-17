@@ -52,7 +52,7 @@ window.randosCoords = [
   { nom:"Collias. Falaises et gorges du Gardon",              lat:43.9270000,   lon:4.4950000 },
   { nom:"Collias. le vire des Chèvres",                       lat:43.927,         lon:4.495 },
   { nom:"Collias. Sainte Veredeme",                           lat:43.927,         lon:4.495 },
-  { nom:"Combe Obscure. Combe du Chat",                       lat:44.0,         lon:5.25 },
+  { nom:"Combe Obscure. Combe du Chat",                       lat:44.14717,         lon:5.15361 },
   { nom:"Comps",                                              lat:44.5434190,         lon:5.1071300},
   { nom:"Concluses de Lussan",                                lat:44.1819192,   lon:4.4031802 },
   { nom:"Côte bleue au départ de Port Mejean",                lat:43.3340000,   lon:5.1800000 },
