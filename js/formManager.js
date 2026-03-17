@@ -145,6 +145,7 @@ function restaurerFormulaire() {
 
 export function effacerSauvegarde() {
   localStorage.removeItem(STORAGE_KEY);
+  sessionStorage.removeItem("parkingChoisi");
   console.log("[FormManager] Sauvegarde effacée");
 }
 
