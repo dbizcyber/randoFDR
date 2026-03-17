@@ -60,9 +60,12 @@ function majPointDepart(valeurSelect) {
   } else {
     /* parking connu → départ = Châteaurenard */
     pointDepart = CHATEAURENARD
-    /* recalcul route depuis Châteaurenard vers position actuelle du marker */
-    const pos = marker.getLatLng()
-    calculRoute([pos.lat, pos.lng])
+    /* Recalcul route UNIQUEMENT si l'utilisateur a déjà choisi un parking départ rando.
+       Évite de remplir latParking automatiquement au chargement / restauration. */
+    if(sessionStorage.getItem("parkingChoisi") === "1"){
+      const pos = marker.getLatLng()
+      calculRoute([pos.lat, pos.lng])
+    }
   }
 }
 
