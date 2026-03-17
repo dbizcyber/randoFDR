@@ -62,7 +62,7 @@ function majPointDepart(valeurSelect) {
     pointDepart = CHATEAURENARD
     /* Recalcul route UNIQUEMENT si l'utilisateur a déjà choisi un parking départ rando.
        Évite de remplir latParking automatiquement au chargement / restauration. */
-    if(sessionStorage.getItem("parkingChoisi") === "1"){
+    if(document.getElementById("latParking")?.dataset.userSet === "1"){
       const pos = marker.getLatLng()
       calculRoute([pos.lat, pos.lng])
     }
@@ -149,7 +149,7 @@ function calculRoute(dest){
 
     window.coordsParking = dest[0].toFixed(5) + "," + dest[1].toFixed(5)
     /* Marquer que le parking a été choisi explicitement par l'utilisateur */
-    sessionStorage.setItem("parkingChoisi", "1")
+    document.getElementById("latParking").dataset.userSet = "1"
 
     majAdresse(dest[0], dest[1])
 
