@@ -86,6 +86,21 @@
     </div>
   </section>
 
+  <!-- 2. MÉTÉO -->
+  <section class="card" id="meteo">
+    <div class="card-header">
+      <div class="section-icon" style="background:#e3f2fd">🌤</div>
+      <h2>Météo prévue</h2>
+    </div>
+    <div id="meteoRando">
+      <p>☀️ État<br><span id="meteoEtat">—</span></p>
+      <p>🌡 Température<br><span id="meteoTemp">—</span></p>
+      <p>🌧 Pluie<br><span id="meteoPluie">—</span></p>
+      <p>🧭 Vent<br><span id="meteoVent">—</span></p>
+      <p>💨 Rafales<br><span id="meteoRafales">—</span></p>
+    </div>
+  </section>
+
   <!-- 3. COVOITURAGE -->
   <section class="card" id="covoit">
     <div class="card-header">
@@ -143,21 +158,6 @@
     </div>
   </section>
 
-  <!-- 2. MÉTÉO -->
-  <section class="card" id="meteo">
-    <div class="card-header">
-      <div class="section-icon" style="background:#e3f2fd">🌤</div>
-      <h2>Météo prévue</h2>
-    </div>
-    <div id="meteoRando">
-      <p>☀️ État<br><span id="meteoEtat">—</span></p>
-      <p>🌡 Température<br><span id="meteoTemp">—</span></p>
-      <p>🌧 Pluie<br><span id="meteoPluie">—</span></p>
-      <p>🧭 Vent<br><span id="meteoVent">—</span></p>
-      <p>💨 Rafales<br><span id="meteoRafales">—</span></p>
-    </div>
-  </section>
-  
   <!-- 5. COÛTS -->
   <section class="card" id="couts">
     <div class="card-header">
@@ -189,75 +189,75 @@
   </section>
 
   <!-- 6. GPX -->
-<section class="card" id="gpx">
-  <div class="card-header">
-    <div class="section-icon" style="background:#e8f5e9">🗺</div>
-    <h2>Analyse GPX</h2>
-  </div>
-  <div class="gpx-drop-zone" id="gpxDropZone">
-    <div class="drop-icon">📂</div>
-    <div class="drop-text">Glissez votre fichier GPX ici</div>
-    <div class="drop-sub">ou cliquez pour sélectionner (.gpx)</div>
-    <input type="file" id="gpxFile" accept=".gpx">
-  </div>
-  <div id="gpx-status"></div>
+  <section class="card" id="gpx">
+    <div class="card-header">
+      <div class="section-icon" style="background:#e8f5e9">🗺</div>
+      <h2>Analyse GPX</h2>
+    </div>
+    <div class="gpx-drop-zone" id="gpxDropZone">
+      <div class="drop-icon">📂</div>
+      <div class="drop-text">Glissez votre fichier GPX ici</div>
+      <div class="drop-sub">ou cliquez pour sélectionner (.gpx)</div>
+      <input type="file" id="gpxFile" accept=".gpx">
+    </div>
+    <div id="gpx-status"></div>
 
-  <p id="gpx-manuel-hint" style="font-size:12px;color:var(--stone);margin:8px 0 4px;font-style:italic">
-    Sans fichier GPX, saisissez les valeurs manuellement ci-dessous :
-  </p>
+    <p id="gpx-manuel-hint" style="font-size:12px;color:var(--stone);margin:8px 0 4px;font-style:italic">
+      Sans fichier GPX, saisissez les valeurs manuellement ci-dessous :
+    </p>
 
-  <div class="cout-grid">
-    <div class="cout-item">
-      <div class="cout-label">Distance (km)</div>
-      <div class="cout-value">
-        <span id="distanceGPX" class="stat-span">—</span>
-        <input id="distanceGPX_manuel" type="number" min="0" step="0.1"
-          class="stat-input" placeholder="ex: 12.5" style="display:none">
+    <div class="cout-grid">
+      <div class="cout-item">
+        <div class="cout-label">Distance (km)</div>
+        <div class="cout-value">
+          <span id="distanceGPX" class="stat-span">—</span>
+          <input id="distanceGPX_manuel" type="number" min="0" step="0.1"
+            class="stat-input" placeholder="ex: 12.5" style="display:none">
+        </div>
+      </div>
+      <div class="cout-item">
+        <div class="cout-label">Dénivelé + (m)</div>
+        <div class="cout-value">
+          <span id="denivele" class="stat-span">—</span>
+          <input id="denivele_manuel" type="number" min="0" step="1"
+            class="stat-input" placeholder="ex: 450" style="display:none">
+        </div>
+      </div>
+      <div class="cout-item">
+        <div class="cout-label">Durée marche</div>
+        <div class="cout-value">
+          <span id="dureeMarche" class="stat-span">—</span>
+          <input id="dureeMarche_manuel" type="text"
+            class="stat-input" placeholder="ex: 3h30" style="display:none">
+        </div>
+      </div>
+      <div class="cout-item">
+        <div class="cout-label">IBP</div>
+        <div class="cout-value"><span id="ibp">—</span></div>
+      </div>
+      <div class="cout-item">
+        <div class="cout-label">Effort (1–5)</div>
+        <div class="cout-value">
+          <span id="effort" class="stat-span">—</span>
+          <input id="effort_manuel" type="number" min="1" max="5" step="1"
+            class="stat-input" placeholder="1–5" style="display:none">
+        </div>
       </div>
     </div>
-    <div class="cout-item">
-      <div class="cout-label">Dénivelé + (m)</div>
-      <div class="cout-value">
-        <span id="denivele" class="stat-span">—</span>
-        <input id="denivele_manuel" type="number" min="0" step="1"
-          class="stat-input" placeholder="ex: 450" style="display:none">
-      </div>
-    </div>
-    <div class="cout-item">
-      <div class="cout-label">Durée marche</div>
-      <div class="cout-value">
-        <span id="dureeMarche" class="stat-span">—</span>
-        <input id="dureeMarche_manuel" type="text"
-          class="stat-input" placeholder="ex: 3h30" style="display:none">
-      </div>
-    </div>
-    <div class="cout-item">
-      <div class="cout-label">IBP</div>
-      <div class="cout-value"><span id="ibp">—</span></div>
-    </div>
-    <div class="cout-item">
-      <div class="cout-label">Effort (1–5)</div>
-      <div class="cout-value">
-        <span id="effort" class="stat-span">—</span>
-        <input id="effort_manuel" type="number" min="1" max="5" step="1"
-          class="stat-input" placeholder="1–5" style="display:none">
-      </div>
-    </div>
-  </div>
 
-  <div class="form-row" style="margin-top:14px">
-    <div class="form-group">
-      <label>Technicité (1–5)</label>
-      <input id="technicite" type="number" min="1" max="5" placeholder="1 à 5">
-      <div id="erreur-technicite" class="erreur-champ" style="display:none">⚠️ Valeur entre 1 et 5 uniquement</div>
+    <div class="form-row" style="margin-top:14px">
+      <div class="form-group">
+        <label>Technicité (1–5)</label>
+        <input id="technicite" type="number" min="1" max="5" placeholder="1 à 5">
+        <div id="erreur-technicite" class="erreur-champ" style="display:none">⚠️ Valeur entre 1 et 5 uniquement</div>
+      </div>
+      <div class="form-group">
+        <label>Risque (1–5)</label>
+        <input id="risque" type="number" min="1" max="5" placeholder="1 à 5">
+        <div id="erreur-risque" class="erreur-champ" style="display:none">⚠️ Valeur entre 1 et 5 uniquement</div>
+      </div>
     </div>
-    <div class="form-group">
-      <label>Risque (1–5)</label>
-      <input id="risque" type="number" min="1" max="5" placeholder="1 à 5">
-      <div id="erreur-risque" class="erreur-champ" style="display:none">⚠️ Valeur entre 1 et 5 uniquement</div>
-    </div>
-  </div>
-</section>
+  </section>
 
   <!-- 7. PROFIL ALTIMÉTRIQUE -->
   <section class="card" id="profil">
@@ -303,7 +303,7 @@
     <pre id="resumeRando"></pre>
   </section>
 
-  <!-- 10. EXPORT PDF & ENVOI -->
+  <!-- 10. ENVOI -->
   <section class="card" id="envoi">
     <div class="card-header">
       <div class="section-icon" style="background:#fce4ec">✉️</div>
@@ -321,7 +321,7 @@
 <script type="module" src="js/app.js"></script>
 
 <script>
-/* Hamburger */
+/* ══ HAMBURGER ══ */
 const navToggle = document.getElementById('navToggle');
 const appNav    = document.getElementById('appNav');
 
@@ -336,19 +336,18 @@ navToggle.addEventListener('click', () => {
   navToggle.textContent = appNav.classList.contains('open') ? '✕' : '☰';
   setTimeout(ajusterPaddingMain, 360);
 });
+
 document.querySelectorAll('.app-nav a').forEach(link => {
   link.addEventListener('click', (e) => {
     e.preventDefault();
     appNav.classList.remove('open');
     navToggle.textContent = '☰';
     setTimeout(ajusterPaddingMain, 360);
-
     const targetId = link.getAttribute('href').replace('#', '');
     const target   = document.getElementById(targetId);
     if (!target) return;
-
-    const topbarH  = document.getElementById('topbar').offsetHeight;
-    const offsetY  = target.getBoundingClientRect().top + window.scrollY - topbarH - 12;
+    const topbarH = document.getElementById('topbar').offsetHeight;
+    const offsetY = target.getBoundingClientRect().top + window.scrollY - topbarH - 12;
     window.scrollTo({ top: offsetY, behavior: 'smooth' });
   });
 });
@@ -357,7 +356,7 @@ window.addEventListener('load',   ajusterPaddingMain);
 window.addEventListener('resize', ajusterPaddingMain);
 ajusterPaddingMain();
 
-/* Drag & drop GPX */
+/* ══ DRAG & DROP GPX ══ */
 const dropZone = document.getElementById('gpxDropZone');
 if (dropZone) {
   ['dragenter','dragover'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.style.borderColor='var(--sage)'; }));
@@ -372,7 +371,7 @@ if (dropZone) {
   });
 }
 
-/* Validation technicité et risque */
+/* ══ VALIDATION TECHNICITÉ / RISQUE ══ */
 function validerIntervalle(inputId, erreurId) {
   const input  = document.getElementById(inputId);
   const erreur = document.getElementById(erreurId);
@@ -390,7 +389,7 @@ function validerIntervalle(inputId, erreurId) {
 validerIntervalle('technicite', 'erreur-technicite');
 validerIntervalle('risque',     'erreur-risque');
 
-/* Enregistrement Service Worker PWA — uniquement sur GitHub Pages */
+/* ══ PWA SERVICE WORKER ══ */
 if ('serviceWorker' in navigator && location.hostname === 'dbizcyber.github.io') {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/randoFDR/sw.js')
@@ -399,7 +398,104 @@ if ('serviceWorker' in navigator && location.hostname === 'dbizcyber.github.io')
   });
 }
 
-/* Bouton Reset */
+/* ══ RESET FORMULAIRE (sans rechargement) ══ */
+function resetFormulaire() {
+
+  /* 1. Vider localStorage */
+  localStorage.removeItem('randoFDR_form');
+
+  /* 2. Inputs / selects / textareas */
+  const champs = [
+    'rechercheRando','nomRando','dateRando','animateur',
+    'parkingCovoiturage','nouveauParking','heureRV','itineraire',
+    'autoroute','technicite','risque','remarques',
+    'heureDepartMarche','vitesse','emailUser',
+    'distanceGPX_manuel','denivele_manuel','dureeMarche_manuel','effort_manuel',
+    'lieuRecherche'
+  ];
+  champs.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = id === 'autoroute' ? '0' : id === 'vitesse' ? '4' : '';
+  });
+
+  /* 3. Spans → — */
+  ['meteoEtat','meteoTemp','meteoPluie','meteoVent','meteoRafales',
+   'parkingRandoAdresse','ibp','effort','heureDepart',
+   'distanceGPX','denivele','dureeMarche'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '—';
+  });
+
+  /* 4. Spans coûts → 0.00 € */
+  ['coutKm','coutTotal','cout4','cout5'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '0.00 €';
+  });
+
+  /* 5. Spans spéciaux */
+  const distAR = document.getElementById('distanceAR');
+  if (distAR) distAR.textContent = '0';
+
+  const latEl = document.getElementById('latParking');
+  if (latEl) { latEl.textContent = '—'; latEl.dataset.userSet = ''; }
+  const lonEl = document.getElementById('lonParking');
+  if (lonEl) lonEl.textContent = '—';
+
+  /* 6. Zones texte résumé + simulations */
+  ['resumeRando','dureeMarcheSim','heureArriveeSim','gpx-status'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  });
+
+  /* 7. Masquer le champ nouveauParking */
+  const champAutre = document.getElementById('nouveauParking');
+  if (champAutre) { champAutre.style.display = 'none'; champAutre.value = ''; }
+
+  /* 8. Réinitialiser affichage saisie manuelle GPX */
+  if (window._initGPXManuel) {
+    window._initGPXManuel();
+  } else {
+    ['distanceGPX_manuel','denivele_manuel','dureeMarche_manuel','effort_manuel'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.value = ''; el.style.display = 'block'; }
+    });
+    ['distanceGPX','denivele','dureeMarche','effort'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+  }
+
+  /* 9. Vider fichier GPX + variables globales */
+  const gpxFile = document.getElementById('gpxFile');
+  if (gpxFile) gpxFile.value = '';
+  window.profilExportBase64 = null;
+  window.coordsParking      = '';
+  window.gpxImporte         = false;
+
+  /* 10. Détruire le graphique Chart.js */
+  if (window.chartProfil) {
+    window.chartProfil.destroy();
+    window.chartProfil = null;
+  }
+
+  /* 11. Réinitialiser la carte Leaflet */
+  if (window._resetCarte) window._resetCarte();
+
+  /* 12. Remettre la date du jour */
+  const dateInput = document.getElementById('dateRando');
+  if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+
+  /* 13. Mettre à jour les indicateurs visuels */
+  window._majIndicateurs && window._majIndicateurs();
+
+  /* 14. Scroller en haut */
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  console.log('[Reset] Formulaire réinitialisé sans rechargement');
+}
+
 document.getElementById('btnReset')?.addEventListener('click', () => {
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(44,26,14,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
@@ -409,7 +505,7 @@ document.getElementById('btnReset')?.addEventListener('click', () => {
 
   box.innerHTML = `
     <div style="font-size:36px;margin-bottom:12px">🔄</div>
-    <div style="font-size:17px;font-weight:700;color:#c1440e;margin-bottom:10px">Réinitialiser tout le formulaire ?</div>
+    <div style="font-size:17px;font-weight:700;color:#c1440e;margin-bottom:10px">Nouvelle fiche ?</div>
     <div style="font-size:14px;color:#2c1a0e;margin-bottom:24px">Toutes les données saisies seront effacées.</div>
     <div style="display:flex;gap:10px">
       <button id="resetAnnuler"   style="flex:1;padding:11px;background:#f5ead8;color:#2c1a0e;border:1.5px solid #e8d8c4;border-radius:8px;font-size:14px;font-weight:600;font-family:Outfit,Arial,sans-serif;cursor:pointer;margin-top:0;box-shadow:none;transform:none">Annuler</button>
@@ -423,12 +519,12 @@ document.getElementById('btnReset')?.addEventListener('click', () => {
   overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
   box.querySelector('#resetAnnuler').addEventListener('click', () => overlay.remove());
   box.querySelector('#resetConfirmer').addEventListener('click', () => {
-    localStorage.removeItem('randoFDR_form');
-    window.location.reload();
+    overlay.remove();
+    resetFormulaire();
   });
 });
 
-/* Active nav au scroll */
+/* ══ ACTIVE NAV AU SCROLL ══ */
 const sections = document.querySelectorAll('.card[id]');
 const navLinks  = document.querySelectorAll('.app-nav a');
 const obs = new IntersectionObserver(entries => {
