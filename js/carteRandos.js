@@ -5,13 +5,30 @@
 
 var randosCoords = window.randosCoords || [];
 
+var TF_KEY = '0ffff5950d8a4019bcede9aaeeecb57f';
+
 /* ══ INIT CARTE ══ */
 var map = L.map('map', { center: [43.9, 5.0], zoom: 9 });
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '© OpenStreetMap contributors'
-}).addTo(map);
+/* ── Fond Thunderforest Outdoors ── */
+L.tileLayer(
+  'https://tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=' + TF_KEY,
+  {
+    maxZoom: 22,
+    attribution: '© <a href="https://www.thunderforest.com">Thunderforest</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }
+).addTo(map);
+
+/* ── Layer sentiers hiking (Waymarked Trails) ── */
+var layerSentiers = L.tileLayer(
+  'https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png',
+  {
+    maxZoom: 22,
+    opacity: 0.8,
+    attribution: '© <a href="https://hiking.waymarkedtrails.org">Waymarked Trails</a>'
+  }
+);
+var sentiersActifs = false;
 
 /* ══ CLUSTERS ══ */
 var clusterKnown    = L.markerClusterGroup({ chunkedLoading: true });
@@ -33,9 +50,6 @@ var iconKnown    = makeIcon('#1978c8');
 var iconAuto     = makeIcon('#28a745');
 var iconNotFound = makeIcon('#d9534f');
 
-/* ══ ZOOM seuil pour afficher les étiquettes ══ */
-var ZOOM_LABELS = 11;
-
 /* ══ AJOUT MARKER ══ */
 function ajouterMarker(item, cluster, icon, geocoded) {
   var badge = geocoded
@@ -45,18 +59,13 @@ function ajouterMarker(item, cluster, icon, geocoded) {
     + item.lat.toFixed(5) + ', ' + item.lon.toFixed(5) + '</span>';
 
   var marker = L.marker([item.lat, item.lon], { icon: icon });
-
-  /* Popup au clic */
   marker.bindPopup('<strong>' + item.nom + '</strong>' + coords + badge);
-
-  /* Tooltip permanent (étiquette) — affiché selon zoom */
   marker.bindTooltip(item.nom, {
     permanent: true,
     direction: 'right',
     offset: [8, 0],
     className: 'label-rando'
   });
-
   marker.addTo(cluster);
 }
 
@@ -73,16 +82,95 @@ function majStats() {
   document.getElementById('stat-nok').textContent      = nbNok;
 }
 
-/* ══ AFFICHAGE / MASQUAGE étiquettes selon zoom ══ */
+/* ══ ÉTIQUETTES selon zoom ══ */
+var ZOOM_LABELS = 11;
+
 function majLabels() {
-  var zoom = map.getZoom();
-  var afficher = zoom >= ZOOM_LABELS;
+  var afficher = map.getZoom() >= ZOOM_LABELS;
   document.querySelectorAll('.label-rando').forEach(function(el) {
     el.style.display = afficher ? '' : 'none';
   });
 }
 
 map.on('zoomend', majLabels);
+
+/* ══ STYLES BOUTONS ══ */
+function styleBtnOn() {
+  return [
+    'width:100%', 'padding:6px 10px',
+    'background:linear-gradient(135deg,#c1440e,#f49d37)',
+    'color:white', 'border:none', 'border-radius:6px',
+    'font-size:12px', 'font-weight:700',
+    'font-family:Arial,sans-serif', 'cursor:pointer', 'text-align:left'
+  ].join(';');
+}
+
+function styleBtnOff() {
+  return [
+    'width:100%', 'padding:6px 10px',
+    'background:#f0ece4', 'color:#5a4a3a',
+    'border:1px solid #d8cfc4', 'border-radius:6px',
+    'font-size:12px', 'font-weight:700',
+    'font-family:Arial,sans-serif', 'cursor:pointer', 'text-align:left'
+  ].join(';');
+}
+
+/* ══ CONTRÔLE PERSONNALISÉ ══ */
+var ControlToggle = L.Control.extend({
+  options: { position: 'topright' },
+
+  onAdd: function() {
+    var div = L.DomUtil.create('div', 'ctrl-toggle');
+    div.style.cssText = [
+      'background:white', 'border-radius:10px', 'padding:8px 12px',
+      'box-shadow:0 2px 8px rgba(0,0,0,0.18)',
+      'font-family:Arial,sans-serif', 'font-size:13px',
+      'display:flex', 'flex-direction:column', 'gap:8px', 'min-width:165px'
+    ].join(';');
+
+    /* Bouton Sentiers */
+    var btnSentiers = document.createElement('button');
+    btnSentiers.textContent = '🥾 Sentiers : OFF';
+    btnSentiers.style.cssText = styleBtnOff();
+    btnSentiers.addEventListener('click', function(e) {
+      L.DomEvent.stopPropagation(e);
+      sentiersActifs = !sentiersActifs;
+      if (sentiersActifs) {
+        layerSentiers.addTo(map);
+        btnSentiers.textContent = '🥾 Sentiers : ON';
+        btnSentiers.style.cssText = styleBtnOn();
+      } else {
+        map.removeLayer(layerSentiers);
+        btnSentiers.textContent = '🥾 Sentiers : OFF';
+        btnSentiers.style.cssText = styleBtnOff();
+      }
+    });
+
+    /* Bouton Légende */
+    var btnLegende = document.createElement('button');
+    btnLegende.textContent = '📋 Légende : ON';
+    btnLegende.style.cssText = styleBtnOn();
+    btnLegende.addEventListener('click', function(e) {
+      L.DomEvent.stopPropagation(e);
+      var panel = document.querySelector('.stats-panel');
+      if (!panel) return;
+      var visible = panel.style.display !== 'none';
+      panel.style.display = visible ? 'none' : '';
+      btnLegende.textContent = visible ? '📋 Légende : OFF' : '📋 Légende : ON';
+      btnLegende.style.cssText = visible ? styleBtnOff() : styleBtnOn();
+    });
+
+    div.appendChild(btnSentiers);
+    div.appendChild(btnLegende);
+
+    L.DomEvent.disableClickPropagation(div);
+    L.DomEvent.disableScrollPropagation(div);
+
+    return div;
+  }
+});
+
+new ControlToggle().addTo(map);
 
 /* ══ TRAITEMENT : coords connues ══ */
 var connus    = randosCoords.filter(function(r) { return r.lat !== null; });
@@ -104,9 +192,9 @@ if (bounds.length > 0) {
 }
 
 majStats();
-majLabels(); /* état initial */
+majLabels();
 
-/* ══ GÉOCODAGE automatique (Promises chainées) ══ */
+/* ══ GÉOCODAGE automatique ══ */
 function sleep(ms) {
   return new Promise(function(resolve) { setTimeout(resolve, ms); });
 }
