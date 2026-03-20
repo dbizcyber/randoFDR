@@ -130,21 +130,19 @@ function niveauIBP(v) {
 
 /* ══ Envoi vers Apps Script ══ */
 async function envoyerVersSheets(item) {
-  await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(Object.assign({ action: 'add' }, item))
+  const params = new URLSearchParams(Object.assign({ action: 'add' }, item));
+  await fetch(APPS_SCRIPT_URL + '?' + params.toString(), {
+    method: 'GET',
+    mode: 'no-cors'
   });
   return true;
 }
 
 async function syncCalendar(item) {
-  await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(Object.assign({ action: 'sync' }, item))
+  const params = new URLSearchParams(Object.assign({ action: 'sync' }, item));
+  await fetch(APPS_SCRIPT_URL + '?' + params.toString(), {
+    method: 'GET',
+    mode: 'no-cors'
   });
   return true;
 }
