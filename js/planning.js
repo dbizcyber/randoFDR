@@ -4,7 +4,7 @@
    ============================================================ */
 
 const BASE = 'https://dbizcyber.github.io/randoFDR/data/';
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxsnw8kJgyjVLKrR8bZszgbW6yo76PX8Y86KbK4AunVe3Q-peMdHdHT_hGjRA8eKd5JKg/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzA02C9_e874xobZ2BMaaqyQXJtpe1Fc_BCOjxrP53sGBns-9CsPUHBrVIYacXrKSG7/exec';
 
 let planning = [];
 
