@@ -6,6 +6,19 @@ document
 
 }
 
+/* ══════════════════════════════════════
+   IBP → émoji + niveau + libellé
+══════════════════════════════════════ */
+function niveauIBP(valeur) {
+  const v = parseFloat(valeur)
+  if (isNaN(v) || valeur === "—" || valeur === "") return ""
+  if (v <= 25)  return "🟢 Niveau 1 — Facile"
+  if (v <= 50)  return "🔵 Niveau 2 — Assez Facile"
+  if (v <= 75)  return "🟡 Niveau 3 — Peu Difficile"
+  if (v <= 100) return "🔴 Niveau 4 — Assez Difficile"
+  return              "⚫ Niveau 5 — Difficile"
+}
+
 function genererResume(){
   
 const gps = window.coordsParking || ""
@@ -48,6 +61,7 @@ const duree = txt("duree")
 
 const ibp = txt("ibp")
 const effort = txt("effort")
+const ibpNiveau = niveauIBP(ibp)
 
 const technicite = val("technicite","0")
 const risque = val("risque","0")
@@ -90,7 +104,7 @@ Distance de la Randonnée : ≃${distRando} km
 😋 Dénivelé positif : ≃${denivele} m
 ⏱️ Durée totale: ≃${duree}
 
-IBP : ${ibp}
+IBP : ${ibp}${ibpNiveau ? " — " + ibpNiveau : ""}
 
 E: ${effort}, T: ${technicite}, R : ${risque}
 
