@@ -1,68 +1,121 @@
-import { animateurs } from './data/animateurs.js';
-import { randos }     from './data/randos.js';
+/* ============================================================
+   planning.js — Gestion du planning randonnées
+   Données chargées depuis data/animateurs.json et data/randos.json
+   ============================================================ */
 
+const BASE = 'https://dbizcyber.github.io/randoFDR/data/';
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGgz-y30P40OJshqvCM0F2J3P5oXD1Chg1jDqxqC2tN3jFz6RlfwqJd-74dY8TZQvkig/exec';
 
 let planning = [];
 
-/* ── Animateurs ── */
-const selAnim = document.getElementById('animateur');
-animateurs.filter(a => a.nom !== '').forEach(a => {
-  const opt = document.createElement('option');
-  opt.value = a.nom;
-  opt.textContent = a.nom;
-  selAnim.appendChild(opt);
-});
+/* ══ INIT — charger les données JSON ══ */
+async function init() {
+  try {
+    const [animateurs, randos] = await Promise.all([
+      fetch(BASE + 'animateurs.json').then(r => r.json()),
+      fetch(BASE + 'randos.json').then(r => r.json())
+    ]);
 
-/* ── Autocomplétion randos ── */
-const inputRando = document.getElementById('rechercheRando');
-const sugDiv     = document.getElementById('suggestions');
-let nomSelectionne = '';
-let indexSugg = -1;
-
-inputRando.addEventListener('input', () => {
-  const filtre = inputRando.value.toLowerCase().trim();
-  sugDiv.innerHTML = '';
-  nomSelectionne = '';
-  if (!filtre) return;
-  randos.filter(r => r.toLowerCase().includes(filtre)).slice(0, 10).forEach(r => {
-    const div = document.createElement('div');
-    div.className = 'suggestion';
-    div.textContent = r;
-    div.addEventListener('click', () => {
-      inputRando.value = r;
-      nomSelectionne = r;
-      sugDiv.innerHTML = '';
+    /* ── Remplir menu animateurs ── */
+    const selAnim = document.getElementById('animateur');
+    animateurs.filter(a => a.nom !== '').forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a.nom;
+      opt.textContent = a.nom;
+      selAnim.appendChild(opt);
     });
-    sugDiv.appendChild(div);
-  });
-});
 
-inputRando.addEventListener('keydown', e => {
-  const items = sugDiv.querySelectorAll('.suggestion');
-  if (!items.length) return;
-  if (e.key === 'ArrowDown')  { e.preventDefault(); indexSugg = Math.min(indexSugg + 1, items.length - 1); }
-  else if (e.key === 'ArrowUp') { e.preventDefault(); indexSugg = Math.max(indexSugg - 1, 0); }
-  else if (e.key === 'Enter' && indexSugg >= 0) { e.preventDefault(); items[indexSugg].click(); indexSugg = -1; return; }
-  items.forEach((s, i) => s.classList.toggle('highlight', i === indexSugg));
-});
+    /* ── Autocomplétion randos ── */
+    const inputRando = document.getElementById('rechercheRando');
+    const sugDiv     = document.getElementById('suggestions');
+    let nomSelectionne = '';
+    let indexSugg = -1;
 
-document.addEventListener('click', e => {
-  if (!e.target.closest('.search-wrap')) sugDiv.innerHTML = '';
-});
+    inputRando.addEventListener('input', () => {
+      const filtre = inputRando.value.toLowerCase().trim();
+      sugDiv.innerHTML = '';
+      nomSelectionne = '';
+      if (!filtre) return;
+      randos.filter(r => r.toLowerCase().includes(filtre)).slice(0, 10).forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'suggestion';
+        div.textContent = r;
+        div.addEventListener('click', () => {
+          inputRando.value = r;
+          nomSelectionne = r;
+          sugDiv.innerHTML = '';
+        });
+        sugDiv.appendChild(div);
+      });
+    });
 
-/* ── IBP badge ── */
-const ibpInput = document.getElementById('ibp');
-const ibpBadge = document.getElementById('ibpBadge');
-ibpInput.addEventListener('input', () => majBadgeIBP(ibpInput.value));
+    inputRando.addEventListener('keydown', e => {
+      const items = sugDiv.querySelectorAll('.suggestion');
+      if (!items.length) return;
+      if (e.key === 'ArrowDown')  { e.preventDefault(); indexSugg = Math.min(indexSugg + 1, items.length - 1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); indexSugg = Math.max(indexSugg - 1, 0); }
+      else if (e.key === 'Enter' && indexSugg >= 0) { e.preventDefault(); items[indexSugg].click(); indexSugg = -1; return; }
+      items.forEach((s, i) => s.classList.toggle('highlight', i === indexSugg));
+    });
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.search-wrap')) sugDiv.innerHTML = '';
+    });
+
+    /* ── Exposer ajouterRando avec accès à nomSelectionne ── */
+    window.ajouterRando = function() {
+      const date      = document.getElementById('dateRando').value;
+      const animateur = document.getElementById('animateur').value;
+      const nom       = nomSelectionne || inputRando.value.trim();
+      const ibp       = document.getElementById('ibp').value;
+      const distance  = document.getElementById('distance').value;
+      const denivele  = document.getElementById('denivele').value;
+
+      if (!date)      { toast('⚠️ Date manquante'); return; }
+      if (!animateur) { toast('⚠️ Animateur manquant'); return; }
+      if (!nom)       { toast('⚠️ Nom de la rando manquant'); return; }
+
+      planning.push({ date, animateur, nom, ibp, distance, denivele });
+      planning.sort((a, b) => a.date.localeCompare(b.date));
+
+      document.getElementById('dateRando').value  = '';
+      document.getElementById('animateur').value  = '';
+      document.getElementById('ibp').value        = '';
+      document.getElementById('distance').value   = '';
+      document.getElementById('denivele').value   = '';
+      inputRando.value = ''; nomSelectionne = '';
+      document.getElementById('ibpBadge').className = 'ibp-badge';
+
+      /* Date suivante automatique */
+      const last = new Date(date + 'T12:00:00');
+      const dow = last.getDay();
+      const next = new Date(last);
+      next.setDate(last.getDate() + (dow === 1 ? 3 : dow === 4 ? 4 : 3));
+      document.getElementById('dateRando').value = next.toISOString().split('T')[0];
+
+      renderPlanning();
+      toast('✅ Randonnée ajoutée');
+    };
+
+  } catch(err) {
+    console.error('[Planning] Erreur chargement données:', err);
+    toast('❌ Erreur chargement données');
+  }
+}
+
+/* ══ IBP badge ══ */
+document.getElementById('ibp').addEventListener('input', function() {
+  majBadgeIBP(this.value);
+});
 
 function majBadgeIBP(v) {
+  const badge = document.getElementById('ibpBadge');
   const info = niveauIBP(v);
-  if (!info) { ibpBadge.className = 'ibp-badge'; return; }
-  ibpBadge.textContent = info.label;
-  ibpBadge.style.background = info.bg;
-  ibpBadge.style.color = info.color;
-  ibpBadge.className = 'ibp-badge visible';
+  if (!info) { badge.className = 'ibp-badge'; return; }
+  badge.textContent = info.label;
+  badge.style.background = info.bg;
+  badge.style.color = info.color;
+  badge.className = 'ibp-badge visible';
 }
 
 function niveauIBP(v) {
@@ -75,9 +128,9 @@ function niveauIBP(v) {
   return              { label: '⚫ N5 Difficile',         bg: '#343a40', color: '#ffffff' };
 }
 
-/* ── URL Form pré-rempli ── */
+/* ══ Envoi vers Apps Script ══ */
 async function envoyerVersSheets(item) {
-  const response = await fetch(APPS_SCRIPT_URL, {
+  await fetch(APPS_SCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
@@ -86,45 +139,11 @@ async function envoyerVersSheets(item) {
   return true;
 }
 
-/* ── Ajouter ── */
-window.ajouterRando = function() {
-  const date      = document.getElementById('dateRando').value;
-  const animateur = document.getElementById('animateur').value;
-  const nom       = nomSelectionne || inputRando.value.trim();
-  const ibp       = document.getElementById('ibp').value;
-  const distance  = document.getElementById('distance').value;
-  const denivele  = document.getElementById('denivele').value;
-
-  if (!date)      { toast('⚠️ Date manquante'); return; }
-  if (!animateur) { toast('⚠️ Animateur manquant'); return; }
-  if (!nom)       { toast('⚠️ Nom de la rando manquant'); return; }
-
-  planning.push({ date, animateur, nom, ibp, distance, denivele });
-  planning.sort((a, b) => a.date.localeCompare(b.date));
-
-  document.getElementById('dateRando').value  = '';
-  document.getElementById('animateur').value  = '';
-  document.getElementById('ibp').value        = '';
-  document.getElementById('distance').value   = '';
-  document.getElementById('denivele').value   = '';
-  inputRando.value = ''; nomSelectionne = '';
-  ibpBadge.className = 'ibp-badge';
-
-  /* Date suivante : +3 ou +4 jours (alterner lundi/jeudi) */
-  const last = new Date(date + 'T12:00:00');
-  const dow = last.getDay();
-  const next = new Date(last);
-  next.setDate(last.getDate() + (dow === 1 ? 3 : dow === 4 ? 4 : 3));
-  document.getElementById('dateRando').value = next.toISOString().split('T')[0];
-
-  renderPlanning();
-  toast('✅ Randonnée ajoutée');
-};
-
-/* ── Envoyer une rando ── */
+/* ══ Envoyer une rando ══ */
 window.envoyerRando = async function(index) {
   const item = planning[index];
-  const btn = document.querySelectorAll('.btn-send')[index];
+  const btns = document.querySelectorAll('.btn-send');
+  const btn = btns[index];
   if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
   try {
     await envoyerVersSheets(item);
@@ -137,7 +156,7 @@ window.envoyerRando = async function(index) {
   }
 };
 
-/* ── Envoyer tout ── */
+/* ══ Envoyer tout ══ */
 window.envoyerTout = async function() {
   const btn = document.getElementById('btnEnvoyerTout');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Envoi...'; }
@@ -154,20 +173,20 @@ window.envoyerTout = async function() {
   toast('✅ ' + ok + ' rando(s) envoyée(s) dans Sheets');
 };
 
-/* ── Supprimer ── */
+/* ══ Supprimer ══ */
 window.supprimerRando = function(index) {
   planning.splice(index, 1);
   renderPlanning();
 };
 
-/* ── Vider ── */
+/* ══ Vider ══ */
 window.viderPlanning = function() {
   if (!confirm('Vider tout le planning ?')) return;
   planning = [];
   renderPlanning();
 };
 
-/* ── Rendu ── */
+/* ══ Rendu ══ */
 function renderPlanning() {
   const list   = document.getElementById('planningList');
   const btnEnv = document.getElementById('btnEnvoyerTout');
@@ -192,7 +211,7 @@ function renderPlanning() {
     const details = [
       item.distance ? item.distance + ' km' : '',
       item.denivele ? '↑' + item.denivele + ' m' : '',
-      item.animateur.split(' ')[0] + ' ' + (item.animateur.split(' ')[1] || '')
+      (item.animateur.split(' ')[0] + ' ' + (item.animateur.split(' ')[1] || '')).trim()
     ].filter(Boolean).join(' · ');
 
     return `
@@ -205,13 +224,13 @@ function renderPlanning() {
         </div>
         <div class="actions">
           <button class="btn-send" onclick="envoyerRando(${i})">📤</button>
-          <button class="btn-del"  onclick="supprimerRando(${i})" title="Supprimer">✕</button>
+          <button class="btn-del" onclick="supprimerRando(${i})" title="Supprimer">✕</button>
         </div>
       </div>`;
   }).join('');
 }
 
-/* ── Toast ── */
+/* ══ Toast ══ */
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -219,9 +238,12 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-/* ── Date par défaut : prochain lundi ── */
+/* ══ Date par défaut : prochain lundi ══ */
 const d = new Date();
 const dow = d.getDay();
 const diff = dow === 0 ? 1 : dow === 1 ? 7 : (8 - dow);
 d.setDate(d.getDate() + diff);
 document.getElementById('dateRando').value = d.toISOString().split('T')[0];
+
+/* ══ Lancer ══ */
+init();
