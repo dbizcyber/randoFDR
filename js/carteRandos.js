@@ -170,7 +170,7 @@ var ControlToggle = L.Control.extend({
   }
 });
 
-new ControlToggle().addTo(map);
+map.whenReady(function() { new ControlToggle().addTo(map); });
 
 /* ══ TRAITEMENT : coords connues ══ */
 var connus    = randosCoords.filter(function(r) { return r.lat !== null; });
@@ -248,5 +248,115 @@ async function lancerGeocodage() {
 }
 
 lancerGeocodage();
+
+/* ══ TRACE GPX depuis sessionStorage ══ */
+var gpxLayers  = [];
+var gpxMarkers = [];
+var traceVisible = false;
+var btnTrace = null;
+
+function couleurPente(p) {
+  if(p>=20) return "rgb(200,0,0)";
+  if(p>=15) return "rgb(255,80,0)";
+  if(p>=10) return "rgb(255,150,0)";
+  if(p>=5)  return "rgb(255,200,0)";
+  if(p>-5)  return "rgb(255,220,0)";
+  if(p>-10) return "rgb(150,200,255)";
+  if(p>-15) return "rgb(80,150,255)";
+  if(p>-20) return "rgb(40,100,255)";
+  return "rgb(0,60,200)";
+}
+
+function afficherTrace(pts) {
+  for(var i = 1; i < pts.length; i++) {
+    var seg = L.polyline(
+      [[pts[i-1].lat, pts[i-1].lon], [pts[i].lat, pts[i].lon]],
+      { color: couleurPente(pts[i].pente), weight: 4, opacity: 0.85 }
+    ).addTo(map);
+    gpxLayers.push(seg);
+  }
+  /* Marqueur départ */
+  var mkD = L.circleMarker([pts[0].lat, pts[0].lon], {
+    radius: 8, fillColor: '#28a745', fillOpacity: 1, color: 'white', weight: 2
+  }).bindTooltip('🏁 Départ').addTo(map);
+  gpxMarkers.push(mkD);
+  /* Marqueur arrivée */
+  var last = pts[pts.length - 1];
+  var mkA = L.circleMarker([last.lat, last.lon], {
+    radius: 8, fillColor: '#d9534f', fillOpacity: 1, color: 'white', weight: 2
+  }).bindTooltip('🏁 Arrivée').addTo(map);
+  gpxMarkers.push(mkA);
+  /* Zoom sur la trace */
+  var bounds = L.latLngBounds(pts.map(function(p){ return [p.lat, p.lon]; }));
+  map.fitBounds(bounds, { padding: [30, 30] });
+  traceVisible = true;
+}
+
+function effacerTrace() {
+  gpxLayers.forEach(function(l){ map.removeLayer(l); });
+  gpxLayers = [];
+  gpxMarkers.forEach(function(m){ map.removeLayer(m); });
+  gpxMarkers = [];
+  traceVisible = false;
+}
+
+function styleBtnTraceOn() {
+  if(!btnTrace) return;
+  btnTrace.textContent = '🗺 Trace GPX : ON';
+  btnTrace.style.background = 'linear-gradient(135deg,#c1440e,#f49d37)';
+  btnTrace.style.color = 'white';
+  btnTrace.style.border = 'none';
+}
+
+function styleBtnTraceOff() {
+  if(!btnTrace) return;
+  btnTrace.textContent = '🗺 Trace GPX';
+  btnTrace.style.background = '#f5ead8';
+  btnTrace.style.color = '#5a4a3a';
+  btnTrace.style.border = '1.5px solid #d8cfc4';
+}
+
+/* Lire sessionStorage et créer le bouton si trace disponible */
+(function initTrace() {
+  var raw = null;
+  try { raw = sessionStorage.getItem('gpxTrace'); } catch(e) {}
+  if(!raw) return;
+
+  var pts;
+  try { pts = JSON.parse(raw); } catch(e) { return; }
+  if(!pts || pts.length < 2) return;
+
+  /* Créer le bouton dans le contrôle toggle existant */
+  var ctrl = document.querySelector('.ctrl-toggle');
+  if(!ctrl) {
+    /* Fallback : créer un contrôle simple */
+    ctrl = document.createElement('div');
+    ctrl.style.cssText = 'position:absolute;z-index:900;top:70px;right:10px;background:white;border-radius:10px;padding:8px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.18);';
+    document.getElementById('map').appendChild(ctrl);
+  }
+
+  btnTrace = document.createElement('button');
+  btnTrace.textContent = '🗺 Trace GPX';
+  btnTrace.style.cssText = [
+    'width:100%', 'padding:6px 10px',
+    'background:#f5ead8', 'color:#5a4a3a',
+    'border:1.5px solid #d8cfc4', 'border-radius:6px',
+    'font-size:12px', 'font-weight:700',
+    'font-family:Arial,sans-serif', 'cursor:pointer', 'text-align:left'
+  ].join(';');
+
+  btnTrace.addEventListener('click', function(e) {
+    if(typeof L !== 'undefined' && L.DomEvent) L.DomEvent.stopPropagation(e);
+    if(traceVisible) {
+      effacerTrace();
+      styleBtnTraceOff();
+    } else {
+      afficherTrace(pts);
+      styleBtnTraceOn();
+    }
+  });
+
+  ctrl.appendChild(btnTrace);
+})();
 
 })();
