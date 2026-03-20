@@ -4,7 +4,7 @@
    ============================================================ */
 
 const BASE = 'https://dbizcyber.github.io/randoFDR/data/';
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCloUqDhHjvf50e351lFIyMTjDLcutQ7Wt7p0XPPsbalmGOhQDj-4VXyrlS9L6S_lmvA/exec';
+const PROXY_URL = 'https://whlxbfnmyqdflmxosfse.supabase.co/functions/v1/smart-endpoint';
 
 let planning = [];
 
@@ -129,24 +129,32 @@ function niveauIBP(v) {
 }
 
 /* ══ Envoi vers Apps Script ══ */
-function appelGET(params) {
-  return new Promise(function(resolve) {
-    var img = new Image();
-    var url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
-    img.onload = img.onerror = function() { resolve(); };
-    img.src = url;
-    setTimeout(resolve, 3000); /* timeout 3s */
-  });
-}
-
 async function envoyerVersSheets(item) {
-  await appelGET(Object.assign({ action: 'add' }, item));
-  return true;
+  const resp = await fetch(PROXY_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE',
+      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE'
+    },
+    body: JSON.stringify(Object.assign({ action: 'add' }, item))
+  });
+  const data = await resp.json();
+  return data.success;
 }
 
 async function syncCalendar(item) {
-  await appelGET(Object.assign({ action: 'sync' }, item));
-  return true;
+  const resp = await fetch(PROXY_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE',
+      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE'
+    },
+    body: JSON.stringify(Object.assign({ action: 'sync' }, item))
+  });
+  const data = await resp.json();
+  return data.success;
 }
 
 /* ══ Envoyer une rando ══ */
