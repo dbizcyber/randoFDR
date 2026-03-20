@@ -1,12 +1,56 @@
 /* ============================================================
    planning.js — Gestion du planning randonnées
-   Données chargées depuis data/animateurs.json et data/randos.json
+   Envoi vers Apps Script via formulaire HTML invisible
    ============================================================ */
 
 const BASE = 'https://dbizcyber.github.io/randoFDR/data/';
-const PROXY_URL = 'https://whlxbfnmyqdflmxosfse.supabase.co/functions/v1/smart-endpoint';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCloUqDhHjvf50e351lFIyMTjDLcutQ7Wt7p0XPPsbalmGOhQDj-4VXyrlS9L6S_lmvA/exec';
 
 let planning = [];
+
+/* ══ Iframe cachée pour recevoir la réponse du formulaire ══ */
+(function() {
+  var iframe = document.createElement('iframe');
+  iframe.name = 'iframe_hidden';
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+})();
+
+/* ══ Envoi via formulaire HTML — contourne les restrictions CORS ══ */
+function envoyerViaFormulaire(item, action) {
+  return new Promise(function(resolve) {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = APPS_SCRIPT_URL;
+    form.target = 'iframe_hidden';
+    form.style.display = 'none';
+
+    var fields = {
+      action:    action          || 'add',
+      date:      item.date      || '',
+      animateur: item.animateur || '',
+      nom:       item.nom       || '',
+      ibp:       item.ibp       || '',
+      distance:  item.distance  || '',
+      denivele:  item.denivele  || ''
+    };
+
+    Object.keys(fields).forEach(function(key) {
+      var input = document.createElement('input');
+      input.type  = 'hidden';
+      input.name  = key;
+      input.value = fields[key];
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+    setTimeout(function() {
+      document.body.removeChild(form);
+      resolve();
+    }, 2000);
+  });
+}
 
 /* ══ INIT — charger les données JSON ══ */
 async function init() {
@@ -62,7 +106,7 @@ async function init() {
       if (!e.target.closest('.search-wrap')) sugDiv.innerHTML = '';
     });
 
-    /* ── Exposer ajouterRando avec accès à nomSelectionne ── */
+    /* ── Exposer ajouterRando ── */
     window.ajouterRando = function() {
       const date      = document.getElementById('dateRando').value;
       const animateur = document.getElementById('animateur').value;
@@ -128,46 +172,17 @@ function niveauIBP(v) {
   return              { label: '⚫ N5 Difficile',         bg: '#343a40', color: '#ffffff' };
 }
 
-/* ══ Envoi vers Apps Script ══ */
-async function envoyerVersSheets(item) {
-  const resp = await fetch(PROXY_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE',
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE'
-    },
-    body: JSON.stringify(Object.assign({ action: 'add' }, item))
-  });
-  const data = await resp.json();
-  return data.success;
-}
-
-async function syncCalendar(item) {
-  const resp = await fetch(PROXY_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE',
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE'
-    },
-    body: JSON.stringify(Object.assign({ action: 'sync' }, item))
-  });
-  const data = await resp.json();
-  return data.success;
-}
-
 /* ══ Envoyer une rando ══ */
 window.envoyerRando = async function(index) {
   const item = planning[index];
   const btns = document.querySelectorAll('.btn-send');
-  const btn = btns[index];
+  const btn  = btns[index];
   if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
   try {
-    await envoyerVersSheets(item);
+    await envoyerViaFormulaire(item, 'add');
     planning.splice(index, 1);
     renderPlanning();
-    toast('✅ Envoyé dans Google Sheets !');
+    toast('✅ Envoyé — Sheets et Calendar mis à jour !');
   } catch(err) {
     toast('❌ Erreur : ' + err.message);
     if (btn) { btn.disabled = false; btn.textContent = '📤'; }
@@ -181,14 +196,13 @@ window.envoyerTout = async function() {
   let ok = 0;
   for (const item of [...planning]) {
     try {
-      await envoyerVersSheets(item);
+      await envoyerViaFormulaire(item, 'add');
       ok++;
-      await new Promise(r => setTimeout(r, 300));
     } catch(e) {}
   }
   planning = [];
   renderPlanning();
-  toast('✅ ' + ok + ' rando(s) envoyée(s) dans Sheets');
+  toast('✅ ' + ok + ' rando(s) envoyée(s) !');
 };
 
 /* ══ Sync Calendar uniquement ══ */
@@ -196,7 +210,7 @@ window.syncRando = async function(index) {
   const item = planning[index];
   toast('📅 Sync Calendar en cours…');
   try {
-    await syncCalendar(item);
+    await envoyerViaFormulaire(item, 'sync');
     toast('✅ Calendrier mis à jour !');
   } catch(err) {
     toast('❌ Erreur : ' + err.message);
