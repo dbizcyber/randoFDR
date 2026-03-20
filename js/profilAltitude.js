@@ -30,9 +30,6 @@ async function lireGPX(event){
 
   let distances=[], altitudes=[], slopes=[], totalDist=0
 
-  /* ── Collecte aussi les lat/lon bruts pour la trace carte ── */
-  let tracePoints = []
-
   for(let i=1;i<points.length;i++){
     const lat1=parseFloat(points[i-1].getAttribute("lat"))
     const lon1=parseFloat(points[i-1].getAttribute("lon"))
@@ -50,21 +47,6 @@ async function lireGPX(event){
     distances.push(totalDist)
     altitudes.push(ele2)
     slopes.push(pente)
-    tracePoints.push({ lat: lat2, lon: lon2, pente })
-  }
-  /* Ajouter le premier point */
-  if(points.length > 0){
-    const lat0 = parseFloat(points[0].getAttribute("lat"))
-    const lon0 = parseFloat(points[0].getAttribute("lon"))
-    tracePoints.unshift({ lat: lat0, lon: lon0, pente: 0 })
-  }
-
-  /* ── Exposer les points de trace globalement + sessionStorage ── */
-  window.gpxTracePoints = tracePoints
-  try {
-    sessionStorage.setItem('gpxTrace', JSON.stringify(tracePoints))
-  } catch(e) {
-    console.warn('[GPX] sessionStorage plein ou indisponible', e)
   }
 
   /* sous-échantillonnage uniforme 300 pts */
