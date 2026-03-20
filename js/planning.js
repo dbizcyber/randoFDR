@@ -134,7 +134,17 @@ async function envoyerVersSheets(item) {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(item)
+    body: JSON.stringify(Object.assign({ action: 'add' }, item))
+  });
+  return true;
+}
+
+async function syncCalendar(item) {
+  await fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(Object.assign({ action: 'sync' }, item))
   });
   return true;
 }
@@ -171,6 +181,18 @@ window.envoyerTout = async function() {
   planning = [];
   renderPlanning();
   toast('✅ ' + ok + ' rando(s) envoyée(s) dans Sheets');
+};
+
+/* ══ Sync Calendar uniquement ══ */
+window.syncRando = async function(index) {
+  const item = planning[index];
+  toast('📅 Sync Calendar en cours…');
+  try {
+    await syncCalendar(item);
+    toast('✅ Calendrier mis à jour !');
+  } catch(err) {
+    toast('❌ Erreur : ' + err.message);
+  }
 };
 
 /* ══ Supprimer ══ */
@@ -224,6 +246,7 @@ function renderPlanning() {
         </div>
         <div class="actions">
           <button class="btn-send" onclick="envoyerRando(${i})">📤</button>
+          <button class="btn-sync" onclick="syncRando(${i})" title="Sync Calendar" style="background:linear-gradient(135deg,#1978c8,#28a745);color:white;border:none;border-radius:5px;padding:5px 8px;font-size:11px;font-weight:700;font-family:Arial,sans-serif;cursor:pointer;">📅</button>
           <button class="btn-del" onclick="supprimerRando(${i})" title="Supprimer">✕</button>
         </div>
       </div>`;
