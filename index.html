@@ -86,20 +86,6 @@
     </div>
   </section>
 
-  <!-- 2. MÉTÉO -->
-  <section class="card" id="meteo">
-    <div class="card-header">
-      <div class="section-icon" style="background:#e3f2fd">🌤</div>
-      <h2>Météo prévue</h2>
-    </div>
-    <div id="meteoRando">
-      <p>☀️ État<br><span id="meteoEtat">—</span></p>
-      <p>🌡 Température<br><span id="meteoTemp">—</span></p>
-      <p>🌧 Pluie<br><span id="meteoPluie">—</span></p>
-      <p>🧭 Vent<br><span id="meteoVent">—</span></p>
-      <p>💨 Rafales<br><span id="meteoRafales">—</span></p>
-    </div>
-  </section>
 
   <!-- 3. COVOITURAGE -->
   <section class="card" id="covoit">
@@ -157,7 +143,21 @@
       </div>
     </div>
   </section>
-
+  
+  <!-- 2. MÉTÉO -->
+  <section class="card" id="meteo">
+    <div class="card-header">
+      <div class="section-icon" style="background:#e3f2fd">🌤</div>
+      <h2>Météo prévue</h2>
+    </div>
+    <div id="meteoRando">
+      <p>☀️ État<br><span id="meteoEtat">—</span></p>
+      <p>🌡 Température<br><span id="meteoTemp">—</span></p>
+      <p>🌧 Pluie<br><span id="meteoPluie">—</span></p>
+      <p>🧭 Vent<br><span id="meteoVent">—</span></p>
+      <p>💨 Rafales<br><span id="meteoRafales">—</span></p>
+    </div>
+  </section>
   <!-- 5. COÛTS -->
   <section class="card" id="couts">
     <div class="card-header">
@@ -401,9 +401,8 @@ if ('serviceWorker' in navigator && location.hostname === 'dbizcyber.github.io')
 /* ══ RESET FORMULAIRE (sans rechargement) ══ */
 function resetFormulaire() {
 
-  /* 1. Vider localStorage + sessionStorage GPX */
+  /* 1. Vider localStorage */
   localStorage.removeItem('randoFDR_form');
-  try { sessionStorage.removeItem('gpxTrace'); } catch(e) {}
 
   /* 2. Inputs / selects / textareas */
   const champs = [
@@ -542,3 +541,4 @@ sections.forEach(s => obs.observe(s));
 
 </body>
 </html>
+
