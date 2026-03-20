@@ -129,21 +129,23 @@ function niveauIBP(v) {
 }
 
 /* ══ Envoi vers Apps Script ══ */
-async function envoyerVersSheets(item) {
-  const params = new URLSearchParams(Object.assign({ action: 'add' }, item));
-  await fetch(APPS_SCRIPT_URL + '?' + params.toString(), {
-    method: 'GET',
-    mode: 'no-cors'
+function appelGET(params) {
+  return new Promise(function(resolve) {
+    var img = new Image();
+    var url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+    img.onload = img.onerror = function() { resolve(); };
+    img.src = url;
+    setTimeout(resolve, 3000); /* timeout 3s */
   });
+}
+
+async function envoyerVersSheets(item) {
+  await appelGET(Object.assign({ action: 'add' }, item));
   return true;
 }
 
 async function syncCalendar(item) {
-  const params = new URLSearchParams(Object.assign({ action: 'sync' }, item));
-  await fetch(APPS_SCRIPT_URL + '?' + params.toString(), {
-    method: 'GET',
-    mode: 'no-cors'
-  });
+  await appelGET(Object.assign({ action: 'sync' }, item));
   return true;
 }
 
