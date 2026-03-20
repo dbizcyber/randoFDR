@@ -1,15 +1,16 @@
 /* ============================================================
-   sw.js — Service Worker randoFDR
-   Cache les ressources essentielles pour usage hors ligne
+   sw.js — Service Worker randoFDR v5
+   Stratégie Network First pour HTML et JS (toujours à jour)
+   Stratégie Cache First pour CSS et images (statiques)
    ============================================================ */
+const CACHE_NAME = 'randofdr-v5';
 
-const CACHE_NAME = 'randofdr-v4';
-
-/* Fichiers à mettre en cache au démarrage */
 const CACHE_STATIC = [
   '/randoFDR/',
   '/randoFDR/index.html',
+  '/randoFDR/carteRandos.html',
   '/randoFDR/css/style.css',
+  '/randoFDR/css/carteRandos.css',
   '/randoFDR/js/app.js',
   '/randoFDR/js/meteoRando.js',
   '/randoFDR/js/carteParking.js',
@@ -24,54 +25,50 @@ const CACHE_STATIC = [
   '/randoFDR/js/resumeRando.js',
   '/randoFDR/js/envoiRando.js',
   '/randoFDR/js/formManager.js',
+  '/randoFDR/js/gpxManuel.js',
+  '/randoFDR/js/carteRandos.js',
   '/randoFDR/data/randos.js',
   '/randoFDR/data/animateurs.js',
   '/randoFDR/data/parkings.js',
-  '/randoFDR/carteRandos.html',
-  '/randoFDR/css/carteRandos.css',
-  '/randoFDR/js/carteRandos.js',
   '/randoFDR/data/randosCoords.js',
   '/randoFDR/manifest.json',
 ];
 
-/* ── INSTALLATION : mise en cache des ressources statiques ── */
+/* ── INSTALLATION ── */
 self.addEventListener('install', event => {
-  console.log('[SW] Installation...');
+  console.log('[SW v5] Installation...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[SW] Mise en cache des ressources');
-        return cache.addAll(CACHE_STATIC);
-      })
+      .then(cache => cache.addAll(CACHE_STATIC))
       .then(() => self.skipWaiting())
   );
 });
 
-/* ── ACTIVATION : nettoyage des anciens caches ── */
+/* ── ACTIVATION : purge anciens caches ── */
 self.addEventListener('activate', event => {
-  console.log('[SW] Activation...');
+  console.log('[SW v5] Activation...');
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => {
-            console.log('[SW] Suppression ancien cache:', key);
-            return caches.delete(key);
-          })
-      )
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then(keys => Promise.all(
+        keys.filter(k => k !== CACHE_NAME).map(k => {
+          console.log('[SW v5] Suppression ancien cache:', k);
+          return caches.delete(k);
+        })
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
-/* ── FETCH : stratégie Cache First, réseau en fallback ── */
+/* ── FETCH ── */
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  /* APIs externes (météo, carte, nominatim) → réseau uniquement */
+  /* APIs externes → réseau uniquement, pas de cache */
   const apiDomains = [
     'api.open-meteo.com',
     'tile.openstreetmap.org',
+    'tile.thunderforest.com',
+    'tile.waymarkedtrails.org',
     'nominatim.openstreetmap.org',
     'router.project-osrm.org',
     'ibp-proxy.vercel.app',
@@ -82,31 +79,46 @@ self.addEventListener('fetch', event => {
     'fonts.googleapis.com',
     'fonts.gstatic.com',
   ];
-
   if (apiDomains.some(d => url.hostname.includes(d))) {
     event.respondWith(fetch(event.request));
     return;
   }
 
-  /* Ressources locales → Cache First */
+  const dest = event.request.destination;
+
+  /* HTML et JS → Network First
+     Toujours tenter le réseau d'abord pour avoir la version la plus récente.
+     Si hors ligne, fallback sur le cache. */
+  if (dest === 'document' || dest === 'script') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request)
+            .then(cached => cached || caches.match('/randoFDR/index.html'));
+        })
+    );
+    return;
+  }
+
+  /* CSS, images, icônes → Cache First (rarement modifiés) */
   event.respondWith(
     caches.match(event.request)
       .then(cached => {
         if (cached) return cached;
         return fetch(event.request)
           .then(response => {
-            /* Mettre en cache les nouvelles ressources */
             if (response && response.status === 200) {
               const clone = response.clone();
               caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
             }
             return response;
-          })
-          .catch(() => {
-            /* Hors ligne et pas en cache : page de fallback */
-            if (event.request.destination === 'document') {
-              return caches.match('/randoFDR/index.html');
-            }
           });
       })
   );
