@@ -8,7 +8,7 @@ const emailUser  = document.getElementById("emailUser");
 /* option placeholder */
 const placeholder = document.createElement("option");
 placeholder.value = "";
-placeholder.textContent = "— Choisir un animateur —";
+placeholder.textContent = "— Choisir votre nom —";
 select.appendChild(placeholder);
 
 animateurs.filter(a => a.nom !== "").forEach(a => {
