@@ -401,8 +401,9 @@ if ('serviceWorker' in navigator && location.hostname === 'dbizcyber.github.io')
 /* ══ RESET FORMULAIRE (sans rechargement) ══ */
 function resetFormulaire() {
 
-  /* 1. Vider localStorage */
+  /* 1. Vider localStorage + sessionStorage GPX */
   localStorage.removeItem('randoFDR_form');
+  try { sessionStorage.removeItem('gpxTrace'); } catch(e) {}
 
   /* 2. Inputs / selects / textareas */
   const champs = [
