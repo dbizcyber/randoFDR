@@ -4,7 +4,7 @@
    ============================================================ */
 
 const BASE = 'https://dbizcyber.github.io/randoFDR/data/';
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGgz-y30P40OJshqvCM0F2J3P5oXD1Chg1jDqxqC2tN3jFz6RlfwqJd-74dY8TZQvkig/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgT2WIKvUgDeOYkGT1efTv3Dt4QoajR-O0HtpxKeVykyGsqwq6Rbt6YsWUHlcJG86jXQ/exec';
 
 let planning = [];
 
@@ -130,9 +130,10 @@ function niveauIBP(v) {
 
 /* ══ Envoi vers Apps Script ══ */
 async function envoyerVersSheets(item) {
+  /* Utiliser fetch sans mode no-cors — Apps Script gère le CORS */
   await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
+    method: "POST",
+
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(item)
   });
