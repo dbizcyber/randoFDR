@@ -141,9 +141,7 @@
 <div id="tab-gestion" class="tab-content">
   <div class="card">
     <h2>📋 Événements planifiés</h2>
-    <div style="margin-bottom:16px">
-      <button class="btn btn-load" id="btn-load" onclick="loadEvents()">🔄 Charger les événements</button>
-    </div>
+
     <div class="table-wrap">
       <table>
         <thead>
@@ -354,7 +352,7 @@ async function creerRando() {
 
 /* ══ CHARGER ══ */
 async function loadEvents() {
-  setBusy('btn-load', true);
+  
   try {
     const res   = await callScript({ action: 'list' });
     const tbody = document.getElementById('events-body');
@@ -381,7 +379,7 @@ async function loadEvents() {
       });
     }
   } catch(e) { showToast('Erreur réseau lors du chargement.', true); }
-  setBusy('btn-load', false);
+  
 }
 
 /* ══ MODIFIER ══ */
