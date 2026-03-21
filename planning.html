@@ -296,6 +296,7 @@ function switchTab(tab, btn) {
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   btn.classList.add('active');
+  if (tab === 'gestion') loadEvents();
 }
 
 /* ══ Toast ══ */
@@ -445,6 +446,7 @@ document.getElementById('date').value = d0.toISOString().split('T')[0];
 
 /* ══ Lancer ══ */
 loadData();
+loadEvents();
 </script>
 </body>
 </html>
