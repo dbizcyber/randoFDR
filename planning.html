@@ -132,7 +132,7 @@
 
     </div>
     <div class="form-actions">
-      <button class="btn btn-primary" id="btn-create" onclick="createEvent()">➕ Créer l'événement</button>
+      <button class="btn btn-primary" id="btn-create" onclick="creerRando()">➕ Créer l'événement</button>
     </div>
   </div>
 </div>
@@ -321,7 +321,7 @@ function setBusy(btnId, busy) {
 }
 
 /* ══ CRÉER ══ */
-async function createEvent() {
+async function creerRando() {
   const date      = document.getElementById('date').value;
   const nom       = document.getElementById('nom-input').value.trim();
   const animateur = document.getElementById('animateur-input').value.trim();
