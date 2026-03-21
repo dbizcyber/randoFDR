@@ -199,7 +199,7 @@
       </div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-cancel" onclick="closeModal('modal-edit')">Annuler</button>
+      <button class="btn btn-cancel" onclick="closeModal('modal-edit')">Effacer</button>
       <button class="btn btn-primary" id="btn-save-edit" onclick="saveEdit()">💾 Enregistrer</button>
     </div>
   </div>
@@ -374,7 +374,7 @@ async function loadEvents() {
           <td>${ev.denivele ? '<span class="badge green">'+ev.denivele+' m</span>' : '—'}</td>
           <td class="actions-cell">
             <button class="btn btn-edit"   onclick='openEdit(${ej})'>✏️ Modifier</button>
-            <button class="btn btn-delete" onclick='confirmDelete(${ev.rowIndex},"${(ev.nom||'').replace(/"/g,'&quot;')}")'>❌ Annuler</button>
+            <button class="btn btn-delete" onclick='confirmDelete(${ev.rowIndex},"${(ev.nom||'').replace(/"/g,'&quot;')}")'>❌ Effacer</button>
           </td>`;
         tbody.appendChild(tr);
       });
@@ -418,7 +418,7 @@ async function saveEdit() {
 
 /* ══ SUPPRIMER ══ */
 function confirmDelete(rowIndex, nom) {
-  if (!confirm('Annuler "' + nom + '" ?\nSera supprimé de Sheets ET de Google Calendar.')) return;
+  if (!confirm('Effacer "' + nom + '" ?\nSera supprimé de Sheets ET de Google Calendar.')) return;
   deleteEvent(rowIndex);
 }
 
