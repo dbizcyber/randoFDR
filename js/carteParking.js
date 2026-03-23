@@ -156,7 +156,14 @@ function calculRoute(dest){
     const distanceKm = route.distance / 1000
     const AR = (distanceKm * 2).toFixed(1)
 
-    document.getElementById("distanceAR").textContent = AR
+    const elAR = document.getElementById("distanceAR");
+    if (elAR) {
+      /* Ne pas écraser si l'utilisateur a saisi manuellement */
+      if (!elAR.dataset.manuel) {
+        if (elAR.tagName === "INPUT") elAR.value = AR;
+        else elAR.textContent = AR;
+      }
+    }
     calculCovoiturage()
 
     if(routeLine) map.removeLayer(routeLine)
