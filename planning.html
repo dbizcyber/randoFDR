@@ -297,7 +297,13 @@ function switchTab(tab, btn) {
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   btn.classList.add('active');
-  if (tab === 'gestion') loadEvents();
+  if (tab === 'gestion') loadEvents().then(resizeParent);
+}
+
+/* ══ Resize parent iframe ══ */
+function resizeParent() {
+  const h = document.body.scrollHeight;
+  window.parent.postMessage({ type: 'resize', height: h }, '*');
 }
 
 /* ══ Toast ══ */
@@ -457,7 +463,8 @@ async function saveEdit() {
     if (res.success) {
       showToast('✅ Événement modifié dans Sheets et Calendar !');
       closeModal('modal-edit');
-      loadEvents();
+      await loadEvents();
+      resizeParent();
     } else showToast('Erreur : ' + (res.error || 'inconnue'), true);
   } catch(e) { showToast('Erreur réseau.', true); }
   setBusy('btn-save-edit', false);
@@ -492,7 +499,7 @@ document.getElementById('date').value = d0.toISOString().split('T')[0];
 
 /* ══ Lancer ══ */
 loadData();
-loadEvents();
+loadEvents().then(resizeParent);
 </script>
 </body>
 </html>
