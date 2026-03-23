@@ -1,4 +1,7 @@
 import { calculCovoiturage } from "./covoiturage.js"
+
+/* Exposer pour saisie manuelle distanceAR */
+window._calculCovoiturage = calculCovoiturage;
 import { afficherMeteo } from "./meteoRando.js"
 
 const CHATEAURENARD = [43.88808, 4.84882];
