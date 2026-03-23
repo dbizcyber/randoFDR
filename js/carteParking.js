@@ -178,4 +178,3 @@ function calculRoute(dest){
     map.fitBounds(routeLine.getBounds())
   })
 }
-
