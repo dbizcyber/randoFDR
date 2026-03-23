@@ -151,8 +151,7 @@
                    color:var(--forest,#2d6a4f);background:transparent;
                    border:none;border-bottom:1.5px dashed var(--stone,#8a7560);
                    text-align:right;outline:none;"
-            title="Modifiable manuellement">
-          km
+            title="Modifiable manuellement"> km
         </div>
       </div>
       <div class="stat-badge">
@@ -434,6 +433,30 @@ document.getElementById('btnReset')?.addEventListener('click', () => {
     window.location.reload();
   });
 });
+
+/* ══ RECHERCHE RANDO → NOM RANDO ══ */
+(function() {
+  var inputR = document.getElementById('rechercheRando');
+  var nomR   = document.getElementById('nomRando');
+  if (!inputR || !nomR) return;
+  inputR.addEventListener('input', function() {
+    nomR.value = inputR.value;
+    window._majIndicateurs && window._majIndicateurs();
+  });
+})();
+
+/* ══ DISTANCE A/R MANUELLE → RECALCUL COUTS ══ */
+(function() {
+  var elAR = document.getElementById('distanceAR');
+  if (!elAR) return;
+  elAR.addEventListener('input', function() {
+    elAR.dataset.manuel = '1';
+    if (window._calculCovoiturage) window._calculCovoiturage();
+  });
+  elAR.addEventListener('change', function() {
+    if (!elAR.value || parseFloat(elAR.value) === 0) elAR.dataset.manuel = '';
+  });
+})();
 
 /* Active nav au scroll */
 const sections = document.querySelectorAll('.card[id]');
