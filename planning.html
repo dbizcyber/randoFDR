@@ -284,11 +284,11 @@ document.getElementById('ibp').addEventListener('input', function() {
 function niveauIBP(v) {
   const n = parseFloat(v);
   if (isNaN(n) || v === '') return null;
-  if (n <= 25)  return { label: '🟢 N1 — Facile',          bg: '#d4edda', color: '#155724' };
-  if (n <= 50)  return { label: '🔵 N2 — Assez Facile',    bg: '#cce5ff', color: '#004085' };
-  if (n <= 75)  return { label: '🟡 N3 — Peu Difficile',   bg: '#fff3cd', color: '#856404' };
-  if (n <= 100) return { label: '🔴 N4 — Assez Difficile', bg: '#f8d7da', color: '#721c24' };
-  return              { label: '⚫ N5 — Difficile',         bg: '#343a40', color: '#ffffff' };
+  if (n <= 25)  return { label: '🟢 Facile',          bg: '#d4edda', color: '#155724' };
+  if (n <= 50)  return { label: '🔵 Assez Facile',    bg: '#cce5ff', color: '#004085' };
+  if (n <= 75)  return { label: '🟡 Peu Difficile',   bg: '#fff3cd', color: '#856404' };
+  if (n <= 100) return { label: '🔴 Assez Difficile', bg: '#f8d7da', color: '#721c24' };
+  return              { label: '⚫ Difficile',         bg: '#343a40', color: '#ffffff' };
 }
 
 /* ══ Onglets ══ */
