@@ -415,7 +415,11 @@ function renderEvents() {
       <td>${formatDate(ev.date)}</td>
       <td><strong>${ev.nom || '—'}</strong></td>
       <td>${ev.animateur || '—'}</td>
-      <td>${ev.ibp ? '<span class="badge">'+ev.ibp+'</span>' : '—'}</td>
+      <td>${(function() {
+        const info = niveauIBP(String(ev.ibp || ''));
+        if (!info) return ev.ibp || '—';
+        return '<span style="background:'+info.bg+';color:'+info.color+';padding:2px 8px;border-radius:20px;font-size:.75rem;font-weight:700;">'+ev.ibp+' '+info.label+'</span>';
+      })()}</td>
       <td>${ev.distance ? '<span class="badge green">'+ev.distance+' km</span>' : '—'}</td>
       <td>${ev.denivele ? '<span class="badge green">'+ev.denivele+' m</span>' : '—'}</td>
       <td class="actions-cell">
