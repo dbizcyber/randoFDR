@@ -11,6 +11,18 @@ export function activerRecherche() {
     return;
   }
 
+  // Si "Autre" sélectionné : mettre à jour nomRando en temps réel
+  const selectRando = document.getElementById("rando");
+  if (selectRando) {
+    input.addEventListener("input", () => {
+      const selVal = selectRando.value;
+      if (selVal === "__autre__" || selVal === "" || !randos.includes(selVal)) {
+        nomRando.value = input.value;
+        window._majIndicateurs && window._majIndicateurs();
+      }
+    });
+  }
+
   // Filtrer et afficher les suggestions à chaque frappe
   input.addEventListener("input", () => {
     const filtre = input.value.toLowerCase().trim();
