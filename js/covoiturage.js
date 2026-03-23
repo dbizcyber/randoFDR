@@ -7,8 +7,9 @@ function arrondir(val){
 
 export function calculCovoiturage(){
 
+const elAR = document.getElementById("distanceAR");
 const km = parseFloat(
-document.getElementById("distanceAR").textContent
+  elAR ? (elAR.tagName === "INPUT" ? elAR.value : elAR.textContent) : "0"
 ) || 0
 
 const autoroute =
@@ -42,3 +43,5 @@ document.getElementById("cout5").textContent =
 arrondir(par5) + " €"
 
 }
+
+window._calculCovoiturage = calculCovoiturage;
