@@ -14,9 +14,9 @@
     .tab-btn { padding: 14px 28px; border: none; background: none; font-size: .95rem; font-weight: 600; color: #718096; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all .2s; }
     .tab-btn.active { color: #2d6a4f; border-bottom-color: #2d6a4f; }
     .tab-btn:hover:not(.active) { color: #2d6a4f; background: #f7fafc; }
-    .tab-content { display: none; padding: 20px; max-width: 100%; margin: 0 auto; }
+    .tab-content { display: none; padding: 30px; max-width: 980px; margin: 0 auto; }
     .tab-content.active { display: block; }
-    .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.08); padding: 20px; margin-bottom: 24px; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.08); padding: 28px; margin-bottom: 24px; }
     .card h2 { font-size: 1.1rem; color: #2d6a4f; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
@@ -42,8 +42,8 @@
 
     .btn { padding: 10px 22px; border: none; border-radius: 8px; font-size: .9rem; font-weight: 600; cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: 6px; }
     .btn-primary { background: #2d6a4f; color: #fff; } .btn-primary:hover { background: #1b4332; }
-    .btn-edit    { background: #3182ce; color: #fff; font-size: .8rem; padding: 6px 0; width: 80px; text-align:center; display:block; } .btn-edit:hover { background: #2c5282; }
-    .btn-delete  { background: #e53e3e; color: #fff; font-size: .8rem; padding: 6px 0; width: 80px; text-align:center; display:block; } .btn-delete:hover { background: #c53030; }
+    .btn-edit    { background: #3182ce; color: #fff; font-size: .8rem; padding: 5px 10px; } .btn-edit:hover { background: #2c5282; }
+    .btn-delete  { background: #e53e3e; color: #fff; font-size: .8rem; padding: 5px 10px; } .btn-delete:hover { background: #c53030; }
     .btn-cancel  { background: #e2e8f0; color: #4a5568; } .btn-cancel:hover { background: #cbd5e0; }
     .btn-load    { background: #52b788; color: #fff; } .btn-load:hover { background: #2d6a4f; }
     .form-actions { display: flex; gap: 10px; margin-top: 20px; }
@@ -52,10 +52,9 @@
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: .87rem; }
     thead th { background: #2d6a4f; color: #fff; padding: 10px 12px; text-align: left; white-space: nowrap; }
-    thead th:hover { background: #1b4332; }
     tbody tr { border-bottom: 1px solid #e2e8f0; } tbody tr:hover { background: #f7fafc; }
     tbody td { padding: 10px 12px; vertical-align: middle; }
-    .actions-cell { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+    .actions-cell { display: flex; gap: 5px; flex-wrap: wrap; }
     .badge { display: inline-block; font-size: .75rem; background: #ebf8ff; color: #2b6cb0; border-radius: 20px; padding: 2px 8px; font-weight: 600; }
     .badge.green { background: #f0fff4; color: #276749; }
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; }
@@ -142,14 +141,14 @@
 <div id="tab-gestion" class="tab-content">
   <div class="card">
     <h2>📋 Événements planifiés</h2>
-
+    <div style="margin-bottom:16px">
+      <button class="btn btn-load" id="btn-load" onclick="loadEvents()">🔄 Charger les événements</button>
+    </div>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th style="cursor:pointer;user-select:none;white-space:nowrap" onclick="trierParDate()">Date <span id="sort-date">▲</span></th>
-            <th>Randonnée</th>
-            <th style="cursor:pointer;user-select:none;white-space:nowrap" onclick="trierParAnimateur()">Animateur <span id="sort-anim"></span></th>
+            <th>Date</th><th>Randonnée</th><th>Animateur</th>
             <th>IBP</th><th>Distance</th><th>Dénivelé +</th><th>Actions</th>
           </tr>
         </thead>
@@ -164,7 +163,7 @@
 <!-- ══ MODAL MODIFIER ══ -->
 <div class="modal-overlay" id="modal-edit">
   <div class="modal">
-    <h3>Modifier l'événement</h3>
+    <h3>✏️ Modifier l'événement</h3>
     <input type="hidden" id="edit-rowIndex" />
     <div class="form-grid">
       <div class="form-group">
@@ -200,7 +199,7 @@
       </div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-cancel" onclick="closeModal('modal-edit')">Effacer</button>
+      <button class="btn btn-cancel" onclick="closeModal('modal-edit')">Annuler</button>
       <button class="btn btn-primary" id="btn-save-edit" onclick="saveEdit()">💾 Enregistrer</button>
     </div>
   </div>
@@ -284,11 +283,11 @@ document.getElementById('ibp').addEventListener('input', function() {
 function niveauIBP(v) {
   const n = parseFloat(v);
   if (isNaN(n) || v === '') return null;
-  if (n <= 25)  return { label: '🟢 Facile',          bg: '#d4edda', color: '#155724' };
-  if (n <= 50)  return { label: '🔵 Assez Facile',    bg: '#cce5ff', color: '#004085' };
-  if (n <= 75)  return { label: '🟡 Peu Difficile',   bg: '#fff3cd', color: '#856404' };
-  if (n <= 100) return { label: '🔴 Assez Difficile', bg: '#f8d7da', color: '#721c24' };
-  return              { label: '⚫ Difficile',         bg: '#343a40', color: '#ffffff' };
+  if (n <= 25)  return { label: '🟢 N1 — Facile',          bg: '#d4edda', color: '#155724' };
+  if (n <= 50)  return { label: '🔵 N2 — Assez Facile',    bg: '#cce5ff', color: '#004085' };
+  if (n <= 75)  return { label: '🟡 N3 — Peu Difficile',   bg: '#fff3cd', color: '#856404' };
+  if (n <= 100) return { label: '🔴 N4 — Assez Difficile', bg: '#f8d7da', color: '#721c24' };
+  return              { label: '⚫ N5 — Difficile',         bg: '#343a40', color: '#ffffff' };
 }
 
 /* ══ Onglets ══ */
@@ -297,13 +296,6 @@ function switchTab(tab, btn) {
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   btn.classList.add('active');
-  if (tab === 'gestion') loadEvents().then(resizeParent);
-}
-
-/* ══ Resize parent iframe ══ */
-function resizeParent() {
-  const h = document.body.scrollHeight;
-  window.parent.postMessage({ type: 'resize', height: h }, '*');
 }
 
 /* ══ Toast ══ */
@@ -360,80 +352,35 @@ async function creerRando() {
 }
 
 /* ══ CHARGER ══ */
-let eventsData = [];
-let sortAsc = true;
-
 async function loadEvents() {
+  setBusy('btn-load', true);
   try {
-    const res  = await callScript({ action: 'list' });
-    eventsData = res.rows || res.events || [];
-    renderEvents();
+    const res   = await callScript({ action: 'list' });
+    const tbody = document.getElementById('events-body');
+    tbody.innerHTML = '';
+    const rows = res.rows || res.events || [];
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Aucun événement trouvé.</td></tr>';
+    } else {
+      rows.forEach(ev => {
+        const tr = document.createElement('tr');
+        const ej = JSON.stringify(ev).replace(/'/g, "&#39;");
+        tr.innerHTML = `
+          <td>${ev.date || '—'}</td>
+          <td><strong>${ev.nom || '—'}</strong></td>
+          <td>${ev.animateur || '—'}</td>
+          <td>${ev.ibp ? '<span class="badge">'+ev.ibp+'</span>' : '—'}</td>
+          <td>${ev.distance ? '<span class="badge green">'+ev.distance+' km</span>' : '—'}</td>
+          <td>${ev.denivele ? '<span class="badge green">'+ev.denivele+' m</span>' : '—'}</td>
+          <td class="actions-cell">
+            <button class="btn btn-edit"   onclick='openEdit(${ej})'>✏️ Modifier</button>
+            <button class="btn btn-delete" onclick='confirmDelete(${ev.rowIndex},"${(ev.nom||'').replace(/"/g,'&quot;')}")'>❌ Annuler</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    }
   } catch(e) { showToast('Erreur réseau lors du chargement.', true); }
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  /* dateStr au format yyyy-MM-dd → JJ/MM/AAAA */
-  const parts = dateStr.split('-');
-  if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];
-  return dateStr;
-}
-
-let sortCol = 'date';
-
-function trierParDate() {
-  if (sortCol === 'date') { sortAsc = !sortAsc; }
-  else { sortCol = 'date'; sortAsc = true; }
-  document.getElementById('sort-date').textContent = sortCol === 'date' ? (sortAsc ? '▲' : '▼') : '';
-  document.getElementById('sort-anim').textContent = '';
-  eventsData.sort(function(a, b) {
-    const da = a.date || '';
-    const db = b.date || '';
-    return sortAsc ? da.localeCompare(db) : db.localeCompare(da);
-  });
-  renderEvents();
-}
-
-function trierParAnimateur() {
-  if (sortCol === 'anim') { sortAsc = !sortAsc; }
-  else { sortCol = 'anim'; sortAsc = true; }
-  document.getElementById('sort-anim').textContent = sortAsc ? '▲' : '▼';
-  document.getElementById('sort-date').textContent = '';
-  eventsData.sort(function(a, b) {
-    const da = (a.animateur || '').toLowerCase();
-    const db = (b.animateur || '').toLowerCase();
-    return sortAsc ? da.localeCompare(db) : db.localeCompare(da);
-  });
-  renderEvents();
-}
-
-function renderEvents() {
-  const tbody = document.getElementById('events-body');
-  tbody.innerHTML = '';
-  if (!eventsData.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Aucun événement trouvé.</td></tr>';
-    return;
-  }
-  eventsData.forEach(ev => {
-    const tr = document.createElement('tr');
-    const ej = JSON.stringify(ev).replace(/'/g, "&#39;");
-    tr.innerHTML = `
-      <td>${formatDate(ev.date)}</td>
-      <td><strong>${ev.nom || '—'}</strong></td>
-      <td>${ev.animateur || '—'}</td>
-      <td>${(function() {
-        const info = niveauIBP(String(ev.ibp || ''));
-        if (!info) return ev.ibp || '—';
-        return '<span style="background:'+info.bg+';color:'+info.color+';padding:2px 8px;border-radius:20px;font-size:.75rem;font-weight:700;">'+ev.ibp+' '+info.label+'</span>';
-      })()}</td>
-      <td>${ev.distance ? '<span class="badge green">'+ev.distance+' km</span>' : '—'}</td>
-      <td>${ev.denivele ? '<span class="badge green">'+ev.denivele+' m</span>' : '—'}</td>
-      <td class="actions-cell">
-        <button class="btn btn-edit"   onclick='openEdit(${ej})'>Modifier</button>
-        <button class="btn btn-delete" onclick='confirmDelete(${ev.rowIndex},"${(ev.nom||'').replace(/"/g,"&quot;")}")'>Effacer</button>
-      </td>`;
-    tbody.appendChild(tr);
-  });
+  setBusy('btn-load', false);
 }
 
 /* ══ MODIFIER ══ */
@@ -463,8 +410,7 @@ async function saveEdit() {
     if (res.success) {
       showToast('✅ Événement modifié dans Sheets et Calendar !');
       closeModal('modal-edit');
-      await loadEvents();
-      resizeParent();
+      loadEvents();
     } else showToast('Erreur : ' + (res.error || 'inconnue'), true);
   } catch(e) { showToast('Erreur réseau.', true); }
   setBusy('btn-save-edit', false);
@@ -472,7 +418,7 @@ async function saveEdit() {
 
 /* ══ SUPPRIMER ══ */
 function confirmDelete(rowIndex, nom) {
-  if (!confirm('Effacer "' + nom + '" ?\nSera supprimé de Sheets ET de Google Calendar.')) return;
+  if (!confirm('Annuler "' + nom + '" ?\nSera supprimé de Sheets ET de Google Calendar.')) return;
   deleteEvent(rowIndex);
 }
 
@@ -499,7 +445,6 @@ document.getElementById('date').value = d0.toISOString().split('T')[0];
 
 /* ══ Lancer ══ */
 loadData();
-loadEvents().then(resizeParent);
 </script>
 </body>
 </html>
