@@ -160,7 +160,7 @@ window.randosCoords = [
   { nom:"Roque D'Anthéron. Chemin Crêtes",                    lat:43.705,         lon:5.314 },
   { nom:"Russan . pont Saint Nicolas",                        lat:43.976,         lon:4.394 },
   { nom:"Saignon",                                            lat:43.8629181,   lon:5.4289006 },
-  { nom:"Saint Andre d'Oleargues",                            lat:43.593,         lon:2.965 },
+  { nom:"Saint Andre d'Olerargues",                            lat:44.1614, lon:4.48619 },
   { nom:"Saint Etienne du Grès",                              lat:43.7809809,   lon:4.7311849 },
   { nom:"Saint Gens Combe de Capellan",                       lat:44.1141727,   lon:4.8261305 },
   { nom:"Saint Hubert au départ du lac de Monieux",           lat:44.0248082,   lon:5.3219265 },
