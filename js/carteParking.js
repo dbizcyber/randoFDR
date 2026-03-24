@@ -164,13 +164,9 @@ function calculRoute(dest){
       if(!data.routes || !data.routes.length) return
 
       // 🔥 meilleur trajet intelligent
-      const route = data.routes.reduce((best, current) => {
-
-        const scoreCurrent = current.duration + (current.distance * 0.05)
-        const scoreBest = best.duration + (best.distance * 0.05)
-
-        return scoreCurrent < scoreBest ? current : best
-      })
+const route = data.routes.reduce((best, current) =>
+  current.distance < best.distance ? current : best
+)
 
       // ✅ limite cache
       if(cacheRoutes.size > MAX_CACHE_SIZE){
