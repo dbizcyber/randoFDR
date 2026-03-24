@@ -159,7 +159,7 @@ export const randos = [
 "Roque D'Anthéron. Chemin Crêtes",
 "Russan . pont Saint Nicolas",
 "Saignon",
-"Saint Andre d'Oleargues",
+"Saint André d'Olérargues",
 "Saint Etienne du Grès",
 "Saint Gens Combe de Capellan",
 "Saint Hubert au départ du lac de Monieux",
