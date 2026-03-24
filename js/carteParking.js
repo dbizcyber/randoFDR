@@ -11,14 +11,6 @@ let marker
 let routeLine
 let pointDepart = CHATEAURENARD
 
-// 🔥 OPTIMISATION ROUTAGE
-let abortController = null
-const cacheRoutes = new Map()
-let debounceTimer = null
-
-const DEBOUNCE_DELAY = 250
-const MAX_CACHE_SIZE = 50
-
 /* ══════════════════════════════════════
    INITIALISATION CARTE
 ══════════════════════════════════════ */
@@ -30,16 +22,25 @@ export function initCarte(){
     maxZoom: 19
   }).addTo(map)
 
+  /* marker TOUJOURS draggable — l'utilisateur positionne librement le parking départ rando */
   marker = L.marker(CHATEAURENARD, { draggable: true }).addTo(map)
 
   window.coordsParking = ""
 
+  /* NE PAS appeler calculRoute ni afficherMeteo ici :
+     latParking / lonParking restent "—" tant que l'utilisateur
+     n'a pas explicitement choisi un lieu (recherche ou drag). */
+
+  /* déplacement marker → recalcul route et météo */
   marker.on("dragend", () => {
     const pos = marker.getLatLng()
     calculRoute([pos.lat, pos.lng])
     afficherMeteo(pos.lat, pos.lng)
   })
 
+  /* écouter le select parking covoiturage
+     → si "Autre" : géocoder le lieu saisi + repositionner pointDepart
+     → si parking connu : pointDepart = Châteaurenard */
   window._majPointDepart = majPointDepart
 
   const champAutre = document.getElementById("nouveauParking")
@@ -58,8 +59,12 @@ export function initCarte(){
 ══════════════════════════════════════ */
 function majPointDepart(valeurSelect) {
   if(valeurSelect === "__autre__"){
+    /* le point de départ sera mis à jour par geocoderParkingAutre */
   } else {
+    /* parking connu → départ = Châteaurenard */
     pointDepart = CHATEAURENARD
+    /* Recalcul route UNIQUEMENT si l'utilisateur a déjà choisi un parking départ rando.
+       Évite de remplir latParking automatiquement au chargement / restauration. */
     if(document.getElementById("latParking")?.dataset.userSet === "1"){
       const pos = marker.getLatLng()
       calculRoute([pos.lat, pos.lng])
@@ -67,7 +72,7 @@ function majPointDepart(valeurSelect) {
   }
 }
 
-/* geocoder parking autre */
+/* geocoder le parking "Autre" saisi manuellement */
 function geocoderParkingAutre(texte){
   if(!texte.trim()) return
   fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(texte)}`)
@@ -76,14 +81,16 @@ function geocoderParkingAutre(texte){
       if(!data.length) return
       const lat = parseFloat(data[0].lat)
       const lon = parseFloat(data[0].lon)
+      /* nouveau point de départ covoit */
       pointDepart = [lat, lon]
+      /* recalcul route depuis ce nouveau point vers position actuelle marker */
       const pos = marker.getLatLng()
       calculRoute([pos.lat, pos.lng])
     })
 }
 
 /* ══════════════════════════════════════
-   RECHERCHE LIEU
+   RECHERCHE LIEU (bouton Localiser)
 ══════════════════════════════════════ */
 export function chercherLieu(){
 
@@ -122,107 +129,52 @@ function majAdresse(lat, lon){
 }
 
 /* ══════════════════════════════════════
-   CALCUL ITINÉRAIRE ULTRA OPTIMISÉ
+   CALCUL ITINÉRAIRE
+   Départ = pointDepart (Châteaurenard ou parking Autre)
+   Arrivée = dest (marker parking départ rando)
 ══════════════════════════════════════ */
 function calculRoute(dest){
 
-  clearTimeout(debounceTimer)
+  const url =
+    `https://router.project-osrm.org/route/v1/driving/` +
+    `${pointDepart[1]},${pointDepart[0]};` +
+    `${dest[1]},${dest[0]}?overview=full&geometries=geojson`
 
-  debounceTimer = setTimeout(() => {
+  fetch(url)
+  .then(r => r.json())
+  .then(data => {
+    if(!data.routes || !data.routes.length) return
 
-    const key = approxKey(pointDepart, dest)
+    const route = data.routes[0]
 
-    if(window._lastRouteKey === key){
-      return
-    }
-    window._lastRouteKey = key
+    document.getElementById("latParking").textContent = dest[0].toFixed(5)
+    document.getElementById("lonParking").textContent = dest[1].toFixed(5)
 
-    // ✅ cache
-    if(cacheRoutes.has(key)){
-      afficherRoute(cacheRoutes.get(key), dest)
-      return
-    }
+    window.coordsParking = dest[0].toFixed(5) + "," + dest[1].toFixed(5)
+    /* Marquer que le parking a été choisi explicitement par l'utilisateur */
+    document.getElementById("latParking").dataset.userSet = "1"
 
-    // ✅ annuler requête précédente
-    if(abortController){
-      abortController.abort()
-    }
-    abortController = new AbortController()
+    majAdresse(dest[0], dest[1])
 
-    const url =
-      `https://router.project-osrm.org/route/v1/driving/` +
-      `${pointDepart[1]},${pointDepart[0]};` +
-      `${dest[1]},${dest[0]}` +
-      `?overview=full` +
-      `&geometries=geojson` +
-      `&alternatives=true` +
-      `&annotations=distance,duration`
+    const distanceKm = route.distance / 1000
+    const AR = (distanceKm * 2).toFixed(1)
 
-    fetch(url, { signal: abortController.signal })
-    .then(r => r.json())
-    .then(data => {
-      if(!data.routes || !data.routes.length) return
-
-      // 🔥 meilleur trajet intelligent
-const route = data.routes.reduce((best, current) =>
-  current.distance < best.distance ? current : best
-)
-
-      // ✅ limite cache
-      if(cacheRoutes.size > MAX_CACHE_SIZE){
-        const firstKey = cacheRoutes.keys().next().value
-        cacheRoutes.delete(firstKey)
+    const elAR = document.getElementById("distanceAR");
+    if (elAR) {
+      /* Ne pas écraser si l'utilisateur a saisi manuellement */
+      if (!elAR.dataset.manuel) {
+        if (elAR.tagName === "INPUT") elAR.value = AR;
+        else elAR.textContent = AR;
       }
+    }
+    calculCovoiturage()
 
-      cacheRoutes.set(key, route)
+    if(routeLine) map.removeLayer(routeLine)
 
-      afficherRoute(route, dest)
-    })
-    .catch(err => {
-      if(err.name !== "AbortError"){
-        console.error("Erreur OSRM :", err)
-      }
-    })
+    routeLine = L.geoJSON(route.geometry,{
+      style:{ color:"#e8621a", weight: 4 }
+    }).addTo(map)
 
-  }, DEBOUNCE_DELAY)
-}
-
-/* 🔧 clé approximative */
-function approxKey(start, end){
-  return `${round(start[0])},${round(start[1])}-${round(end[0])},${round(end[1])}`
-}
-
-function round(n){
-  return Math.round(n * 500) / 500
-}
-
-/* affichage route */
-function afficherRoute(route, dest){
-
-  document.getElementById("latParking").textContent = dest[0].toFixed(5)
-  document.getElementById("lonParking").textContent = dest[1].toFixed(5)
-
-  window.coordsParking = dest[0].toFixed(5) + "," + dest[1].toFixed(5)
-  document.getElementById("latParking").dataset.userSet = "1"
-
-  majAdresse(dest[0], dest[1])
-
-  const distanceKm = route.distance / 1000
-  const AR = (distanceKm * 2).toFixed(1)
-
-  const elAR = document.getElementById("distanceAR");
-  if (elAR && !elAR.dataset.manuel) {
-    if (elAR.tagName === "INPUT") elAR.value = AR;
-    else elAR.textContent = AR;
-  }
-
-  calculCovoiturage()
-
-  if(routeLine) map.removeLayer(routeLine)
-
-  routeLine = L.geoJSON(route.geometry,{
-    style:{ color:"#e8621a", weight: 4 }
-  }).addTo(map)
-
-  map.fitBounds(routeLine.getBounds())
+    map.fitBounds(routeLine.getBounds())
+  })
 }
