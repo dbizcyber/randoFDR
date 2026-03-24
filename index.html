@@ -86,22 +86,7 @@
     </div>
   </section>
 
-  <!-- 2. MÉTÉO -->
-  <section class="card" id="meteo">
-    <div class="card-header">
-      <div class="section-icon" style="background:#e3f2fd">🌤</div>
-      <h2>Météo prévue</h2>
-    </div>
-    <div id="meteoRando">
-      <p>☀️ État<br><span id="meteoEtat">—</span></p>
-      <p>🌡 Température<br><span id="meteoTemp">—</span></p>
-      <p>🌧 Pluie<br><span id="meteoPluie">—</span></p>
-      <p>🧭 Vent<br><span id="meteoVent">—</span></p>
-      <p>💨 Rafales<br><span id="meteoRafales">—</span></p>
-    </div>
-  </section>
-
-  <!-- 3. COVOITURAGE -->
+  <!-- 2. COVOITURAGE -->
   <section class="card" id="covoit">
     <div class="card-header">
       <div class="section-icon" style="background:#fff3e0">🚗</div>
@@ -130,7 +115,7 @@
     </div>
   </section>
 
-  <!-- 4. PARKING RANDO -->
+  <!-- 3. PARKING RANDO -->
   <section class="card" id="parking">
     <div class="card-header">
       <div class="section-icon" style="background:#f3e5f5">🅿️</div>
@@ -162,6 +147,21 @@
         <div class="stat-label">GPS</div>
         <div class="stat-value" style="font-size:13px"><span id="latParking">—</span>, <span id="lonParking">—</span></div>
       </div>
+    </div>
+  </section>
+
+  <!-- 4. MÉTÉO -->
+  <section class="card" id="meteo">
+    <div class="card-header">
+      <div class="section-icon" style="background:#e3f2fd">🌤</div>
+      <h2>Météo prévue</h2>
+    </div>
+    <div id="meteoRando">
+      <p>☀️ État<br><span id="meteoEtat">—</span></p>
+      <p>🌡 Température<br><span id="meteoTemp">—</span></p>
+      <p>🌧 Pluie<br><span id="meteoPluie">—</span></p>
+      <p>🧭 Vent<br><span id="meteoVent">—</span></p>
+      <p>💨 Rafales<br><span id="meteoRafales">—</span></p>
     </div>
   </section>
 
@@ -405,6 +405,102 @@ if ('serviceWorker' in navigator && location.hostname === 'dbizcyber.github.io')
   });
 }
 
+/* ══ RESET FORMULAIRE (sans rechargement) ══ */
+function resetFormulaire() {
+
+  /* 1. Vider localStorage */
+  localStorage.removeItem('randoFDR_form');
+
+  /* 2. Inputs / selects / textareas */
+  ['rechercheRando','nomRando','dateRando','animateur',
+   'parkingCovoiturage','nouveauParking','heureRV','itineraire',
+   'autoroute','technicite','risque','remarques',
+   'heureDepartMarche','vitesse','emailUser',
+   'distanceGPX_manuel','denivele_manuel','dureeMarche_manuel','effort_manuel',
+   'lieuRecherche'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = id === 'autoroute' ? '0' : id === 'vitesse' ? '4' : '';
+  });
+
+  /* 3. Spans → — */
+  ['meteoEtat','meteoTemp','meteoPluie','meteoVent','meteoRafales',
+   'parkingRandoAdresse','ibp','effort','heureDepart',
+   'distanceGPX','denivele','dureeMarche'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '—';
+  });
+
+  /* 4. Coûts → 0.00 € */
+  ['coutKm','coutTotal','cout4','cout5'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '0.00 €';
+  });
+
+  /* 5. distanceAR (input) → 0 */
+  const distAR = document.getElementById('distanceAR');
+  if (distAR) {
+    if (distAR.tagName === 'INPUT') { distAR.value = '0'; distAR.dataset.manuel = ''; }
+    else distAR.textContent = '0';
+  }
+
+  /* 6. latParking / lonParking */
+  const latEl = document.getElementById('latParking');
+  if (latEl) { latEl.textContent = '—'; latEl.dataset.userSet = ''; }
+  const lonEl = document.getElementById('lonParking');
+  if (lonEl) lonEl.textContent = '—';
+
+  /* 7. Zones texte résumé + simulations */
+  ['resumeRando','dureeMarcheSim','heureArriveeSim','gpx-status'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  });
+
+  /* 8. Masquer nouveauParking */
+  const champAutre = document.getElementById('nouveauParking');
+  if (champAutre) { champAutre.style.display = 'none'; champAutre.value = ''; }
+
+  /* 9. Réinitialiser saisie manuelle GPX */
+  if (window._initGPXManuel) {
+    window._initGPXManuel();
+  } else {
+    ['distanceGPX_manuel','denivele_manuel','dureeMarche_manuel','effort_manuel'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.value = ''; el.style.display = 'block'; }
+    });
+    ['distanceGPX','denivele','dureeMarche','effort'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+  }
+
+  /* 10. Vider GPX + variables globales */
+  const gpxFile = document.getElementById('gpxFile');
+  if (gpxFile) gpxFile.value = '';
+  window.profilExportBase64 = null;
+  window.coordsParking      = '';
+  window.gpxImporte         = false;
+
+  /* 11. Détruire le graphique Chart.js */
+  if (window.chartProfil) { window.chartProfil.destroy(); window.chartProfil = null; }
+
+  /* 12. Réinitialiser la carte Leaflet */
+  if (window._resetCarte) window._resetCarte();
+
+  /* 13. Date du jour */
+  const dateInput = document.getElementById('dateRando');
+  if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+
+  /* 14. Indicateurs visuels */
+  window._majIndicateurs && window._majIndicateurs();
+
+  /* 15. Scroller en haut */
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  console.log('[Reset] Formulaire réinitialisé');
+}
+
 /* Bouton Reset */
 document.getElementById('btnReset')?.addEventListener('click', () => {
   const overlay = document.createElement('div');
@@ -429,8 +525,8 @@ document.getElementById('btnReset')?.addEventListener('click', () => {
   overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
   box.querySelector('#resetAnnuler').addEventListener('click', () => overlay.remove());
   box.querySelector('#resetConfirmer').addEventListener('click', () => {
-    localStorage.removeItem('randoFDR_form');
-    window.location.reload();
+    overlay.remove();
+    resetFormulaire();
   });
 });
 
