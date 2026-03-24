@@ -11,9 +11,13 @@ let marker
 let routeLine
 let pointDepart = CHATEAURENARD
 
-// 🔥 optimisation routage
+// 🔥 OPTIMISATION ROUTAGE
 let abortController = null
 const cacheRoutes = new Map()
+let debounceTimer = null
+
+const DEBOUNCE_DELAY = 250
+const MAX_CACHE_SIZE = 50
 
 /* ══════════════════════════════════════
    INITIALISATION CARTE
@@ -118,55 +122,85 @@ function majAdresse(lat, lon){
 }
 
 /* ══════════════════════════════════════
-   CALCUL ITINÉRAIRE OPTIMISÉ
+   CALCUL ITINÉRAIRE ULTRA OPTIMISÉ
 ══════════════════════════════════════ */
 function calculRoute(dest){
 
-  const key = `${pointDepart[0]},${pointDepart[1]}-${dest[0]},${dest[1]}`
+  clearTimeout(debounceTimer)
 
-  // ✅ cache
-  if(cacheRoutes.has(key)){
-    afficherRoute(cacheRoutes.get(key), dest)
-    return
-  }
+  debounceTimer = setTimeout(() => {
 
-  // ✅ annuler requête précédente
-  if(abortController){
-    abortController.abort()
-  }
-  abortController = new AbortController()
+    const key = approxKey(pointDepart, dest)
 
-  const url =
-    `https://router.project-osrm.org/route/v1/driving/` +
-    `${pointDepart[1]},${pointDepart[0]};` +
-    `${dest[1]},${dest[0]}` +
-    `?overview=full` +
-    `&geometries=geojson` +
-    `&alternatives=true` +
-    `&steps=false`
-
-  fetch(url, { signal: abortController.signal })
-  .then(r => r.json())
-  .then(data => {
-    if(!data.routes || !data.routes.length) return
-
-    // ✅ meilleur trajet (plus rapide)
-    const route = data.routes.reduce((best, current) =>
-      current.duration < best.duration ? current : best
-    )
-
-    cacheRoutes.set(key, route)
-
-    afficherRoute(route, dest)
-  })
-  .catch(err => {
-    if(err.name !== "AbortError"){
-      console.error("Erreur OSRM :", err)
+    if(window._lastRouteKey === key){
+      return
     }
-  })
+    window._lastRouteKey = key
+
+    // ✅ cache
+    if(cacheRoutes.has(key)){
+      afficherRoute(cacheRoutes.get(key), dest)
+      return
+    }
+
+    // ✅ annuler requête précédente
+    if(abortController){
+      abortController.abort()
+    }
+    abortController = new AbortController()
+
+    const url =
+      `https://router.project-osrm.org/route/v1/driving/` +
+      `${pointDepart[1]},${pointDepart[0]};` +
+      `${dest[1]},${dest[0]}` +
+      `?overview=full` +
+      `&geometries=geojson` +
+      `&alternatives=true` +
+      `&annotations=distance,duration`
+
+    fetch(url, { signal: abortController.signal })
+    .then(r => r.json())
+    .then(data => {
+      if(!data.routes || !data.routes.length) return
+
+      // 🔥 meilleur trajet intelligent
+      const route = data.routes.reduce((best, current) => {
+
+        const scoreCurrent = current.duration + (current.distance * 0.05)
+        const scoreBest = best.duration + (best.distance * 0.05)
+
+        return scoreCurrent < scoreBest ? current : best
+      })
+
+      // ✅ limite cache
+      if(cacheRoutes.size > MAX_CACHE_SIZE){
+        const firstKey = cacheRoutes.keys().next().value
+        cacheRoutes.delete(firstKey)
+      }
+
+      cacheRoutes.set(key, route)
+
+      afficherRoute(route, dest)
+    })
+    .catch(err => {
+      if(err.name !== "AbortError"){
+        console.error("Erreur OSRM :", err)
+      }
+    })
+
+  }, DEBOUNCE_DELAY)
 }
 
-/* affichage route (inchangé) */
+/* 🔧 clé approximative */
+function approxKey(start, end){
+  return `${round(start[0])},${round(start[1])}-${round(end[0])},${round(end[1])}`
+}
+
+function round(n){
+  return Math.round(n * 500) / 500
+}
+
+/* affichage route */
 function afficherRoute(route, dest){
 
   document.getElementById("latParking").textContent = dest[0].toFixed(5)
