@@ -22,7 +22,7 @@ const CHAMPS_OBLIGATOIRES = [
   { id: "parkingCovoiturage",  label: "Parking covoiturage",     section: "covoit"   },
   { id: "heureRV",             label: "Heure de rendez-vous",    section: "covoit"   },
   { id: "latParking",          label: "Parking départ rando",    section: "parking", isSpan: true },
-  { id: "distanceGPX",         label: "Distance GPX",            section: "gpx",     isSpan: true },
+  { id: "distanceGPX",         label: "Distance Km",             section: "gpx",     isSpan: true },
   { id: "denivele",            label: "Dénivelé",                section: "gpx",     isSpan: true },
   { id: "dureeMarche",         label: "Durée marche",            section: "gpx",     isSpan: true },
   { id: "technicite",          label: "Technicité (1-5)",        section: "gpx"      },
