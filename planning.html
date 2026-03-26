@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Planning Randonnées</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -87,6 +87,11 @@
     .badge       { display: inline-block; font-size: .75rem; background: #ebf8ff; color: #2b6cb0; border-radius: 20px; padding: 2px 8px; font-weight: 600; }
     .badge.green { background: #f0fff4; color: #276749; }
 
+    /* Colonne date : jour en gras + date normale */
+    .date-cell { white-space: nowrap; }
+    .date-cell .jour { font-weight: 700; text-transform: capitalize; color: #2d6a4f; margin-right: 4px; }
+    .date-cell .date { color: #4a5568; }
+
     /* Modal */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; }
     .modal-overlay.open { display: flex; }
@@ -108,7 +113,7 @@
 
 <div class="tabs">
   <button class="tab-btn active" onclick="switchTab('creation', this)">➕ Création</button>
-  <button class="tab-btn"        onclick="switchTab('gestion',  this)">⚙️ Gestion</button>
+  <button class="tab-btn" onclick="switchTab('gestion',  this)">⚙️ Gestion</button>
 </div>
 
 <!-- ══ ONGLET CRÉATION ══ -->
@@ -119,13 +124,13 @@
 
       <div class="form-group">
         <label for="date">Date *</label>
-        <input type="date" id="date" required />
+        <input type="date" id="date" required="">
       </div>
 
       <div class="form-group">
         <label for="animateur-input">Animateur *</label>
         <div class="autocomplete-wrap">
-          <input type="text" id="animateur-input" placeholder="Tapez un nom…" autocomplete="off" />
+          <input type="text" id="animateur-input" placeholder="Tapez un nom…" autocomplete="off">
           <div class="autocomplete-list" id="animateur-list"></div>
         </div>
       </div>
@@ -133,14 +138,14 @@
       <div class="form-group full">
         <label for="nom-input">Nom de la randonnée *</label>
         <div class="autocomplete-wrap">
-          <input type="text" id="nom-input" placeholder="Tapez quelques lettres…" autocomplete="off" />
+          <input type="text" id="nom-input" placeholder="Tapez quelques lettres…" autocomplete="off">
           <div class="autocomplete-list" id="nom-list"></div>
         </div>
       </div>
 
       <div class="form-group">
         <label for="ibp">Indice IBP</label>
-        <input type="number" id="ibp" placeholder="Ex : 45" min="0" />
+        <input type="number" id="ibp" placeholder="Ex : 45" min="0">
         <span class="ibp-badge" id="ibp-badge"></span>
       </div>
 
@@ -149,7 +154,7 @@
       <div class="form-group">
         <label for="distance">Distance</label>
         <div class="input-unit">
-          <input type="number" id="distance" placeholder="Ex : 18" min="0" step="0.1" />
+          <input type="number" id="distance" placeholder="Ex : 18" min="0" step="0.1">
           <span>km</span>
         </div>
       </div>
@@ -157,7 +162,7 @@
       <div class="form-group">
         <label for="denivele">Dénivelé +</label>
         <div class="input-unit">
-          <input type="number" id="denivele" placeholder="Ex : 850" min="0" step="1" />
+          <input type="number" id="denivele" placeholder="Ex : 850" min="0" step="1">
           <span>m</span>
         </div>
       </div>
@@ -173,14 +178,12 @@
 <div id="tab-gestion" class="tab-content">
   <div class="card">
     <h2>📋 Événements planifiés</h2>
-    <div style="margin-bottom:16px">
-      <button class="btn btn-load" id="btn-load" onclick="loadEvents()">🔄 Charger les événements</button>
-    </div>
+
     <div class="table-wrap">
       <table id="events-table">
         <thead>
           <tr>
-            <th class="sortable" data-col="date"      onclick="sortTable('date')">
+            <th class="sortable" data-col="date" onclick="sortTable('date')">
               Date <span class="sort-icon">⇅</span>
             </th>
             <th>Randonnée</th>
@@ -194,7 +197,7 @@
           </tr>
         </thead>
         <tbody id="events-body">
-          <tr><td colspan="7" class="empty-state">Cliquez sur "Charger les événements"</td></tr>
+          <tr><td colspan="7" class="empty-state">Chargement…</td></tr>
         </tbody>
       </table>
     </div>
@@ -205,36 +208,36 @@
 <div class="modal-overlay" id="modal-edit">
   <div class="modal">
     <h3>✏️ Modifier l'événement</h3>
-    <input type="hidden" id="edit-rowIndex" />
+    <input type="hidden" id="edit-rowIndex">
     <div class="form-grid">
       <div class="form-group">
         <label>Date *</label>
-        <input type="date" id="edit-date" />
+        <input type="date" id="edit-date">
       </div>
       <div class="form-group">
         <label>Animateur *</label>
-        <input type="text" id="edit-animateur" />
+        <input type="text" id="edit-animateur">
       </div>
       <div class="form-group full">
         <label>Nom de la randonnée *</label>
-        <input type="text" id="edit-nom" />
+        <input type="text" id="edit-nom">
       </div>
       <div class="form-group">
         <label>IBP</label>
-        <input type="number" id="edit-ibp" min="0" />
+        <input type="number" id="edit-ibp" min="0">
       </div>
       <div class="form-group"><!-- spacer --></div>
       <div class="form-group">
         <label>Distance</label>
         <div class="input-unit">
-          <input type="number" id="edit-distance" min="0" step="0.1" />
+          <input type="number" id="edit-distance" min="0" step="0.1">
           <span>km</span>
         </div>
       </div>
       <div class="form-group">
         <label>Dénivelé +</label>
         <div class="input-unit">
-          <input type="number" id="edit-denivele" min="0" step="1" />
+          <input type="number" id="edit-denivele" min="0" step="1">
           <span>m</span>
         </div>
       </div>
@@ -264,9 +267,10 @@ let sortDir    = 'asc';   // 'asc' | 'desc'
    Le .gs envoie la date en "dd/MM/yyyy" (ex: "14/06/2025").
    toDisplay() → garantit l'affichage JJ/MM/AAAA quel que soit le format reçu.
    toISO()     → convertit vers YYYY-MM-DD pour le tri et les <input type="date">.
+   jourSemaine() → retourne le nom du jour en français à partir de dd/MM/yyyy.
    ══════════════════════════════════════════ */
 function toDisplay(val) {
-  if (!val) return '—';
+  if (!val) return '';
   const s = String(val).trim();
   if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;               // déjà JJ/MM/AAAA ✓
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {                         // YYYY-MM-DD → JJ/MM/AAAA
@@ -285,6 +289,36 @@ function toISO(val) {
     return y + '-' + m + '-' + d;
   }
   return s;
+}
+
+/* Retourne le nom du jour de la semaine (ex: "lundi") depuis dd/MM/yyyy */
+function jourSemaine(val) {
+  if (!val) return '';
+  const s = String(val).trim();
+  let d;
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
+    const [jj, mm, yyyy] = s.split('/');
+    d = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(jj));
+  } else if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const [yyyy, mm, jj] = s.split('-');
+    d = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(jj));
+  } else {
+    return '';
+  }
+  return d.toLocaleDateString('fr-FR', { weekday: 'long' });
+}
+
+/* ══════════════════════════════════════════
+   COULEUR IBP — harmonisée avec Planning Responsive
+   ══════════════════════════════════════════ */
+function niveauIBP(v) {
+  const n = parseFloat(v);
+  if (isNaN(n) || v === '') return null;
+  if (n <= 25)  return { label: '🟢 N1 — Facile',          bg: '#d4edda', color: '#155724' };
+  if (n <= 50)  return { label: '🔵 N2 — Assez Facile',    bg: '#cce5ff', color: '#004085' };
+  if (n <= 75)  return { label: '🟡 N3 — Peu Difficile',   bg: '#fff3cd', color: '#856404' };
+  if (n <= 100) return { label: '🔴 N4 — Assez Difficile', bg: '#f8d7da', color: '#721c24' };
+  return              { label: '⚫ N5 — Difficile',         bg: '#343a40', color: '#ffffff' };
 }
 
 /* ══════════════════════════════════════════
@@ -344,7 +378,7 @@ function setupAutocomplete(inputId, listId, getItems) {
 }
 
 /* ══════════════════════════════════════════
-   IBP BADGE
+   IBP BADGE (onglet création)
    ══════════════════════════════════════════ */
 document.getElementById('ibp').addEventListener('input', function() {
   const badge = document.getElementById('ibp-badge');
@@ -356,16 +390,6 @@ document.getElementById('ibp').addEventListener('input', function() {
   badge.className        = 'ibp-badge visible';
 });
 
-function niveauIBP(v) {
-  const n = parseFloat(v);
-  if (isNaN(n) || v === '') return null;
-  if (n <= 25)  return { label: '🟢 N1 — Facile',          bg: '#d4edda', color: '#155724' };
-  if (n <= 50)  return { label: '🔵 N2 — Assez Facile',    bg: '#cce5ff', color: '#004085' };
-  if (n <= 75)  return { label: '🟡 N3 — Peu Difficile',   bg: '#fff3cd', color: '#856404' };
-  if (n <= 100) return { label: '🔴 N4 — Assez Difficile', bg: '#f8d7da', color: '#721c24' };
-  return              { label: '⚫ N5 — Difficile',         bg: '#343a40', color: '#ffffff' };
-}
-
 /* ══════════════════════════════════════════
    ONGLETS
    ══════════════════════════════════════════ */
@@ -374,6 +398,7 @@ function switchTab(tab, btn) {
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   btn.classList.add('active');
+  if (tab === 'gestion') loadEvents();
 }
 
 /* ══════════════════════════════════════════
@@ -422,7 +447,7 @@ async function creerRando() {
       document.getElementById('nom-input').value = '';
       document.getElementById('animateur-input').value = '';
       document.getElementById('ibp-badge').className = 'ibp-badge';
-      // Date suivante auto
+      // Date suivante auto : lundi ou jeudi suivant
       const last = new Date(date + 'T12:00:00');
       const dow  = last.getDay();
       const next = new Date(last);
@@ -465,11 +490,9 @@ function renderTable() {
   const sorted = [...allRows].sort((a, b) => {
     let va, vb;
     if (sortCol === 'date') {
-      // Convertir en ISO pour un tri lexicographique correct
       va = toISO(a.date);
       vb = toISO(b.date);
     } else {
-      // Tri alphabétique sur animateur
       va = (a.animateur || '').toLowerCase();
       vb = (b.animateur || '').toLowerCase();
     }
@@ -481,10 +504,16 @@ function renderTable() {
   sorted.forEach(ev => {
     const tr  = document.createElement('tr');
     const ej  = JSON.stringify(ev).replace(/'/g, "&#39;");
-    const dateAff = toDisplay(ev.date);   // → JJ/MM/AAAA garanti
+    const dateAff = toDisplay(ev.date);        // → JJ/MM/AAAA garanti
+    const jour    = jourSemaine(ev.date);      // → "lundi", "jeudi", etc.
+
+    // Cellule date : jour en vert + date
+    const dateHtml = jour
+      ? `<span class="date-cell"><span class="jour">${jour}</span><span class="date">${dateAff}</span></span>`
+      : `<span class="date-cell"><span class="date">${dateAff || '—'}</span></span>`;
 
     tr.innerHTML = `
-      <td>${dateAff}</td>
+      <td>${dateHtml}</td>
       <td><strong>${ev.nom || '—'}</strong></td>
       <td>${ev.animateur || '—'}</td>
       <td>${ev.ibp      ? '<span class="badge">'       + ev.ibp      + '</span>'     : '—'}</td>
@@ -528,7 +557,7 @@ function sortTable(col) {
 /* ══════════════════════════════════════════
    MODIFIER
    La modal utilise <input type="date"> → YYYY-MM-DD requis.
-   On convertit depuis dd/MM/yyyy (ce que le .gs renvoie maintenant).
+   On convertit depuis dd/MM/yyyy (ce que le .gs renvoie).
    On renvoie ISO au script lors de la sauvegarde.
    ══════════════════════════════════════════ */
 function openEdit(ev) {
@@ -601,5 +630,6 @@ document.getElementById('date').value = d0.toISOString().split('T')[0];
    ══════════════════════════════════════════ */
 loadData();
 </script>
+
 </body>
 </html>
