@@ -214,6 +214,40 @@ const BASE_URL   = "https://dbizcyber.github.io/randoFDR/data/";
 let animateurs = [];
 let randos     = [];
 
+/* ══ Utilitaires de date ══
+   - isoToDisplay : "2025-06-14" → "14/06/2025"  (affichage tableau)
+   - displayToIso : "14/06/2025" → "2025-06-14"  (pour <input type=date>)
+   - isoToSortKey : retourne la valeur ISO brute pour le tri croissant
+*/
+function isoToDisplay(iso) {
+  if (!iso) return '—';
+  // Accepte "YYYY-MM-DD" ou déjà "DD/MM/YYYY"
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(iso)) return iso;
+  const parts = iso.split('-');
+  if (parts.length !== 3) return iso;
+  return parts[2] + '/' + parts[1] + '/' + parts[0];
+}
+
+function displayToIso(display) {
+  if (!display) return '';
+  // Si déjà ISO
+  if (/^\d{4}-\d{2}-\d{2}$/.test(display)) return display;
+  const parts = display.split('/');
+  if (parts.length !== 3) return display;
+  return parts[2] + '-' + parts[1] + '-' + parts[0];
+}
+
+function dateToSortKey(val) {
+  // Normalise n'importe quel format vers YYYY-MM-DD pour le tri
+  if (!val) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
+    const p = val.split('/');
+    return p[2] + '-' + p[1] + '-' + p[0];
+  }
+  return val;
+}
+
 /* ══ Chargement des données JSON ══ */
 async function loadData() {
   try {
@@ -359,14 +393,24 @@ async function loadEvents() {
     const tbody = document.getElementById('events-body');
     tbody.innerHTML = '';
     const rows = res.rows || res.events || [];
+
     if (!rows.length) {
       tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Aucun événement trouvé.</td></tr>';
     } else {
+      // ── Tri croissant par date (au cas où Apps Script ne le fait pas) ──
+      rows.sort((a, b) => {
+        const ka = dateToSortKey(a.date);
+        const kb = dateToSortKey(b.date);
+        return ka < kb ? -1 : ka > kb ? 1 : 0;
+      });
+
       rows.forEach(ev => {
         const tr = document.createElement('tr');
         const ej = JSON.stringify(ev).replace(/'/g, "&#39;");
+        // Affichage de la date en JJ/MM/AAAA
+        const dateAffichee = isoToDisplay(ev.date);
         tr.innerHTML = `
-          <td>${ev.date || '—'}</td>
+          <td>${dateAffichee}</td>
           <td><strong>${ev.nom || '—'}</strong></td>
           <td>${ev.animateur || '—'}</td>
           <td>${ev.ibp ? '<span class="badge">'+ev.ibp+'</span>' : '—'}</td>
@@ -383,10 +427,14 @@ async function loadEvents() {
   setBusy('btn-load', false);
 }
 
-/* ══ MODIFIER ══ */
+/* ══ MODIFIER ══
+   La modal utilise <input type="date"> qui attend du format ISO YYYY-MM-DD.
+   On convertit la date reçue (quelle que soit sa forme) vers ISO pour le champ,
+   puis on renvoie l'ISO au script.
+*/
 function openEdit(ev) {
   document.getElementById('edit-rowIndex').value  = ev.rowIndex;
-  document.getElementById('edit-date').value      = ev.date      || '';
+  document.getElementById('edit-date').value      = displayToIso(ev.date) || '';
   document.getElementById('edit-nom').value       = ev.nom       || '';
   document.getElementById('edit-animateur').value = ev.animateur || '';
   document.getElementById('edit-ibp').value       = ev.ibp       || '';
@@ -397,7 +445,7 @@ function openEdit(ev) {
 
 async function saveEdit() {
   const rowIndex  = document.getElementById('edit-rowIndex').value;
-  const date      = document.getElementById('edit-date').value;
+  const date      = document.getElementById('edit-date').value;   // ISO YYYY-MM-DD
   const nom       = document.getElementById('edit-nom').value.trim();
   const animateur = document.getElementById('edit-animateur').value.trim();
   const ibp       = document.getElementById('edit-ibp').value.trim();
