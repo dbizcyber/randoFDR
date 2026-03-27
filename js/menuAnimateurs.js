@@ -1,29 +1,55 @@
-import { animateurs } from "../data/animateurs.js";
+/* menuAnimateurs.js — charge depuis Supabase (données non exposées dans le code) */
 
-export function remplirMenuAnimateurs() {
+const SUPABASE_URL = "https://whlxbfnmyqdflmxosfse.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE";
 
-const select     = document.getElementById("animateur");
-const emailUser  = document.getElementById("emailUser");
+export async function remplirMenuAnimateurs() {
+  const select = document.getElementById("animateur");
+  if (!select) return;
 
-/* option placeholder */
-const placeholder = document.createElement("option");
-placeholder.value = "";
-placeholder.textContent = "— Choisir votre nom —";
-select.appendChild(placeholder);
+  /* Option par défaut pendant le chargement */
+  select.innerHTML = '<option value="">⏳ Chargement…</option>';
 
-animateurs.filter(a => a.nom !== "").forEach(a => {
-  const option = document.createElement("option");
-  option.value       = a.nom;
-  option.dataset.email = a.email || "";
-  option.textContent = a.nom;
-  select.appendChild(option);
-});
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/animateurs?select=nom,email,telephone&order=nom`,
+      {
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        }
+      }
+    );
 
-/* remplir email automatiquement au choix de l'animateur */
-select.addEventListener("change", () => {
-  const selected = select.options[select.selectedIndex];
-  const email    = selected?.dataset.email || "";
-  if (emailUser) emailUser.value = email;
-});
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const animateurs = await res.json();
 
+    select.innerHTML = '<option value="">— Choisir un animateur —</option>';
+
+    animateurs.forEach(a => {
+      const opt = document.createElement("option");
+      /* Afficher nom + téléphone dans le select */
+      opt.value         = a.nom;
+      opt.dataset.email = a.email || "";
+      opt.dataset.tel   = a.telephone || "";
+      opt.textContent   = a.telephone
+        ? `${a.nom} ${a.telephone}`
+        : a.nom;
+      select.appendChild(opt);
+    });
+
+    /* Email auto-rempli à la sélection */
+    select.addEventListener("change", () => {
+      const opt = select.selectedOptions[0];
+      const emailField = document.getElementById("emailUser");
+      if (emailField) emailField.value = opt?.dataset.email || "";
+    });
+
+    console.log(`[Animateurs] ${animateurs.length} animateurs chargés depuis Supabase`);
+
+  } catch(e) {
+    console.warn("[Animateurs] Erreur chargement Supabase:", e);
+    /* Fallback : option d'erreur */
+    select.innerHTML = '<option value="">⚠️ Erreur chargement — réessayez</option>';
+  }
 }
