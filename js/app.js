@@ -13,7 +13,7 @@ import { initEnvoi } from "./envoiRando.js";
 import { initSauvegarde, initIndicateurs, majIndicateurs, validerFormulaire, effacerSauvegarde } from "./formManager.js";
 import { initGPXManuel } from "./gpxManuel.js";
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   console.log("Application MeteoRando initialisée");
 
   const dateInput = document.getElementById("dateRando");
@@ -26,8 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
   activerRecherche();
   initHoraires();
 
-  /* animateurs */
-  remplirMenuAnimateurs();
+  /* animateurs — chargement async depuis Supabase */
+  await remplirMenuAnimateurs();
 
   /* parkings covoiturage */
   remplirMenuParkings();
