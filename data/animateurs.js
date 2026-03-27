@@ -1,26 +1,55 @@
-export const animateurs = [
-  { nom: "", email: "" },
-  { nom: "ALEZINA Pierre Camille 06 03 18 76 16",  email: "pierre.alezina@free.fr" },
-  { nom: "BIZARD Dominique 06 88 00 15 85",         email: "fibre13160@gmail.com" },
-  { nom: "BRIOUDE André 06 84 53 70 30",            email: "andre.brioude@orange.fr" },
-  { nom: "BRUN Nadine 06 82 48 72 61",              email: "nadine.brun1@gmail.com" },
-  { nom: "CIBRARIO Christian 07 81 69 66 16",       email: "christian.cibrario-ruscat@orange.fr" },
-  { nom: "DUPRE Roland 06 52 88 26 57",             email: "duduroro@free.fr" },
-  { nom: "DUVERNE Marie-Ange 06 29 12 33 65",       email: "dinange33@gmail.com" },
-  { nom: "ELISSALDE Sylvie 06 77 91 03 61",         email: "elissalde.sylvie@orange.fr" },
-  { nom: "FABRE Henri 06 09 89 02 67",              email: "henri.fabre459@yahoo.fr" },
-  { nom: "GRANDPERRIN Brigitte 06 24 75 90 59",     email: "b.grandperrin@hotmail.fr" },
-  { nom: "GRANGE Bernard 06 21 56 59 70",           email: "babou456@wanadoo.fr" },
-  { nom: "HERVE Jean-Luc 07 68 60 38 59",           email: "j.herve368@laposte.net" },
-  { nom: "JOUVE Bernadette 06 74 49 96 90",         email: "profitroll@wanadoo.fr" },
-  { nom: "MARTIN Pierre 06 08 23 62 85",            email: "pierrecanibe@aol.com" },
-  { nom: "NOUGUIER Annick 06 87 39 93 86",          email: "ladusto@gmail.com" },
-  { nom: "PALLIER Michel 06 87 92 53 80",           email: "michelpallier@sfr.fr" },
-  { nom: "POMMER Marianne 06 62 17 63 49",          email: "marianne.pommer@free.fr" },
-  { nom: "RAOULX Yves 07 66 59 74 00",              email: "yves.raoulx@free.fr" },
-  { nom: "RAYNAL Didier 06 80 94 09 42",            email: "didier.raynal13@gmail.com" },
-  { nom: "REYNIER Jean-Louis 06 13 09 29 14",       email: "reyniertaussig@orange.fr" },
-  { nom: "TAUSSIG Catherine 06 20 42 54 33",        email: "reyniertaussig@orange.fr" },
-  { nom: "VALDARCHI Jean-Claude 06 25 70 49 05",    email: "jvaldarchi@yahoo.fr" },
-  { nom: "TEST 06 01 02 03 04",                     email: "" },
-];
+/* menuAnimateurs.js — charge depuis Supabase (données non exposées dans le code) */
+
+const SUPABASE_URL = "https://whlxbfnmyqdflmxosfse.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE";
+
+export async function remplirMenuAnimateurs() {
+  const select = document.getElementById("animateur");
+  if (!select) return;
+
+  /* Option par défaut pendant le chargement */
+  select.innerHTML = '<option value="">⏳ Chargement…</option>';
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/animateurs?select=nom,email,telephone&order=nom`,
+      {
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        }
+      }
+    );
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const animateurs = await res.json();
+
+    select.innerHTML = '<option value="">— Choisir un animateur —</option>';
+
+    animateurs.forEach(a => {
+      const opt = document.createElement("option");
+      /* Afficher nom + téléphone dans le select */
+      opt.value         = a.nom;
+      opt.dataset.email = a.email || "";
+      opt.dataset.tel   = a.telephone || "";
+      opt.textContent   = a.telephone
+        ? `${a.nom} ${a.telephone}`
+        : a.nom;
+      select.appendChild(opt);
+    });
+
+    /* Email auto-rempli à la sélection */
+    select.addEventListener("change", () => {
+      const opt = select.selectedOptions[0];
+      const emailField = document.getElementById("emailUser");
+      if (emailField) emailField.value = opt?.dataset.email || "";
+    });
+
+    console.log(`[Animateurs] ${animateurs.length} animateurs chargés depuis Supabase`);
+
+  } catch(e) {
+    console.warn("[Animateurs] Erreur chargement Supabase:", e);
+    /* Fallback : option d'erreur */
+    select.innerHTML = '<option value="">⚠️ Erreur chargement — réessayez</option>';
+  }
+}
