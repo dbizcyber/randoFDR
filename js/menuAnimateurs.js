@@ -28,13 +28,13 @@ export async function remplirMenuAnimateurs() {
 
     animateurs.forEach(a => {
       const opt = document.createElement("option");
-      /* Afficher nom + téléphone dans le select */
-      opt.value         = a.nom;
-      opt.dataset.email = a.email || "";
-      opt.dataset.tel   = a.telephone || "";
-      opt.textContent   = a.telephone
+      /* Select affiche : nom prénom uniquement */
+      opt.value         = a.telephone
         ? `${a.nom} ${a.telephone}`
         : a.nom;
+      opt.dataset.email = a.email || "";
+      opt.dataset.tel   = a.telephone || "";
+      opt.textContent   = a.nom;  /* affiché dans le select */
       select.appendChild(opt);
     });
 
