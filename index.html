@@ -554,6 +554,48 @@ document.getElementById('btnReset')?.addEventListener('click', () => {
   });
 })();
 
+/* Pré-remplissage depuis l'historique (sessionStorage) */
+(function() {
+  const raw = sessionStorage.getItem("fiche_a_reutiliser");
+  if (!raw) return;
+  sessionStorage.removeItem("fiche_a_reutiliser");
+  try {
+    const f = JSON.parse(raw);
+    window.addEventListener("load", () => setTimeout(() => {
+      const set    = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+      const setTxt = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.textContent = val; };
+      set("nomRando",           f.nomRando);
+      set("technicite",         f.technicite);
+      set("risque",             f.risque);
+      set("remarques",          f.remarques);
+      set("heureRV",            f.heureRV);
+      /* Animateur : déclencher change pour email auto */
+      const selAnim = document.getElementById("animateur");
+      if (selAnim && f.animateur) {
+        selAnim.value = f.animateur;
+        selAnim.dispatchEvent(new Event("change"));
+      }
+      /* Parking covoiturage */
+      const selPark = document.getElementById("parkingCovoiturage");
+      if (selPark && f.parkingCovoit) {
+        selPark.value = f.parkingCovoit;
+        selPark.dispatchEvent(new Event("change"));
+      }
+      /* Champs manuels GPX */
+      set("distanceGPX_manuel", f.distance);
+      set("denivele_manuel",    f.denivele);
+      set("dureeMarche_manuel", f.duree);
+      set("effort_manuel",      f.effort);
+      /* Sync spans */
+      setTxt("distanceGPX", f.distance);
+      setTxt("denivele",    f.denivele);
+      setTxt("dureeMarche", f.duree);
+      setTxt("effort",      f.effort);
+      window._majIndicateurs && window._majIndicateurs();
+    }, 800));
+  } catch(e) { console.warn("Erreur lecture fiche sessionStorage:", e); }
+})();
+
 /* Active nav au scroll */
 const sections = document.querySelectorAll('.card[id]');
 const navLinks  = document.querySelectorAll('.app-nav a');
