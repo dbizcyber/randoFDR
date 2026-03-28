@@ -107,8 +107,8 @@
   /* ── CARTES FICHES ── */
   .fiches-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
   }
 
   .fiche-card {
@@ -259,7 +259,6 @@
 
 <div class="topbar">
   <h1>🥾 Historique des fiches — La Marmotte</h1>
-  <a href="index.html" class="btn-retour">← Retour app</a>
 </div>
 
 <div class="container">
@@ -434,34 +433,22 @@ function afficherFiches() {
     return `
     <div class="fiche-card" onclick="voirFiche(${f.id})" style="cursor:pointer">
       <div class="fiche-header">
-        <div>
+        <div style="flex:1;min-width:0">
           <div class="fiche-date">🗓 ${dateRando}</div>
           <div class="fiche-nom">${f.nom_rando || "—"}</div>
           <div class="fiche-animateur">👤 ${f.animateur || "—"}${f.heure_rv ? " · RV " + f.heure_rv : ""}</div>
         </div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.6);white-space:nowrap;text-align:right">
-          Envoyé le<br>${dateEnvoi}
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);white-space:nowrap;text-align:right;flex-shrink:0">
+          Envoyé<br>${dateEnvoi}
         </div>
       </div>
-      <div class="fiche-body">
-        ${profilHTML}
-        <div class="fiche-stats">
-          <div class="stat-item">
-            <div class="s-val">${f.distance ? f.distance + " km" : "—"}</div>
-            <div class="s-lab">Distance</div>
-          </div>
-          <div class="stat-item">
-            <div class="s-val">${f.denivele ? f.denivele + " m" : "—"}</div>
-            <div class="s-lab">Dénivelé +</div>
-          </div>
-          <div class="stat-item">
-            <div class="s-val">${f.duree || "—"}</div>
-            <div class="s-lab">Durée</div>
-          </div>
-        </div>
-        ${tags ? `<div class="fiche-tags">${tags}</div>` : ""}
-        ${f.parking_depart ? `<div class="fiche-parking">🅿️ ${f.parking_depart}</div>` : ""}
-        ${f.couts ? `<div style="font-size:12px;color:var(--stone)">💶 ${f.couts}</div>` : ""}
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;font-size:12px;color:var(--stone);border-bottom:1px solid #e8d8c4;flex-wrap:wrap">
+        ${f.distance  ? `<span>📏 ${f.distance} km</span>` : ""}
+        ${f.denivele  ? `<span>⛰ ${f.denivele} m</span>` : ""}
+        ${f.duree     ? `<span>⏱ ${f.duree}</span>` : ""}
+        ${f.ibp       ? `<span class="tag ibp" style="margin:0">IBP ${f.ibp}</span>` : ""}
+        ${f.technicite ? `<span class="tag tech" style="margin:0">T${f.technicite}</span>` : ""}
+        ${f.risque    ? `<span class="tag risque" style="margin:0">R${f.risque}</span>` : ""}
       </div>
       <div class="fiche-actions" onclick="event.stopPropagation()">
         <button class="btn-action btn-dupliquer" onclick="dupliquerFiche(${f.id})">📋 Réutiliser</button>
