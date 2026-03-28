@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Historique des fiches — La Marmotte</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ember:  #7c2d00;
+    --flame:  #c1440e;
+    --orange: #e8621a;
+    --amber:  #f49d37;
+    --cream:  #fff8ee;
+    --sand:   #f5ead8;
+    --stone:  #8a7560;
+    --ink:    #2c1a0e;
+    --radius: 12px;
+  }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--sand);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .topbar {
+    background: linear-gradient(135deg, var(--ember), var(--flame), var(--orange));
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 3px 12px rgba(124,45,0,0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar h1 { font-size: 16px; font-weight: 700; color: white; }
+  .btn-retour {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 14px;
+    background: rgba(255,255,255,0.18);
+    border: 1.5px solid rgba(255,255,255,0.45);
+    border-radius: 8px;
+    color: white; font-family: 'Outfit', sans-serif;
+    font-size: 13px; font-weight: 600;
+    text-decoration: none; cursor: pointer;
+    transition: background .2s;
+  }
+  .btn-retour:hover { background: rgba(255,255,255,0.30); }
+
+  /* ── CONTENU ── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+
+  /* ── BARRE OUTILS ── */
+  .toolbar {
+    display: flex; align-items: center; gap: 12px;
+    flex-wrap: wrap; margin-bottom: 20px;
+  }
+  .toolbar-title {
+    font-size: 20px; font-weight: 700; color: var(--ember);
+    flex: 1;
+  }
+  .search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: white; border: 1.5px solid #e8d8c4;
+    border-radius: 8px; padding: 8px 14px;
+    flex: 1; max-width: 280px;
+  }
+  .search-box input {
+    border: none; outline: none; font-family: 'Outfit', sans-serif;
+    font-size: 14px; color: var(--ink); background: transparent; width: 100%;
+  }
+  .stat-badge {
+    background: var(--cream); border: 1.5px solid #e8d8c4;
+    border-radius: 8px; padding: 8px 14px;
+    font-size: 13px; font-weight: 600; color: var(--stone);
+  }
+  .stat-badge span { color: var(--flame); font-weight: 700; }
+
+  /* ── EN-TÊTES TRI ── */
+  .sort-bar {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .sort-btn {
+    padding: 7px 14px;
+    background: white; border: 1.5px solid #e8d8c4;
+    border-radius: 8px; font-family: 'Outfit', sans-serif;
+    font-size: 13px; font-weight: 600; color: var(--stone);
+    cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .sort-btn.active {
+    background: var(--flame); border-color: var(--flame);
+    color: white;
+  }
+  .sort-btn:hover:not(.active) {
+    border-color: var(--amber); color: var(--ember);
+  }
+
+  /* ── CARTES FICHES ── */
+  .fiches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+  }
+
+  .fiche-card {
+    background: white;
+    border-radius: var(--radius);
+    border: 1.5px solid #e8d8c4;
+    overflow: hidden;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .fiche-card:hover {
+    box-shadow: 0 8px 24px rgba(124,45,0,0.12);
+    transform: translateY(-2px);
+  }
+
+  .fiche-header {
+    background: linear-gradient(135deg, var(--ember), var(--flame));
+    padding: 14px 16px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+  }
+  .fiche-date { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 600; }
+  .fiche-nom  { font-size: 15px; font-weight: 700; color: white; margin-top: 2px; line-height: 1.3; }
+  .fiche-animateur {
+    font-size: 11px; color: rgba(255,255,255,0.75);
+    margin-top: 4px;
+  }
+
+  .fiche-body { padding: 14px 16px; }
+
+  .fiche-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; margin-bottom: 12px;
+  }
+  .stat-item { text-align: center; }
+  .stat-item .s-val {
+    font-size: 16px; font-weight: 700; color: var(--flame);
+  }
+  .stat-item .s-lab {
+    font-size: 10px; color: var(--stone); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  .fiche-tags {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+  }
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px;
+    background: var(--cream); border: 1px solid #e8d8c4;
+    border-radius: 20px; font-size: 11px; font-weight: 600; color: var(--stone);
+  }
+  .tag.ibp   { background: #fff3cd; border-color: #f49d37; color: #856404; }
+  .tag.tech  { background: #e8f4fd; border-color: #90cdf4; color: #2b6cb0; }
+  .tag.risque { background: #fde8e8; border-color: #f5a0a0; color: #a01010; }
+
+  .fiche-parking {
+    font-size: 12px; color: var(--stone); margin-bottom: 12px;
+    display: flex; align-items: flex-start; gap: 5px;
+  }
+
+  /* ── ACTIONS ── */
+  .fiche-actions {
+    display: flex; gap: 8px;
+    padding: 12px 16px;
+    background: var(--cream);
+    border-top: 1px solid #e8d8c4;
+  }
+  .btn-action {
+    flex: 1; padding: 9px 8px;
+    border: none; border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .btn-dupliquer {
+    background: linear-gradient(135deg, var(--flame), var(--amber));
+    color: white;
+  }
+  .btn-dupliquer:hover { opacity: .88; }
+  .btn-supprimer {
+    background: #fde8e8; color: #c53030;
+    border: 1.5px solid #f5a0a0;
+  }
+  .btn-supprimer:hover { background: #f5a0a0; color: white; }
+
+  /* ── PROFIL MINIATURE ── */
+  .fiche-profil {
+    width: 100%; height: 60px; object-fit: cover;
+    border-radius: 6px; margin-bottom: 10px;
+    background: var(--sand);
+  }
+
+  /* ── ÉTAT VIDE / CHARGEMENT ── */
+  .empty-state {
+    text-align: center; padding: 60px 20px;
+    color: var(--stone); font-size: 15px;
+    grid-column: 1 / -1;
+  }
+  .empty-state .big { font-size: 48px; margin-bottom: 12px; }
+
+  /* ── MODAL CONFIRMATION ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(44,26,14,0.55);
+    z-index: 9999; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: white; border-radius: 16px; padding: 28px 24px;
+    max-width: 380px; width: 100%;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    text-align: center; font-family: 'Outfit', sans-serif;
+  }
+  .modal-icon  { font-size: 40px; margin-bottom: 12px; }
+  .modal-titre { font-size: 17px; font-weight: 700; color: var(--flame); margin-bottom: 8px; }
+  .modal-msg   { font-size: 14px; color: var(--ink); margin-bottom: 22px; line-height: 1.5; }
+  .modal-btns  { display: flex; gap: 10px; }
+  .modal-btn   {
+    flex: 1; padding: 11px; border-radius: 8px;
+    font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none;
+  }
+  .modal-btn.annuler  { background: var(--sand); color: var(--ink); border: 1.5px solid #e8d8c4; }
+  .modal-btn.confirmer { background: linear-gradient(135deg, #c53030, #e53e3e); color: white; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--ember); color: white;
+    padding: 12px 24px; border-radius: 30px;
+    font-weight: 600; font-size: 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s; z-index: 9998;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; }
+  #toast.ok   { background: #276749; }
+  #toast.err  { background: #c53030; }
+
+  @media (max-width: 600px) {
+    .fiches-grid { grid-template-columns: 1fr; }
+    .toolbar-title { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>🥾 Historique des fiches — La Marmotte</h1>
+  <a href="index.html" class="btn-retour">← Retour app</a>
+</div>
+
+<div class="container">
+
+  <div class="toolbar">
+    <div class="toolbar-title">📋 Fiches archivées</div>
+    <div class="search-box">
+      <span>🔍</span>
+      <input type="text" id="searchInput" placeholder="Rechercher une rando, animateur…">
+    </div>
+    <div class="stat-badge">Total : <span id="statTotal">—</span></div>
+  </div>
+
+  <div class="sort-bar">
+    <span style="font-size:13px;font-weight:600;color:var(--stone);align-self:center">Trier par :</span>
+    <button class="sort-btn active" data-col="created_at" data-dir="desc" onclick="setSort('created_at')">📅 Date envoi ↓</button>
+    <button class="sort-btn" data-col="date_rando"  data-dir="asc"  onclick="setSort('date_rando')">🗓 Date rando</button>
+    <button class="sort-btn" data-col="nom_rando"   data-dir="asc"  onclick="setSort('nom_rando')">🏔 Nom</button>
+    <button class="sort-btn" data-col="animateur"   data-dir="asc"  onclick="setSort('animateur')">👤 Animateur</button>
+  </div>
+
+  <div class="fiches-grid" id="fichesGrid">
+    <div class="empty-state"><div class="big">⏳</div>Chargement des fiches…</div>
+  </div>
+
+</div>
+
+<!-- Modal confirmation suppression -->
+<div class="modal-overlay" id="modalSupp">
+  <div class="modal-box">
+    <div class="modal-icon">🗑️</div>
+    <div class="modal-titre">Supprimer cette fiche ?</div>
+    <div class="modal-msg" id="modalSuppMsg">Cette action est irréversible.</div>
+    <div class="modal-btns">
+      <button class="modal-btn annuler"   onclick="fermerModal()">Annuler</button>
+      <button class="modal-btn confirmer" onclick="confirmerSupp()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ══ PROTECTION ACCÈS ══ */
+(function() {
+  const MOT_DE_PASSE = "marmotte2026";
+  const CLE_SESSION  = "historique_auth";
+
+  if (sessionStorage.getItem(CLE_SESSION) === "ok") return;
+
+  document.body.style.display = "none";
+
+  const overlay = document.createElement("div");
+  overlay.style.cssText = "position:fixed;inset:0;background:linear-gradient(135deg,#7c2d00,#c1440e);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;";
+
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:16px;padding:36px 28px;max-width:360px;width:100%;text-align:center;font-family:'Outfit',sans-serif;box-shadow:0 8px 40px rgba(0,0,0,0.3)">
+      <div style="font-size:48px;margin-bottom:12px">🔐</div>
+      <div style="font-size:20px;font-weight:700;color:#c1440e;margin-bottom:6px">Accès restreint</div>
+      <div style="font-size:14px;color:#8a7560;margin-bottom:24px">Historique des fiches — La Marmotte</div>
+      <input id="mdp-input" type="password" placeholder="Mot de passe…"
+        style="width:100%;padding:12px 16px;border:1.5px solid #e8d8c4;border-radius:8px;font-family:'Outfit',sans-serif;font-size:15px;margin-bottom:12px;outline:none">
+      <div id="mdp-err" style="font-size:13px;color:#c53030;margin-bottom:10px;display:none">Mot de passe incorrect</div>
+      <button id="mdp-btn" style="width:100%;padding:12px;background:linear-gradient(135deg,#c1440e,#f49d37);color:white;border:none;border-radius:8px;font-size:15px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer">
+        Accéder →
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  function tenter() {
+    const val = document.getElementById("mdp-input").value;
+    if (val === MOT_DE_PASSE) {
+      sessionStorage.setItem(CLE_SESSION, "ok");
+      overlay.remove();
+      document.body.style.display = "";
+    } else {
+      document.getElementById("mdp-err").style.display = "block";
+      document.getElementById("mdp-input").value = "";
+      document.getElementById("mdp-input").focus();
+    }
+  }
+
+  document.getElementById("mdp-btn").addEventListener("click", tenter);
+  document.getElementById("mdp-input").addEventListener("keydown", e => {
+    if (e.key === "Enter") tenter();
+  });
+  setTimeout(() => document.getElementById("mdp-input")?.focus(), 100);
+})();
+</script>
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE";
+
+let fiches      = [];
+let fichesFilt  = [];
+let sortCol     = "created_at";
+let sortDir     = "desc";
+let idASupp     = null;
+
+/* ══ CHARGEMENT ══ */
+async function chargerFiches() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/fiches?select=id,created_at,date_rando,nom_rando,animateur,parking_covoit,heure_rv,parking_depart,gps,distance,denivele,duree,ibp,effort,technicite,risque,couts,remarques,profil_png&order=${sortCol}.${sortDir}`,
+      { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` } }
+    );
+    fiches = await res.json();
+    filtrerEtAfficher();
+  } catch(e) {
+    document.getElementById("fichesGrid").innerHTML =
+      '<div class="empty-state"><div class="big">⚠️</div>Erreur de chargement.</div>';
+  }
+}
+
+/* ══ FILTRE + AFFICHAGE ══ */
+function filtrerEtAfficher() {
+  const q = document.getElementById("searchInput").value.toLowerCase().trim();
+  fichesFilt = q
+    ? fiches.filter(f =>
+        (f.nom_rando   || "").toLowerCase().includes(q) ||
+        (f.animateur   || "").toLowerCase().includes(q) ||
+        (f.date_rando  || "").includes(q)
+      )
+    : [...fiches];
+
+  document.getElementById("statTotal").textContent = fichesFilt.length;
+  afficherFiches();
+}
+
+/* ══ RENDU CARTES ══ */
+function afficherFiches() {
+  const grid = document.getElementById("fichesGrid");
+
+  if (!fichesFilt.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="big">🏔</div>Aucune fiche trouvée.</div>';
+    return;
+  }
+
+  grid.innerHTML = fichesFilt.map(f => {
+    const dateRando = f.date_rando
+      ? new Date(f.date_rando + "T12:00:00").toLocaleDateString("fr-FR", { weekday:"long", day:"2-digit", month:"long", year:"numeric" })
+      : "—";
+    const dateEnvoi = f.created_at
+      ? new Date(f.created_at).toLocaleDateString("fr-FR") + " " + new Date(f.created_at).toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" })
+      : "";
+
+    const profilHTML = f.profil_png
+      ? `<img class="fiche-profil" src="${f.profil_png}" alt="Profil altimétrique">`
+      : "";
+
+    const tags = [
+      f.ibp       ? `<span class="tag ibp">IBP ${f.ibp}</span>` : "",
+      f.technicite ? `<span class="tag tech">Tech. ${f.technicite}/5</span>` : "",
+      f.risque     ? `<span class="tag risque">Risque ${f.risque}/5</span>` : "",
+      f.effort     ? `<span class="tag">Effort ${f.effort}/5</span>` : "",
+    ].filter(Boolean).join("");
+
+    return `
+    <div class="fiche-card">
+      <div class="fiche-header">
+        <div>
+          <div class="fiche-date">🗓 ${dateRando}</div>
+          <div class="fiche-nom">${f.nom_rando || "—"}</div>
+          <div class="fiche-animateur">👤 ${f.animateur || "—"}${f.heure_rv ? " · RV " + f.heure_rv : ""}</div>
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);white-space:nowrap;text-align:right">
+          Envoyé le<br>${dateEnvoi}
+        </div>
+      </div>
+      <div class="fiche-body">
+        ${profilHTML}
+        <div class="fiche-stats">
+          <div class="stat-item">
+            <div class="s-val">${f.distance ? f.distance + " km" : "—"}</div>
+            <div class="s-lab">Distance</div>
+          </div>
+          <div class="stat-item">
+            <div class="s-val">${f.denivele ? f.denivele + " m" : "—"}</div>
+            <div class="s-lab">Dénivelé +</div>
+          </div>
+          <div class="stat-item">
+            <div class="s-val">${f.duree || "—"}</div>
+            <div class="s-lab">Durée</div>
+          </div>
+        </div>
+        ${tags ? `<div class="fiche-tags">${tags}</div>` : ""}
+        ${f.parking_depart ? `<div class="fiche-parking">🅿️ ${f.parking_depart}</div>` : ""}
+        ${f.couts ? `<div style="font-size:12px;color:var(--stone)">💶 ${f.couts}</div>` : ""}
+      </div>
+      <div class="fiche-actions">
+        <button class="btn-action btn-dupliquer" onclick="dupliquerFiche(${f.id})">📋 Réutiliser</button>
+        <button class="btn-action btn-supprimer" onclick="demanderSupp(${f.id}, '${(f.nom_rando||"").replace(/'/g,"\\'")}')">🗑 Supprimer</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+/* ══ TRI ══ */
+function setSort(col) {
+  if (sortCol === col) {
+    sortDir = sortDir === "asc" ? "desc" : "asc";
+  } else {
+    sortCol = col;
+    sortDir = col === "created_at" ? "desc" : "asc";
+  }
+
+  document.querySelectorAll(".sort-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.col === sortCol);
+    if (btn.dataset.col === sortCol) {
+      btn.textContent = btn.textContent.replace(/ [↑↓]$/, "") + " " + (sortDir === "asc" ? "↑" : "↓");
+    }
+  });
+
+  chargerFiches();
+}
+
+/* ══ DUPLIQUER / RÉUTILISER ══ */
+function dupliquerFiche(id) {
+  const f = fiches.find(x => x.id === id);
+  if (!f) return;
+
+  /* Encoder la fiche en base64 dans l'URL pour pré-remplir le formulaire */
+  const payload = {
+    nomRando:        f.nom_rando,
+    animateur:       f.animateur,
+    parkingCovoit:   f.parking_covoit,
+    heureRV:         f.heure_rv,
+    distance:        f.distance,
+    denivele:        f.denivele,
+    duree:           f.duree,
+    effort:          f.effort,
+    technicite:      f.technicite,
+    risque:          f.risque,
+    remarques:       f.remarques,
+  };
+
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  window.location.href = "index.html?fiche=" + encoded;
+}
+
+/* ══ SUPPRESSION ══ */
+function demanderSupp(id, nom) {
+  idASupp = id;
+  document.getElementById("modalSuppMsg").textContent =
+    `Supprimer la fiche "${nom}" ? Cette action est irréversible.`;
+  document.getElementById("modalSupp").classList.add("open");
+}
+
+function fermerModal() {
+  document.getElementById("modalSupp").classList.remove("open");
+  idASupp = null;
+}
+
+async function confirmerSupp() {
+  if (!idASupp) return;
+  fermerModal();
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/fiches?id=eq.${idASupp}`, {
+      method: "DELETE",
+      headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+    });
+    if (res.ok) {
+      showToast("🗑️ Fiche supprimée", "ok");
+      fiches = fiches.filter(f => f.id !== idASupp);
+      filtrerEtAfficher();
+    } else {
+      showToast("Erreur lors de la suppression", "err");
+    }
+  } catch(e) {
+    showToast("Erreur réseau", "err");
+  }
+}
+
+/* ══ TOAST ══ */
+function showToast(msg, type = "") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "show " + type;
+  setTimeout(() => t.className = "", 3000);
+}
+
+/* ══ RECHERCHE ══ */
+document.getElementById("searchInput").addEventListener("input", filtrerEtAfficher);
+
+/* ══ FERMER MODAL EN DEHORS ══ */
+document.getElementById("modalSupp").addEventListener("click", function(e) {
+  if (e.target === this) fermerModal();
+});
+
+/* ══ LANCEMENT ══ */
+chargerFiches();
+</script>
+
+</body>
+</html>
