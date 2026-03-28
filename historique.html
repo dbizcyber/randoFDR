@@ -137,76 +137,57 @@
 
   .fiche-body { padding: 14px 16px; }
 
-  .fiche-stats {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 8px; margin-bottom: 12px;
-  }
-  .stat-item { text-align: center; }
-  .stat-item .s-val {
-    font-size: 16px; font-weight: 700; color: var(--flame);
-  }
-  .stat-item .s-lab {
-    font-size: 10px; color: var(--stone); font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.5px;
+  /* ── LISTE FICHES EN LIGNES ── */
+  .fiches-liste {
+    display: flex; flex-direction: column; gap: 5px;
   }
 
-  .fiche-tags {
-    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+  .fiche-row {
+    display: flex; align-items: center; gap: 12px;
+    background: white; border: 1.5px solid #e8d8c4;
+    border-radius: 10px; padding: 10px 14px;
+    cursor: pointer; transition: box-shadow .15s, border-color .15s;
   }
-  .tag {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 3px 8px;
-    background: var(--cream); border: 1px solid #e8d8c4;
-    border-radius: 20px; font-size: 11px; font-weight: 600; color: var(--stone);
+  .fiche-row:hover {
+    box-shadow: 0 3px 12px rgba(124,45,0,0.1);
+    border-color: var(--amber);
   }
-  .tag.ibp   { background: #fff3cd; border-color: #f49d37; color: #856404; }
-  .tag.tech  { background: #e8f4fd; border-color: #90cdf4; color: #2b6cb0; }
-  .tag.risque { background: #fde8e8; border-color: #f5a0a0; color: #a01010; }
-
-  .fiche-parking {
-    font-size: 12px; color: var(--stone); margin-bottom: 12px;
-    display: flex; align-items: flex-start; gap: 5px;
+  .fiche-row-date {
+    font-size: 12px; font-weight: 700; color: var(--flame);
+    white-space: nowrap; min-width: 88px;
   }
-
-  /* ── ACTIONS ── */
-  .fiche-actions {
-    display: flex; gap: 8px;
-    padding: 12px 16px;
-    background: var(--cream);
-    border-top: 1px solid #e8d8c4;
+  .fiche-row-nom {
+    font-size: 14px; font-weight: 700; color: var(--ink);
+    flex: 1; min-width: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .fiche-row-anim {
+    font-size: 12px; color: var(--stone);
+    white-space: nowrap; min-width: 110px; text-align: right;
+  }
+  .fiche-row-stats {
+    display: flex; gap: 10px;
+    font-size: 11px; color: var(--stone); white-space: nowrap;
+  }
+  .fiche-row-actions {
+    display: flex; gap: 6px; flex-shrink: 0;
   }
   .btn-action {
-    flex: 1; padding: 9px 8px;
-    border: none; border-radius: 8px;
-    font-family: 'Outfit', sans-serif;
-    font-size: 12px; font-weight: 600;
-    cursor: pointer; transition: all .2s;
-    display: flex; align-items: center; justify-content: center; gap: 5px;
+    padding: 5px 10px; border: none; border-radius: 6px;
+    font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 600;
+    cursor: pointer; transition: all .15s; white-space: nowrap;
   }
   .btn-dupliquer {
-    background: linear-gradient(135deg, var(--flame), var(--amber));
-    color: white;
+    background: linear-gradient(135deg, var(--flame), var(--amber)); color: white;
   }
-  .btn-dupliquer:hover { opacity: .88; }
+  .btn-dupliquer:hover { opacity: .85; }
   .btn-supprimer {
-    background: #fde8e8; color: #c53030;
-    border: 1.5px solid #f5a0a0;
+    background: #fde8e8; color: #c53030; border: 1.5px solid #f5a0a0;
   }
   .btn-supprimer:hover { background: #f5a0a0; color: white; }
 
-  /* ── PROFIL MINIATURE ── */
-  .fiche-profil {
-    width: 100%; height: 60px; object-fit: cover;
-    border-radius: 6px; margin-bottom: 10px;
-    background: var(--sand);
-  }
-
-  /* ── ÉTAT VIDE / CHARGEMENT ── */
-  .empty-state {
-    text-align: center; padding: 60px 20px;
-    color: var(--stone); font-size: 15px;
-    grid-column: 1 / -1;
-  }
+  /* ── ÉTAT VIDE ── */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--stone); font-size: 15px; }
   .empty-state .big { font-size: 48px; margin-bottom: 12px; }
 
   /* ── MODAL CONFIRMATION ── */
@@ -231,7 +212,7 @@
     font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600;
     cursor: pointer; border: none;
   }
-  .modal-btn.annuler  { background: var(--sand); color: var(--ink); border: 1.5px solid #e8d8c4; }
+  .modal-btn.annuler   { background: var(--sand); color: var(--ink); border: 1.5px solid #e8d8c4; }
   .modal-btn.confirmer { background: linear-gradient(135deg, #c53030, #e53e3e); color: white; }
 
   /* ── TOAST ── */
@@ -241,8 +222,7 @@
     padding: 12px 24px; border-radius: 30px;
     font-weight: 600; font-size: 14px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-    opacity: 0; pointer-events: none;
-    transition: opacity .3s; z-index: 9998;
+    opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 9998;
     white-space: nowrap;
   }
   #toast.show { opacity: 1; }
@@ -250,8 +230,9 @@
   #toast.err  { background: #c53030; }
 
   @media (max-width: 600px) {
-    .fiches-grid { grid-template-columns: 1fr; }
-    .toolbar-title { font-size: 16px; }
+    .fiche-row-stats { display: none; }
+    .fiche-row-anim  { min-width: 80px; font-size: 11px; }
+    .toolbar-title   { font-size: 16px; }
   }
 </style>
 </head>
@@ -280,7 +261,7 @@
     <button class="sort-btn" data-col="animateur"   data-dir="asc"  onclick="setSort('animateur')">👤 Animateur</button>
   </div>
 
-  <div class="fiches-grid" id="fichesGrid">
+  <div class="fiches-liste" id="fichesGrid">
     <div class="empty-state"><div class="big">⏳</div>Chargement des fiches…</div>
   </div>
 
@@ -314,53 +295,60 @@
 <div id="toast"></div>
 
 <script>
-/* ══ PROTECTION ACCÈS ══ */
-(function() {
-  const MOT_DE_PASSE = "marmotte2026";
-  const CLE_SESSION  = "historique_auth";
+const MOT_DE_PASSE = "marmotte2026";
+const CLE_SUPPR    = "suppr_auth";
 
-  if (sessionStorage.getItem(CLE_SESSION) === "ok") return;
-
-  document.body.style.display = "none";
+/* ══ VÉRIFICATION MDP POUR SUPPRESSION ══ */
+function verifierMdpPuisSupprimer(id, nom) {
+  /* Si déjà authentifié dans cette session */
+  if (sessionStorage.getItem(CLE_SUPPR) === "ok") {
+    demanderSupp(id, nom);
+    return;
+  }
 
   const overlay = document.createElement("div");
-  overlay.style.cssText = "position:fixed;inset:0;background:linear-gradient(135deg,#7c2d00,#c1440e);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;";
+  overlay.id = "mdp-overlay";
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(44,26,14,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;";
 
   overlay.innerHTML = `
-    <div style="background:white;border-radius:16px;padding:36px 28px;max-width:360px;width:100%;text-align:center;font-family:'Outfit',sans-serif;box-shadow:0 8px 40px rgba(0,0,0,0.3)">
-      <div style="font-size:48px;margin-bottom:12px">🔐</div>
-      <div style="font-size:20px;font-weight:700;color:#c1440e;margin-bottom:6px">Accès restreint</div>
-      <div style="font-size:14px;color:#8a7560;margin-bottom:24px">Historique des fiches — La Marmotte</div>
-      <input id="mdp-input" type="password" placeholder="Mot de passe…"
-        style="width:100%;padding:12px 16px;border:1.5px solid #e8d8c4;border-radius:8px;font-family:'Outfit',sans-serif;font-size:15px;margin-bottom:12px;outline:none">
-      <div id="mdp-err" style="font-size:13px;color:#c53030;margin-bottom:10px;display:none">Mot de passe incorrect</div>
-      <button id="mdp-btn" style="width:100%;padding:12px;background:linear-gradient(135deg,#c1440e,#f49d37);color:white;border:none;border-radius:8px;font-size:15px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer">
-        Accéder →
-      </button>
+    <div style="background:white;border-radius:16px;padding:28px 24px;max-width:340px;width:100%;text-align:center;font-family:'Outfit',sans-serif;box-shadow:0 8px 40px rgba(0,0,0,0.3)">
+      <div style="font-size:36px;margin-bottom:10px">🔐</div>
+      <div style="font-size:17px;font-weight:700;color:#c1440e;margin-bottom:6px">Suppression protégée</div>
+      <div style="font-size:13px;color:#8a7560;margin-bottom:18px">Entrez le mot de passe pour supprimer</div>
+      <input id="mdp-supp-input" type="password" placeholder="Mot de passe…"
+        style="width:100%;padding:11px 14px;border:1.5px solid #e8d8c4;border-radius:8px;font-family:'Outfit',sans-serif;font-size:14px;margin-bottom:10px;outline:none">
+      <div id="mdp-supp-err" style="font-size:12px;color:#c53030;margin-bottom:8px;display:none">Mot de passe incorrect</div>
+      <div style="display:flex;gap:8px">
+        <button id="mdp-supp-annuler" style="flex:1;padding:10px;background:#f5ead8;color:#2c1a0e;border:1.5px solid #e8d8c4;border-radius:8px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer">Annuler</button>
+        <button id="mdp-supp-ok"      style="flex:1;padding:10px;background:linear-gradient(135deg,#c1440e,#f49d37);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer">Confirmer</button>
+      </div>
     </div>
   `;
 
   document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById("mdp-supp-input")?.focus(), 100);
 
   function tenter() {
-    const val = document.getElementById("mdp-input").value;
+    const val = document.getElementById("mdp-supp-input").value;
     if (val === MOT_DE_PASSE) {
-      sessionStorage.setItem(CLE_SESSION, "ok");
+      sessionStorage.setItem(CLE_SUPPR, "ok");
       overlay.remove();
-      document.body.style.display = "";
+      demanderSupp(id, nom);
     } else {
-      document.getElementById("mdp-err").style.display = "block";
-      document.getElementById("mdp-input").value = "";
-      document.getElementById("mdp-input").focus();
+      document.getElementById("mdp-supp-err").style.display = "block";
+      document.getElementById("mdp-supp-input").value = "";
+      document.getElementById("mdp-supp-input").focus();
     }
   }
 
-  document.getElementById("mdp-btn").addEventListener("click", tenter);
-  document.getElementById("mdp-input").addEventListener("keydown", e => {
+  document.getElementById("mdp-supp-ok").addEventListener("click", tenter);
+  document.getElementById("mdp-supp-annuler").addEventListener("click", () => overlay.remove());
+  document.getElementById("mdp-supp-input").addEventListener("keydown", e => {
     if (e.key === "Enter") tenter();
+    if (e.key === "Escape") overlay.remove();
   });
-  setTimeout(() => document.getElementById("mdp-input")?.focus(), 100);
-})();
+  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+}
 </script>
 <script>
 const SUPABASE_URL = "https://whlxbfnmyqdflmxosfse.supabase.co";
@@ -402,7 +390,7 @@ function filtrerEtAfficher() {
   afficherFiches();
 }
 
-/* ══ RENDU CARTES ══ */
+/* ══ RENDU LIGNES ══ */
 function afficherFiches() {
   const grid = document.getElementById("fichesGrid");
 
@@ -412,47 +400,30 @@ function afficherFiches() {
   }
 
   grid.innerHTML = fichesFilt.map(f => {
-    const dateRando = f.date_rando
-      ? new Date(f.date_rando + "T12:00:00").toLocaleDateString("fr-FR", { weekday:"long", day:"2-digit", month:"long", year:"numeric" })
+    const dateAff = f.date_rando
+      ? new Date(f.date_rando + "T12:00:00").toLocaleDateString("fr-FR", { day:"2-digit", month:"2-digit", year:"numeric" })
       : "—";
-    const dateEnvoi = f.created_at
-      ? new Date(f.created_at).toLocaleDateString("fr-FR") + " " + new Date(f.created_at).toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" })
-      : "";
 
-    const profilHTML = f.profil_png
-      ? `<img class="fiche-profil" src="${f.profil_png}" alt="Profil altimétrique">`
-      : "";
+    const stats = [
+      f.distance  ? `📏 ${f.distance} km` : "",
+      f.denivele  ? `⛰ ${f.denivele} m`  : "",
+      f.duree     ? `⏱ ${f.duree}`        : "",
+      f.ibp       ? `IBP ${f.ibp}`        : "",
+    ].filter(Boolean).join("  ·  ");
 
-    const tags = [
-      f.ibp       ? `<span class="tag ibp">IBP ${f.ibp}</span>` : "",
-      f.technicite ? `<span class="tag tech">Tech. ${f.technicite}/5</span>` : "",
-      f.risque     ? `<span class="tag risque">Risque ${f.risque}/5</span>` : "",
-      f.effort     ? `<span class="tag">Effort ${f.effort}/5</span>` : "",
-    ].filter(Boolean).join("");
+    const nom  = (f.nom_rando  || "—");
+    const anim = (f.animateur  || "—");
+    const nomEsc = nom.replace(/'/g, "\\'");
 
     return `
-    <div class="fiche-card" onclick="voirFiche(${f.id})" style="cursor:pointer">
-      <div class="fiche-header">
-        <div style="flex:1;min-width:0">
-          <div class="fiche-date">🗓 ${dateRando}</div>
-          <div class="fiche-nom">${f.nom_rando || "—"}</div>
-          <div class="fiche-animateur">👤 ${f.animateur || "—"}${f.heure_rv ? " · RV " + f.heure_rv : ""}</div>
-        </div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.6);white-space:nowrap;text-align:right;flex-shrink:0">
-          Envoyé<br>${dateEnvoi}
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;font-size:12px;color:var(--stone);border-bottom:1px solid #e8d8c4;flex-wrap:wrap">
-        ${f.distance  ? `<span>📏 ${f.distance} km</span>` : ""}
-        ${f.denivele  ? `<span>⛰ ${f.denivele} m</span>` : ""}
-        ${f.duree     ? `<span>⏱ ${f.duree}</span>` : ""}
-        ${f.ibp       ? `<span class="tag ibp" style="margin:0">IBP ${f.ibp}</span>` : ""}
-        ${f.technicite ? `<span class="tag tech" style="margin:0">T${f.technicite}</span>` : ""}
-        ${f.risque    ? `<span class="tag risque" style="margin:0">R${f.risque}</span>` : ""}
-      </div>
-      <div class="fiche-actions" onclick="event.stopPropagation()">
+    <div class="fiche-row" onclick="voirFiche(${f.id})">
+      <div class="fiche-row-date">${dateAff}</div>
+      <div class="fiche-row-nom" title="${nom}">${nom}</div>
+      <div class="fiche-row-anim">👤 ${anim}</div>
+      ${stats ? `<div class="fiche-row-stats">${stats}</div>` : ""}
+      <div class="fiche-row-actions" onclick="event.stopPropagation()">
         <button class="btn-action btn-dupliquer" onclick="dupliquerFiche(${f.id})">📋 Réutiliser</button>
-        <button class="btn-action btn-supprimer" onclick="demanderSupp(${f.id}, '${(f.nom_rando||"").replace(/'/g,"\\'")}')">🗑 Supprimer</button>
+        <button class="btn-action btn-supprimer" onclick="demanderSupp(${f.id}, '${nomEsc}')">🗑</button>
       </div>
     </div>`;
   }).join("");
