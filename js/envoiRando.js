@@ -2,6 +2,9 @@ console.log("envoiRando.js chargé");
 
 import { chartProfil } from "./profilAltitude.js"
 
+const SUPABASE_URL = "https://whlxbfnmyqdflmxosfse.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE";
+
 export function initEnvoi() {
   const btn = document.getElementById("btnEnvoyer");
   if (!btn) { console.warn("Bouton Envoyer introuvable"); return; }
@@ -9,24 +12,17 @@ export function initEnvoi() {
 }
 
 /* ══════════════════════════════════════
-   POPUP STYLISÉ (remplace alert)
+   POPUP STYLISÉ
 ══════════════════════════════════════ */
 function afficherPopup({ icone, titre, message, couleur = "#c1440e", bouton = "OK", onClose }) {
   document.getElementById("envoi-popup")?.remove();
 
   const overlay = document.createElement("div");
   overlay.id = "envoi-popup";
-  overlay.style.cssText = `
-    position:fixed;inset:0;background:rgba(44,26,14,0.55);
-    z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;
-  `;
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(44,26,14,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;";
 
   const box = document.createElement("div");
-  box.style.cssText = `
-    background:white;border-radius:16px;padding:28px 24px;max-width:400px;width:100%;
-    box-shadow:0 8px 40px rgba(0,0,0,0.25);font-family:'Outfit',Arial,sans-serif;
-    text-align:center;
-  `;
+  box.style.cssText = "background:white;border-radius:16px;padding:28px 24px;max-width:400px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.25);font-family:'Outfit',Arial,sans-serif;text-align:center;";
 
   const ico = document.createElement("div");
   ico.style.cssText = "font-size:40px;margin-bottom:12px;";
@@ -34,7 +30,7 @@ function afficherPopup({ icone, titre, message, couleur = "#c1440e", bouton = "O
   box.appendChild(ico);
 
   const tit = document.createElement("div");
-  tit.style.cssText = `font-size:18px;font-weight:700;color:${couleur};margin-bottom:10px;`;
+  tit.style.cssText = "font-size:18px;font-weight:700;color:"+couleur+";margin-bottom:10px;";
   tit.textContent = titre;
   box.appendChild(tit);
 
@@ -47,18 +43,70 @@ function afficherPopup({ icone, titre, message, couleur = "#c1440e", bouton = "O
 
   const btn = document.createElement("button");
   btn.textContent = bouton;
-  btn.style.cssText = `
-    padding:11px 32px;
-    background:linear-gradient(135deg,#c1440e,#f49d37);
-    color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;
-    font-family:'Outfit',Arial,sans-serif;cursor:pointer;
-  `;
+  btn.style.cssText = "padding:11px 32px;background:linear-gradient(135deg,#c1440e,#f49d37);color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;font-family:'Outfit',Arial,sans-serif;cursor:pointer;";
   btn.addEventListener("click", () => { overlay.remove(); onClose && onClose(); });
   box.appendChild(btn);
 
   overlay.appendChild(box);
   document.body.appendChild(overlay);
   overlay.addEventListener("click", e => { if (e.target === overlay) { overlay.remove(); onClose && onClose(); } });
+}
+
+/* ══════════════════════════════════════
+   COLLECTE DES DONNÉES DU FORMULAIRE
+══════════════════════════════════════ */
+function collecterFiche(profilPNG) {
+  const val = id => document.getElementById(id)?.value?.trim() || "";
+  const txt = id => document.getElementById(id)?.textContent?.trim() || "";
+
+  return {
+    date_rando:     val("dateRando")             || null,
+    nom_rando:      val("nomRando")              || null,
+    animateur:      val("animateur")             || null,
+    parking_covoit: val("parkingCovoiturage") === "__autre__"
+                    ? val("nouveauParking")
+                    : val("parkingCovoiturage"),
+    heure_rv:       val("heureRV")               || null,
+    parking_depart: txt("parkingRandoAdresse")   || null,
+    gps:            txt("latParking") + "," + txt("lonParking"),
+    distance:       parseFloat(txt("distanceGPX"))  || parseFloat(val("distanceGPX_manuel"))  || null,
+    denivele:       parseInt(txt("denivele"))        || parseInt(val("denivele_manuel"))        || null,
+    duree:          txt("dureeMarche")              || val("dureeMarche_manuel")               || null,
+    ibp:            parseInt(txt("ibp"))             || null,
+    effort:         parseInt(txt("effort"))          || parseInt(val("effort_manuel"))          || null,
+    technicite:     parseInt(val("technicite"))      || null,
+    risque:         parseInt(val("risque"))           || null,
+    couts:          txt("coutTotal")                 || null,
+    remarques:      val("remarques")                 || null,
+    profil_png:     profilPNG                        || null,
+  };
+}
+
+/* ══════════════════════════════════════
+   SAUVEGARDE DANS SUPABASE
+══════════════════════════════════════ */
+async function sauvegarderFiche(fiche) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/fiches`, {
+      method: "POST",
+      headers: {
+        "Content-Type":  "application/json",
+        "apikey":        SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Prefer":        "return=minimal"
+      },
+      body: JSON.stringify(fiche)
+    });
+    if (!res.ok) {
+      console.warn("[Supabase] Erreur sauvegarde:", await res.text());
+      return false;
+    }
+    console.log("[Supabase] Fiche sauvegardée ✅");
+    return true;
+  } catch(e) {
+    console.warn("[Supabase] Erreur réseau sauvegarde:", e);
+    return false;
+  }
 }
 
 /* ══════════════════════════════════════
@@ -81,11 +129,11 @@ async function envoyerRando() {
     return;
   }
 
-  /* Bouton en état chargement */
   const btnEnvoyer = document.getElementById("btnEnvoyer");
   if (btnEnvoyer) { btnEnvoyer.disabled = true; btnEnvoyer.textContent = "⏳ Envoi en cours…"; }
 
   try {
+    /* Récupération du profil */
     let profilPNG = null;
     if (window.profilExportBase64) {
       profilPNG = window.profilExportBase64;
@@ -97,14 +145,15 @@ async function envoyerRando() {
       console.warn("profil non disponible");
     }
 
+    /* ── 1. Envoi email (inchangé) ── */
     const response = await fetch(
-      "https://whlxbfnmyqdflmxosfse.supabase.co/functions/v1/dynamic-handler",
+      `${SUPABASE_URL}/functions/v1/dynamic-handler`,
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE",
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE"
+          "Content-Type":  "application/json",
+          "apikey":        SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
         },
         body: JSON.stringify({ resume, emailUser, profilPNG })
       }
@@ -113,31 +162,35 @@ async function envoyerRando() {
     const data = await response.json();
     console.log("réponse serveur :", data);
 
-    if (data.success) {
+    if (!data.success) {
       afficherPopup({
-        icone: "✅",
-        titre: "Fiche envoyée !",
-        message: "L'email a bien été envoyé avec la fiche et le profil d'altitude.",
-        couleur: "#2a7a2a",
-        bouton: "Super !",
-        onClose: () => { window._effacerSauvegarde && window._effacerSauvegarde(); }
-      });
-    } else {
-      afficherPopup({
-        icone: "❌",
-        titre: "Erreur serveur",
+        icone: "❌", titre: "Erreur serveur",
         message: data.error || "Une erreur est survenue côté serveur.",
         bouton: "Fermer"
       });
+      return;
     }
+
+    /* ── 2. Sauvegarde fiche dans table Supabase (remplace fichier txt) ── */
+    const fiche = collecterFiche(profilPNG);
+    const saved = await sauvegarderFiche(fiche);
+
+    afficherPopup({
+      icone:   "✅",
+      titre:   "Fiche envoyée !",
+      message: saved
+        ? "Email envoyé et fiche archivée dans l'historique."
+        : "Email envoyé. L'archivage dans l'historique a échoué.",
+      couleur: "#2a7a2a",
+      bouton:  "Super !",
+      onClose: () => { window._effacerSauvegarde && window._effacerSauvegarde(); }
+    });
 
   } catch (err) {
     console.error("Erreur JS :", err);
     afficherPopup({
-      icone: "⚠️",
-      titre: "Erreur réseau",
-      message: err.message,
-      bouton: "Fermer"
+      icone: "⚠️", titre: "Erreur réseau",
+      message: err.message, bouton: "Fermer"
     });
   } finally {
     if (btnEnvoyer) { btnEnvoyer.disabled = false; btnEnvoyer.textContent = "Envoyer"; }
