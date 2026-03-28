@@ -43,7 +43,7 @@ function afficherPopup({ icone, titre, message, couleur = "#c1440e", bouton = "O
 
   const btn = document.createElement("button");
   btn.textContent = bouton;
-  btn.style.cssText = "padding:11px 32px;background:linear-gradient(135deg,#c1440e,#f49d37);color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;font-family:'Outfit',Arial,sans-serif;cursor:pointer;";
+  btn.style.cssText = "padding:11px 32px;background:linear-gradient(135deg,#c1440e,#f49d37);color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;font-family:'Outfit',Arial,sans-serif;cursor:pointer;transform:none;box-shadow:none;";
   btn.addEventListener("click", () => { overlay.remove(); onClose && onClose(); });
   box.appendChild(btn);
 
@@ -53,7 +53,7 @@ function afficherPopup({ icone, titre, message, couleur = "#c1440e", bouton = "O
 }
 
 /* ══════════════════════════════════════
-   COLLECTE DES DONNÉES DU FORMULAIRE
+   COLLECTE DES DONNÉES
 ══════════════════════════════════════ */
 function collecterFiche(profilPNG) {
   const val = id => document.getElementById(id)?.value?.trim() || "";
@@ -83,7 +83,7 @@ function collecterFiche(profilPNG) {
 }
 
 /* ══════════════════════════════════════
-   SAUVEGARDE DANS SUPABASE
+   SAUVEGARDE SUPABASE (indépendante)
 ══════════════════════════════════════ */
 async function sauvegarderFiche(fiche) {
   try {
@@ -98,19 +98,45 @@ async function sauvegarderFiche(fiche) {
       body: JSON.stringify(fiche)
     });
     if (!res.ok) {
-      console.warn("[Supabase] Erreur sauvegarde:", await res.text());
+      console.warn("[Supabase] Erreur sauvegarde:", res.status, await res.text());
       return false;
     }
     console.log("[Supabase] Fiche sauvegardée ✅");
     return true;
   } catch(e) {
-    console.warn("[Supabase] Erreur réseau sauvegarde:", e);
+    console.warn("[Supabase] Erreur réseau sauvegarde:", e.message);
     return false;
   }
 }
 
 /* ══════════════════════════════════════
-   ENVOI
+   ENVOI EMAIL (indépendant)
+══════════════════════════════════════ */
+async function envoyerEmail(resume, emailUser, profilPNG) {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/functions/v1/dynamic-handler`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":  "application/json",
+          "apikey":        SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify({ resume, emailUser, profilPNG })
+      }
+    );
+    const data = await res.json();
+    console.log("[Email] réponse:", data);
+    return data.success === true;
+  } catch(e) {
+    console.warn("[Email] Erreur réseau:", e.message);
+    return false;
+  }
+}
+
+/* ══════════════════════════════════════
+   ENVOI PRINCIPAL
 ══════════════════════════════════════ */
 async function envoyerRando() {
   console.log("envoyerRando déclenché");
@@ -137,59 +163,49 @@ async function envoyerRando() {
     let profilPNG = null;
     if (window.profilExportBase64) {
       profilPNG = window.profilExportBase64;
-      console.log("profil export capturé (canvas fixe 1200x450)");
     } else if (chartProfil) {
       profilPNG = chartProfil.toBase64Image();
-      console.log("profil fallback Chart.js");
-    } else {
-      console.warn("profil non disponible");
     }
 
-    /* ── 1. Envoi email (inchangé) ── */
-    const response = await fetch(
-      `${SUPABASE_URL}/functions/v1/dynamic-handler`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":  "application/json",
-          "apikey":        SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`
-        },
-        body: JSON.stringify({ resume, emailUser, profilPNG })
-      }
-    );
+    /* ── 1 et 2 en parallèle : email + sauvegarde ── */
+    const [emailOk, saveOk] = await Promise.all([
+      envoyerEmail(resume, emailUser, profilPNG),
+      sauvegarderFiche(collecterFiche(profilPNG))
+    ]);
 
-    const data = await response.json();
-    console.log("réponse serveur :", data);
-
-    if (!data.success) {
+    /* Message selon résultat */
+    if (emailOk && saveOk) {
       afficherPopup({
-        icone: "❌", titre: "Erreur serveur",
-        message: data.error || "Une erreur est survenue côté serveur.",
+        icone: "✅", titre: "Fiche envoyée !",
+        message: "Email envoyé et fiche archivée dans l'historique.",
+        couleur: "#2a7a2a", bouton: "Super !",
+        onClose: () => { window._effacerSauvegarde && window._effacerSauvegarde(); }
+      });
+    } else if (emailOk && !saveOk) {
+      afficherPopup({
+        icone: "📧", titre: "Email envoyé",
+        message: "Email envoyé mais l'archivage dans l'historique a échoué.",
+        couleur: "#2a7a2a", bouton: "OK",
+        onClose: () => { window._effacerSauvegarde && window._effacerSauvegarde(); }
+      });
+    } else if (!emailOk && saveOk) {
+      afficherPopup({
+        icone: "⚠️", titre: "Fiche archivée",
+        message: "Fiche sauvegardée dans l'historique mais l'envoi email a échoué. Réessayez l'envoi.",
+        couleur: "#856404", bouton: "OK"
+      });
+    } else {
+      afficherPopup({
+        icone: "❌", titre: "Erreur",
+        message: "L'envoi email et l'archivage ont échoué. Vérifiez votre connexion et réessayez.",
         bouton: "Fermer"
       });
-      return;
     }
-
-    /* ── 2. Sauvegarde fiche dans table Supabase (remplace fichier txt) ── */
-    const fiche = collecterFiche(profilPNG);
-    const saved = await sauvegarderFiche(fiche);
-
-    afficherPopup({
-      icone:   "✅",
-      titre:   "Fiche envoyée !",
-      message: saved
-        ? "Email envoyé et fiche archivée dans l'historique."
-        : "Email envoyé. L'archivage dans l'historique a échoué.",
-      couleur: "#2a7a2a",
-      bouton:  "Super !",
-      onClose: () => { window._effacerSauvegarde && window._effacerSauvegarde(); }
-    });
 
   } catch (err) {
     console.error("Erreur JS :", err);
     afficherPopup({
-      icone: "⚠️", titre: "Erreur réseau",
+      icone: "⚠️", titre: "Erreur inattendue",
       message: err.message, bouton: "Fermer"
     });
   } finally {
