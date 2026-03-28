@@ -563,14 +563,14 @@ function dupliquerFiche(id) {
     remarques:     f.remarques,
   };
 
-  /* Stocker dans sessionStorage plutôt qu'en URL pour éviter le 404 */
-  sessionStorage.setItem("fiche_a_reutiliser", JSON.stringify(payload));
-  window.location.href = "index.html";
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  /* URL absolue + données encodées (sessionStorage ne fonctionne pas cross-domaine) */
+  window.location.href = "https://dbizcyber.github.io/randoFDR/index.html#fiche=" + encoded;
 }
 
 /* ══ SUPPRESSION ══ */
 function demanderSupp(id, nom) {
-  idASupp = id;
+  idASupp = Number(id);  /* forcer en number pour éviter null/string */
   document.getElementById("modalSuppMsg").textContent =
     `Supprimer la fiche "${nom}" ? Cette action est irréversible.`;
   document.getElementById("modalSupp").classList.add("open");
@@ -583,17 +583,24 @@ function fermerModal() {
 
 async function confirmerSupp() {
   if (!idASupp) return;
+  const idCopie = idASupp;
   fermerModal();
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/fiches?id=eq.${idASupp}`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/fiches?id=eq.${idCopie}`, {
       method: "DELETE",
-      headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+      headers: {
+        "apikey":        SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Prefer":        "return=minimal"
+      }
     });
     if (res.ok) {
       showToast("🗑️ Fiche supprimée", "ok");
-      fiches = fiches.filter(f => f.id !== idASupp);
+      fiches = fiches.filter(f => f.id !== idCopie);
       filtrerEtAfficher();
     } else {
+      const err = await res.text();
+      console.error("Erreur suppression:", err);
       showToast("Erreur lors de la suppression", "err");
     }
   } catch(e) {
