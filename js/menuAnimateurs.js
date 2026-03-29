@@ -29,9 +29,7 @@ export async function remplirMenuAnimateurs() {
     animateurs.forEach(a => {
       const opt = document.createElement("option");
       /* Select affiche : nom prénom uniquement */
-      opt.value         = a.telephone
-        ? `${a.nom} ${a.telephone}`
-        : a.nom;
+      opt.value = a.nom;              // ✅ valeur = nom uniquement
       opt.dataset.email = a.email || "";
       opt.dataset.tel   = a.telephone || "";
       opt.textContent   = a.nom;  /* affiché dans le select */
