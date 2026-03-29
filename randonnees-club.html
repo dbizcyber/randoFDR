@@ -154,19 +154,43 @@ td { padding: 9px 12px; border-bottom: 1px solid #f0e8dc; vertical-align: middle
   cursor: pointer; color: var(--ink); flex-shrink: 0;
 }
 .modal-profil { width: 100%; border-radius: 8px; margin-bottom: 14px; }
-.modal-resume {
-  font-size: 13px; color: var(--ink); white-space: pre-wrap; line-height: 1.6;
-  background: var(--cream); border-radius: 8px; padding: 14px;
-  border: 1px solid #e8d8c4;
+
+/* ── SECTIONS DÉTAIL ── */
+.detail-section {
+  margin-bottom: 14px;
+  border: 1.5px solid #e8d8c4;
+  border-radius: 10px;
+  overflow: hidden;
 }
-.btn-modifier-detail {
-  width: 100%; padding: 12px; border: none; border-radius: 8px;
+.detail-section-titre {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: white;
   background: linear-gradient(135deg, var(--ember), var(--flame));
-  color: white; font-family: 'Outfit', sans-serif; font-size: 14px;
-  font-weight: 700; cursor: pointer; margin-top: 14px;
-  transition: opacity .15s;
+  padding: 6px 12px;
 }
-.btn-modifier-detail:hover { opacity: .88; }
+.detail-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.detail-grid.full { grid-template-columns: 1fr; }
+.detail-item {
+  padding: 8px 12px; border-bottom: 1px solid #f0e8dc;
+}
+.detail-item:last-child { border-bottom: none; }
+.detail-item.span2 { grid-column: 1 / -1; }
+.detail-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--stone); margin-bottom: 2px;
+}
+.detail-value {
+  font-size: 13px; font-weight: 600; color: var(--ink);
+  word-break: break-word;
+}
+.detail-value a { color: var(--blue-mid); text-decoration: none; }
+.detail-value a:hover { text-decoration: underline; }
+.detail-value.remarques {
+  font-size: 13px; font-weight: 400; white-space: pre-wrap; line-height: 1.5;
+}
 
 .empty { text-align: center; padding: 40px; color: var(--stone); font-style: italic; }
 
@@ -232,9 +256,7 @@ td { padding: 9px 12px; border-bottom: 1px solid #f0e8dc; vertical-align: middle
       <div class="modal-titre" id="modalTitre"></div>
       <button class="modal-close" onclick="fermerDetail()">✕ Fermer</button>
     </div>
-    <img id="modalProfil" src="" alt="Profil altitude" class="modal-profil" style="display:none">
-    <pre class="modal-resume" id="modalResume"></pre>
-    <button class="btn-modifier-detail" onclick="ouvrirModif()">✏️ Modifier / Réutiliser cette fiche</button>
+    <div id="modalContenu"></div>
   </div>
 </div>
 
@@ -475,45 +497,151 @@ function voirDetail(id) {
   if (!f) return;
   idEnCours = id;
 
-  document.getElementById("modalTitre").textContent =
-    (f.nom_rando || "—") + (f.date_rando
-      ? " — " + new Date(f.date_rando + "T12:00:00").toLocaleDateString("fr-FR")
-      : "");
-
-  const profil = document.getElementById("modalProfil");
-  if (f.profil_png) { profil.src = f.profil_png; profil.style.display = "block"; }
-  else              { profil.style.display = "none"; }
-
   const statut = f.statut || "publiée";
-  const lignes = [
-    statut === "annulée"  ? "❌ RANDONNÉE ANNULÉE"   : "",
-    statut === "modifiée" ? "✏️ RANDONNÉE MODIFIÉE"  : "",
-    "═══════════════════════════════════",
-    `📅 Date        : ${f.date_rando ? new Date(f.date_rando + "T12:00:00").toLocaleDateString("fr-FR", { weekday:"long", day:"2-digit", month:"long", year:"numeric" }) : "—"}`,
-    `👤 Animateur   : ${f.animateur || "—"}`,
-    f.heure_rv     ? `⏰ RV          : ${f.heure_rv}` : "",
-    "───────────────────────────────────",
-    f.parking_covoit ? `🅿️ Covoiturage : ${f.parking_covoit}` : "",
-    f.parking_depart ? `🏁 Parking     : ${f.parking_depart}` : "",
-    f.lieu           ? `📍 Lieu        : ${f.lieu}`            : "",
-    f.gps            ? `🗺 GPS         : ${f.gps}`             : "",
-    f.gps            ? `🗺 Maps        : https://www.google.com/maps?q=${f.gps}` : "",
-    "───────────────────────────────────",
-    `📏 Distance    : ${f.distance ? f.distance + " km" : "—"}`,
-    `⛰  Dénivelé   : ${f.denivele ? f.denivele + " m"  : "—"}`,
-    `⏱  Durée      : ${f.duree    || "—"}`,
-    f.ibp ? `📊 IBP         : ${f.ibp}  ${ibpLabel(f.ibp)}` : "",
-    (f.effort || f.technicite || f.risque)
-      ? `🎯 Effort ${f.effort||"—"}/5 · Tech. ${f.technicite||"—"}/5 · Risque ${f.risque||"—"}/5`
-      : "",
-    f.couts    ? "───────────────────────────────────" : "",
-    f.couts    ? `💶 Coûts       : ${f.couts}`         : "",
-    f.remarques ? "───────────────────────────────────" : "",
-    f.remarques ? `📌 Remarques   : ${f.remarques}`    : "",
-    "═══════════════════════════════════",
-  ].filter(l => l !== "").join("\n");
+  const badgeTitre = statut === "annulée"
+    ? ' <span class="badge badge-ann" style="vertical-align:middle">❌ Annulée</span>'
+    : statut === "modifiée"
+    ? ' <span class="badge badge-mod" style="vertical-align:middle">✏️ Modifiée</span>'
+    : '';
 
-  document.getElementById("modalResume").textContent = lignes;
+  const dateAff = f.date_rando
+    ? new Date(f.date_rando + "T12:00:00").toLocaleDateString("fr-FR", { weekday:"long", day:"2-digit", month:"long", year:"numeric" })
+    : "—";
+
+  const mapsUrl = f.gps ? `https://www.google.com/maps?q=${f.gps}` : null;
+
+  document.getElementById("modalTitre").innerHTML =
+    (f.nom_rando || "—") + badgeTitre;
+
+  let html = "";
+
+  /* ── Profil altimétrique ── */
+  if (f.profil_png) {
+    html += `<img src="${f.profil_png}" alt="Profil altitude" class="modal-profil">`;
+  }
+
+  /* ── Général ── */
+  html += `
+  <div class="detail-section">
+    <div class="detail-section-titre">📅 Général</div>
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="detail-label">Date</div>
+        <div class="detail-value">${dateAff}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Animateur</div>
+        <div class="detail-value">👤 ${f.animateur || "—"}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Heure RV</div>
+        <div class="detail-value">⏰ ${f.heure_rv || "—"}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Statut</div>
+        <div class="detail-value">${
+          statut === "annulée"  ? '<span class="badge badge-ann">❌ Annulée</span>' :
+          statut === "modifiée" ? '<span class="badge badge-mod">✏️ Modifiée</span>' :
+                                  '<span class="badge badge-pub">✅ Publiée</span>'
+        }</div>
+      </div>
+    </div>
+  </div>`;
+
+  /* ── Logistique ── */
+  html += `
+  <div class="detail-section">
+    <div class="detail-section-titre">🅿️ Logistique</div>
+    <div class="detail-grid">
+      <div class="detail-item span2">
+        <div class="detail-label">Parking covoiturage</div>
+        <div class="detail-value">${f.parking_covoit || "—"}</div>
+      </div>
+      <div class="detail-item span2">
+        <div class="detail-label">Parking départ randonnée</div>
+        <div class="detail-value">${f.parking_depart || "—"}</div>
+      </div>
+      ${f.lieu ? `
+      <div class="detail-item span2">
+        <div class="detail-label">Lieu</div>
+        <div class="detail-value">📍 ${f.lieu}</div>
+      </div>` : ""}
+      ${f.gps ? `
+      <div class="detail-item">
+        <div class="detail-label">GPS</div>
+        <div class="detail-value">${f.gps}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Carte</div>
+        <div class="detail-value"><a href="${mapsUrl}" target="_blank">🗺 Ouvrir Maps</a></div>
+      </div>` : ""}
+    </div>
+  </div>`;
+
+  /* ── Parcours ── */
+  html += `
+  <div class="detail-section">
+    <div class="detail-section-titre">📏 Parcours</div>
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="detail-label">Distance</div>
+        <div class="detail-value">${f.distance ? f.distance + " km" : "—"}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Dénivelé +</div>
+        <div class="detail-value">${f.denivele ? f.denivele + " m" : "—"}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Durée</div>
+        <div class="detail-value">⏱ ${f.duree || "—"}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">IBP</div>
+        <div class="detail-value">${f.ibp ? ibpPill(f.ibp) + " " + ibpLabel(f.ibp) : "—"}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Effort</div>
+        <div class="detail-value">${f.effort ? f.effort + " / 5" : "—"}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Technicité</div>
+        <div class="detail-value">${f.technicite ? f.technicite + " / 5" : "—"}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Risque</div>
+        <div class="detail-value">${f.risque ? f.risque + " / 5" : "—"}</div>
+      </div>
+    </div>
+  </div>`;
+
+  /* ── Coûts ── */
+  if (f.couts) {
+    html += `
+  <div class="detail-section">
+    <div class="detail-section-titre">💶 Coûts trajet</div>
+    <div class="detail-grid full">
+      <div class="detail-item">
+        <div class="detail-label">Détail des coûts</div>
+        <div class="detail-value">${f.couts}</div>
+      </div>
+    </div>
+  </div>`;
+  }
+
+  /* ── Remarques ── */
+  if (f.remarques) {
+    html += `
+  <div class="detail-section">
+    <div class="detail-section-titre">📌 Remarques</div>
+    <div class="detail-grid full">
+      <div class="detail-item">
+        <div class="detail-value remarques">${f.remarques}</div>
+      </div>
+    </div>
+  </div>`;
+  }
+
+  document.getElementById("modalContenu").innerHTML = html;
   document.getElementById("modalDetail").classList.add("open");
 }
 
