@@ -595,16 +595,16 @@ function sortTable(col) {
 function openEdit(ev) {
   document.getElementById('edit-rowIndex').value  = ev.rowIndex;
   document.getElementById('edit-date').value      = toISO(ev.date);
-  document.getElementById('edit-nom').value       = ev.nom       || '';
-  document.getElementById('edit-animateur').value = ev.animateur || '';
-  document.getElementById('edit-heureRV').value   = ev.heureRV   || ev.heure_rv || '';
-  document.getElementById('edit-parking').value   = ev.parking   || ev.parking_covoit || '';
-  document.getElementById('edit-ibp').value       = ev.ibp       || '';
-  document.getElementById('edit-duree').value     = ev.duree     || '';
-  document.getElementById('edit-distance').value  = ev.distance  || '';
-  document.getElementById('edit-denivele').value  = ev.denivele  || '';
-  document.getElementById('edit-statut').value    = ev.statut    || 'publiée';
-  document.getElementById('edit-remarques').value = ev.remarques || '';
+  document.getElementById('edit-nom').value       = ev.nom            || '';
+  document.getElementById('edit-animateur').value = ev.animateur      || '';
+  document.getElementById('edit-heureRV').value   = ev.heureRV        || ev.heure_rv   || '';
+  document.getElementById('edit-parking').value   = ev.parking        || ev.parking_covoit || '';
+  document.getElementById('edit-ibp').value       = ev.ibp            || '';
+  document.getElementById('edit-duree').value     = ev.duree          || '';
+  document.getElementById('edit-distance').value  = ev.distance       || '';
+  document.getElementById('edit-denivele').value  = ev.denivele       || '';
+  document.getElementById('edit-statut').value    = ev.statut         || 'publiée';
+  document.getElementById('edit-remarques').value = ev.remarques      || '';
   document.getElementById('modal-edit').classList.add('open');
 }
 
@@ -621,7 +621,6 @@ async function saveEdit() {
   const denivele  = document.getElementById('edit-denivele').value.trim();
   const statut    = document.getElementById('edit-statut').value;
   const remarques = document.getElementById('edit-remarques').value.trim();
-
   if (!date || !nom || !animateur) { showToast('Champs obligatoires manquants.', true); return; }
   setBusy('btn-save-edit', true);
   try {
