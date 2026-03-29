@@ -203,7 +203,7 @@
 
 <!-- ══ MODAL MODIFIER ══ -->
 <div class="modal-overlay" id="modal-edit">
-  <div class="modal">
+  <div class="modal" style="width:580px;max-height:88vh;overflow-y:auto">
     <h3>✏️ Modifier l'événement</h3>
     <input type="hidden" id="edit-rowIndex">
     <div class="form-grid">
@@ -220,10 +220,21 @@
         <input type="text" id="edit-nom">
       </div>
       <div class="form-group">
+        <label>Heure RV</label>
+        <input type="time" id="edit-heureRV">
+      </div>
+      <div class="form-group">
+        <label>Parking covoiturage</label>
+        <input type="text" id="edit-parking" placeholder="Nom du parking">
+      </div>
+      <div class="form-group">
         <label>IBP</label>
         <input type="number" id="edit-ibp" min="0">
       </div>
-      <div class="form-group"><!-- spacer --></div>
+      <div class="form-group">
+        <label>Durée</label>
+        <input type="text" id="edit-duree" placeholder="ex: 3h30">
+      </div>
       <div class="form-group">
         <label>Distance</label>
         <div class="input-unit">
@@ -237,6 +248,18 @@
           <input type="number" id="edit-denivele" min="0" step="1">
           <span>m</span>
         </div>
+      </div>
+      <div class="form-group">
+        <label>Statut</label>
+        <select id="edit-statut">
+          <option value="publiée">✅ Publiée</option>
+          <option value="modifiée">✏️ Modifiée</option>
+          <option value="annulée">❌ Annulée</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Remarques</label>
+        <textarea id="edit-remarques" style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.95rem;font-family:inherit;min-height:70px;resize:vertical" placeholder="Notes, modifications…"></textarea>
       </div>
     </div>
     <div class="modal-actions">
@@ -571,27 +594,41 @@ function sortTable(col) {
    ══════════════════════════════════════════ */
 function openEdit(ev) {
   document.getElementById('edit-rowIndex').value  = ev.rowIndex;
-  document.getElementById('edit-date').value      = toISO(ev.date);  // YYYY-MM-DD pour l'input
+  document.getElementById('edit-date').value      = toISO(ev.date);
   document.getElementById('edit-nom').value       = ev.nom       || '';
   document.getElementById('edit-animateur').value = ev.animateur || '';
+  document.getElementById('edit-heureRV').value   = ev.heureRV   || ev.heure_rv || '';
+  document.getElementById('edit-parking').value   = ev.parking   || ev.parking_covoit || '';
   document.getElementById('edit-ibp').value       = ev.ibp       || '';
+  document.getElementById('edit-duree').value     = ev.duree     || '';
   document.getElementById('edit-distance').value  = ev.distance  || '';
   document.getElementById('edit-denivele').value  = ev.denivele  || '';
+  document.getElementById('edit-statut').value    = ev.statut    || 'publiée';
+  document.getElementById('edit-remarques').value = ev.remarques || '';
   document.getElementById('modal-edit').classList.add('open');
 }
 
 async function saveEdit() {
   const rowIndex  = document.getElementById('edit-rowIndex').value;
-  const date      = document.getElementById('edit-date').value;      // ISO YYYY-MM-DD
+  const date      = document.getElementById('edit-date').value;
   const nom       = document.getElementById('edit-nom').value.trim();
   const animateur = document.getElementById('edit-animateur').value.trim();
+  const heureRV   = document.getElementById('edit-heureRV').value.trim();
+  const parking   = document.getElementById('edit-parking').value.trim();
   const ibp       = document.getElementById('edit-ibp').value.trim();
+  const duree     = document.getElementById('edit-duree').value.trim();
   const distance  = document.getElementById('edit-distance').value.trim();
   const denivele  = document.getElementById('edit-denivele').value.trim();
+  const statut    = document.getElementById('edit-statut').value;
+  const remarques = document.getElementById('edit-remarques').value.trim();
+
   if (!date || !nom || !animateur) { showToast('Champs obligatoires manquants.', true); return; }
   setBusy('btn-save-edit', true);
   try {
-    const res = await callScript({ action:'update', rowIndex, date, nom, animateur, ibp, distance, denivele });
+    const res = await callScript({
+      action: 'update', rowIndex, date, nom, animateur,
+      heureRV, parking, ibp, duree, distance, denivele, statut, remarques
+    });
     if (res.success) {
       showToast('✅ Événement modifié dans Sheets et Calendar !');
       closeModal('modal-edit');
