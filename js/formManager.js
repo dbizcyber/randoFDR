@@ -47,7 +47,10 @@ const SECTIONS_CHAMPS = {
 function getValeur(id, isSpan = false) {
   const el = document.getElementById(id);
   if (!el) return "";
-  if (isSpan && el.tagName !== "INPUT") return el.textContent?.trim() || "";
+  if (isSpan && el.tagName !== "INPUT") {
+    const v = el.textContent?.trim() || "";
+    return v === "—" ? "" : v;  // ← normaliser "—" en ""
+  }
   return el.value?.trim() || "";
 }
 
