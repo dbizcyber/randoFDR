@@ -69,9 +69,11 @@ function collecterFiche(profilPNG) {
                     : val("parkingCovoiturage"),
     heure_rv:       val("heureRV")               || null,
     parking_depart: txt("parkingRandoAdresse")   || null,
-    const lat = txt("latParking");
-    const lon = txt("lonParking");
-    gps: (lat && lat !== "—" && lon && lon !== "—") ? `${lat},${lon}` : null,
+    gps:            (() => {
+                      const lat = txt("latParking");
+                      const lon = txt("lonParking");
+                      return (lat && lat !== "—" && lon && lon !== "—") ? lat + "," + lon : null;
+                    })(),
     distance:       parseFloat(txt("distanceGPX"))  || parseFloat(val("distanceGPX_manuel"))  || null,
     denivele:       parseInt(txt("denivele"))        || parseInt(val("denivele_manuel"))        || null,
     duree:          txt("dureeMarche")              || val("dureeMarche_manuel")               || null,
