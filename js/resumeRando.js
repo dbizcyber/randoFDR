@@ -1,9 +1,7 @@
 export function initResume(){
-
 document
 .getElementById("btnResume")
 .addEventListener("click", genererResume)
-
 }
 
 function genererResume(){
@@ -28,9 +26,7 @@ const parkingCovoit = (parkingCovoitVal === "__autre__" && parkingCovoitAutre)
 
 const rv = val("heureRV","--")
 const depart = txt("heureDepart")
-
 const trajet = val("itineraire","Non renseigné")
-
 const km = txt("distanceAR")
 
 const parkingRando =
@@ -45,15 +41,21 @@ const cov5 = txt("cout5")
 const distRando = txt("distanceGPX")
 const denivele = txt("denivele")
 const duree = txt("duree")
-
 const ibp = txt("ibp")
 const effort = txt("effort")
-
 const technicite = val("technicite","0")
 const risque = val("risque","0")
-
 const remarques = val("remarques","Non renseigné")
 const animateur = val("animateur","❌ Non renseigné")
+
+/* ── Pastille IBP ── */
+const ibpNum = parseFloat(ibp)
+const ibpNiveau = (!ibp || ibp === "—" || isNaN(ibpNum)) ? "" :
+  ibpNum <= 25  ? "🟢 N1 — Facile" :
+  ibpNum <= 50  ? "🔵 N2 — Assez Facile" :
+  ibpNum <= 75  ? "🟡 N3 — Peu Difficile" :
+  ibpNum <= 100 ? "🔴 N4 — Assez Difficile" :
+                  "⚫ N5 — Difficile"
 
 const texte = `
 Feuille de route : ${formatDate(date)} — ${nom}
@@ -75,7 +77,6 @@ Kilométrage voiture A/R : ${km} km
 🏁 Parking départ randonnée : ${parkingRando}
 
 📍 Coordonnées GPS : ${gps}
-
 📍 Google Maps :
 https://www.google.com/maps?q=${gps}
 
@@ -90,7 +91,7 @@ Distance de la Randonnée : ≃${distRando} km
 😋 Dénivelé positif : ≃${denivele} m
 ⏱️ Durée totale: ≃${duree}
 
-IBP : ${ibp}
+IBP : ${ibp}${ibpNiveau ? "  " + ibpNiveau : ""}
 
 E: ${effort}, T: ${technicite}, R : ${risque}
 
@@ -115,28 +116,20 @@ document.getElementById("resumeRando").textContent = texte
 /* helpers */
 
 function val(id,def){
-
 const el = document.getElementById(id)
 if(!el) return def
 return el.value || def
-
 }
 
 function txt(id){
-
 const el = document.getElementById(id)
 if(!el) return ""
 if(el.tagName === "INPUT" || el.tagName === "TEXTAREA") return el.value || ""
 return el.textContent
-
 }
 
 function formatDate(d){
-
 if(!d) return ""
-
 const date = new Date(d)
-
 return date.toLocaleDateString("fr-FR")
-
 }
