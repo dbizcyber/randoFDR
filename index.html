@@ -595,6 +595,60 @@ const f = JSON.parse(decodeURIComponent(atob(encoded)));
   } catch(e) { console.warn("Erreur lecture fiche:", e); }
 })();
 
+  /* ══ RÉCEPTION postMessage depuis randonnees-club.html ══
+   À coller dans index.html juste avant la ligne :
+   });   ← celle qui ferme "Active nav au scroll"
+   ================================================== */
+
+window.addEventListener("message", (e) => {
+  if (!e.data || e.data.type !== "chargerFiche") return;
+  const f = e.data.payload;
+  if (!f) return;
+
+  /* Attendre que app.js ait fini son init si nécessaire */
+  const remplir = () => {
+    const set    = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+    const setTxt = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.textContent = val; };
+
+    set("nomRando",           f.nomRando);
+    set("heureRV",            f.heureRV);
+    set("technicite",         f.technicite);
+    set("risque",             f.risque);
+    set("remarques",          f.remarques);
+
+    const selAnim = document.getElementById("animateur");
+    if (selAnim && f.animateur) {
+      selAnim.value = f.animateur;
+      selAnim.dispatchEvent(new Event("change"));
+    }
+    const selPark = document.getElementById("parkingCovoiturage");
+    if (selPark && f.parkingCovoit) {
+      selPark.value = f.parkingCovoit;
+      selPark.dispatchEvent(new Event("change"));
+    }
+
+    set("distanceGPX_manuel", f.distance);
+    set("denivele_manuel",    f.denivele);
+    set("dureeMarche_manuel", f.duree);
+    set("effort_manuel",      f.effort);
+    setTxt("distanceGPX",     f.distance);
+    setTxt("denivele",        f.denivele);
+    setTxt("dureeMarche",     f.duree);
+    setTxt("effort",          f.effort);
+
+    window._majIndicateurs && window._majIndicateurs();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    console.log("[postMessage] Fiche chargée ✅", f.nomRando);
+  };
+
+  /* Si _majIndicateurs est déjà dispo → remplir immédiatement, sinon attendre 800ms */
+  if (window._majIndicateurs) {
+    remplir();
+  } else {
+    setTimeout(remplir, 800);
+  }
+});
+  
 /* Active nav au scroll */
 const sections = document.querySelectorAll('.card[id]');
 const navLinks  = document.querySelectorAll('.app-nav a');
