@@ -40,7 +40,7 @@ const cov5 = txt("cout5")
 
 const distRando = txt("distanceGPX")
 const denivele = txt("denivele")
-const duree = txt("duree")
+const duree = txt("dureeMarche")  // ✅
 const ibp = txt("ibp")
 const effort = txt("effort")
 const technicite = val("technicite","0")
