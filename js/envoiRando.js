@@ -79,6 +79,7 @@ function collecterFiche(profilPNG) {
     couts:          txt("coutTotal")                 || null,
     remarques:      val("remarques")                 || null,
     profil_png:     profilPNG                        || null,
+    statut:         "publiée",
   };
 }
 
