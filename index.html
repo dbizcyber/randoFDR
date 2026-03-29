@@ -562,7 +562,8 @@ document.getElementById('btnReset')?.addEventListener('click', () => {
   /* Nettoyer le hash immédiatement */
   window.history.replaceState({}, "", window.location.pathname);
   try {
-    const f = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+    // ✅ APRÈS
+const f = JSON.parse(decodeURIComponent(atob(encoded)));
     window.addEventListener("load", () => setTimeout(() => {
       const set    = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
       const setTxt = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.textContent = val; };
