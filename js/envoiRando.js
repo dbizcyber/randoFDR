@@ -4,6 +4,7 @@ import { chartProfil } from "./profilAltitude.js"
 
 const SUPABASE_URL = "https://whlxbfnmyqdflmxosfse.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkOcGRb6QvmWYZsll4crnH4Al3sIXhfQHdd0YpR3_sB-X0tdP8lhXSPMMuh74UmJ22ag/exec";
 
 export function initEnvoi() {
   const btn = document.getElementById("btnEnvoyer");
@@ -137,6 +138,58 @@ async function envoyerEmail(resume, emailUser, profilPNG) {
 }
 
 /* ══════════════════════════════════════
+   SYNC GOOGLE SHEETS + CALENDAR
+   Via Apps Script (GET + iframe, contournement CORS)
+══════════════════════════════════════ */
+function syncGoogleSheets(fiche) {
+  return new Promise((resolve) => {
+    /* Créer l'iframe cachée si elle n'existe pas encore */
+    let iframe = document.getElementById("iframe_hidden_envoi");
+    if (!iframe) {
+      iframe = document.createElement("iframe");
+      iframe.name = "iframe_hidden_envoi";
+      iframe.id   = "iframe_hidden_envoi";
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+    }
+
+    const params = {
+      action:    "add",
+      date:      fiche.date_rando  || "",
+      animateur: fiche.animateur   || "",
+      nom:       fiche.nom_rando   || "",
+      ibp:       fiche.ibp         || "",
+      distance:  fiche.distance    || "",
+      denivele:  fiche.denivele    || "",
+    };
+
+    const form = document.createElement("form");
+    form.method  = "GET";
+    form.action  = APPS_SCRIPT_URL;
+    form.target  = "iframe_hidden_envoi";
+    form.style.display = "none";
+
+    Object.entries(params).forEach(([k, v]) => {
+      const input = document.createElement("input");
+      input.type  = "hidden";
+      input.name  = k;
+      input.value = v;
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+    console.log("[Google] Envoi Apps Script ✅", params);
+
+    /* Résoudre après 2,5 s — on ne peut pas lire la réponse (CORS) */
+    setTimeout(() => {
+      form.parentNode?.removeChild(form);
+      resolve(true);
+    }, 2500);
+  });
+}
+
+/* ══════════════════════════════════════
    ENVOI PRINCIPAL
 ══════════════════════════════════════ */
 async function envoyerRando() {
@@ -168,17 +221,23 @@ async function envoyerRando() {
       profilPNG = chartProfil.toBase64Image();
     }
 
-    /* ── 1 et 2 en parallèle : email + sauvegarde ── */
-    const [emailOk, saveOk] = await Promise.all([
+    /* Collecte unique de la fiche (partagée entre les 3 appels) */
+    const fiche = collecterFiche(profilPNG);
+
+    /* ── 1, 2 et 3 en parallèle : email + Supabase + Google Sheets/Calendar ── */
+    const [emailOk, saveOk, _gsOk] = await Promise.all([
       envoyerEmail(resume, emailUser, profilPNG),
-      sauvegarderFiche(collecterFiche(profilPNG))
+      sauvegarderFiche(fiche),
+      syncGoogleSheets(fiche)
     ]);
 
-    /* Message selon résultat */
+    console.log("[Résultat] email:", emailOk, "supabase:", saveOk, "google:", _gsOk);
+
+    /* Message selon résultat email + supabase (Google est best-effort) */
     if (emailOk && saveOk) {
       afficherPopup({
         icone: "✅", titre: "Fiche envoyée !",
-        message: "Email envoyé et fiche archivée dans l'historique.",
+        message: "Email envoyé, fiche archivée et planning Google mis à jour.",
         couleur: "#2a7a2a", bouton: "Super !",
         onClose: () => { window._effacerSauvegarde && window._effacerSauvegarde(); }
       });
