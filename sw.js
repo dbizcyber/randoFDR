@@ -25,7 +25,6 @@ const CACHE_STATIC = [
   '/randoFDR/js/envoiRando.js',
   '/randoFDR/js/formManager.js',
   '/randoFDR/data/randos.js',
-  '/randoFDR/data/animateurs.js',
   '/randoFDR/data/parkings.js',
   '/randoFDR/carteRandos.html',
   '/randoFDR/css/carteRandos.css',
