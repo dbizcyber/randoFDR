@@ -116,6 +116,13 @@
     font-weight: 700; cursor: pointer; margin-top: 4px;
   }
   .btn-save:hover { opacity: .9; }
+  .btn-delete {
+    width: 100%; padding: 11px; border: 1.5px solid #f5c6cb; border-radius: 8px;
+    background: white; color: #721c24;
+    font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; margin-top: 6px; transition: all .15s;
+  }
+  .btn-delete:hover { background: #f8d7da; }
   .err-msg { font-size: 13px; color: #c53030; text-align: center; margin-top: 4px; display: none; }
 
   /* ── MOT DE PASSE ── */
@@ -223,6 +230,7 @@
       <div><label>Remarques</label><textarea id="modifRemarques" placeholder="Décrivez les modifications…"></textarea></div>
       <div class="err-msg" id="modifErr">Erreur lors de la sauvegarde. Réessayez.</div>
       <button class="btn-save" onclick="sauvegarderModif()">💾 Enregistrer les modifications</button>
+      <button class="btn-delete" onclick="supprimerFiche()">🗑 Supprimer cette randonnée</button>
     </div>
   </div>
 </div>
@@ -442,6 +450,8 @@ document.getElementById("modalModif").addEventListener("click", function(e) {
 
 async function sauvegarderModif() {
   const id = Number(document.getElementById("modifId").value);
+  if (!id) { console.error("[Modif] id manquant"); return; }
+
   const patch = {
     nom_rando:      document.getElementById("modifNom").value.trim()           || null,
     date_rando:     document.getElementById("modifDate").value                 || null,
@@ -455,8 +465,12 @@ async function sauvegarderModif() {
     remarques:      document.getElementById("modifRemarques").value.trim()     || null,
   };
 
-  const btn = document.querySelector(".btn-save");
-  btn.disabled = true; btn.textContent = "⏳ Enregistrement…";
+  /* Sélecteur ciblé sur le modal de modification */
+  const btn = document.querySelector("#modalModif .btn-save");
+  if (btn) { btn.disabled = true; btn.textContent = "⏳ Enregistrement…"; }
+
+  document.getElementById("modifErr").style.display = "none";
+  console.log("[Modif] PATCH id=", id, patch);
 
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/fiches?id=eq.${id}`, {
@@ -470,7 +484,13 @@ async function sauvegarderModif() {
       body: JSON.stringify(patch)
     });
 
-    if (!res.ok) throw new Error(res.status);
+    console.log("[Modif] réponse HTTP:", res.status, res.ok);
+
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error("[Modif] erreur Supabase:", txt);
+      throw new Error("HTTP " + res.status + " — " + txt);
+    }
 
     /* Mettre à jour localement */
     const f = fiches.find(x => x.id === id);
@@ -480,9 +500,49 @@ async function sauvegarderModif() {
     charger(); /* recharger les listes */
 
   } catch(e) {
-    document.getElementById("modifErr").style.display = "block";
+    console.error("[Modif] exception:", e.message);
+    const errEl = document.getElementById("modifErr");
+    errEl.textContent = "Erreur : " + e.message;
+    errEl.style.display = "block";
   } finally {
-    btn.disabled = false; btn.textContent = "💾 Enregistrer les modifications";
+    if (btn) { btn.disabled = false; btn.textContent = "💾 Enregistrer les modifications"; }
+  }
+}
+
+/* ══ SUPPRIMER UNE FICHE ══ */
+async function supprimerFiche() {
+  const id = Number(document.getElementById("modifId").value);
+  if (!id) return;
+
+  const nom = document.getElementById("modifNom").value || "cette randonnée";
+  if (!confirm(`Supprimer définitivement "${nom}" ?
+Cette action est irréversible.`)) return;
+
+  const btn = document.querySelector("#modalModif .btn-delete");
+  if (btn) { btn.disabled = true; btn.textContent = "⏳ Suppression…"; }
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/fiches?id=eq.${id}`, {
+      method: "DELETE",
+      headers: {
+        "apikey":        SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`
+      }
+    });
+
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
+    /* Supprimer localement */
+    fiches = fiches.filter(x => x.id !== id);
+    fermerModif();
+    charger();
+
+  } catch(e) {
+    console.error("[Suppr] exception:", e.message);
+    const errEl = document.getElementById("modifErr");
+    errEl.textContent = "Erreur suppression : " + e.message;
+    errEl.style.display = "block";
+    if (btn) { btn.disabled = false; btn.textContent = "🗑 Supprimer"; }
   }
 }
 
