@@ -117,12 +117,12 @@
   }
   .btn-save:hover { opacity: .9; }
   .btn-delete {
-    width: 100%; padding: 11px; border: 1.5px solid #f5c6cb; border-radius: 8px;
-    background: white; color: #721c24;
-    font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600;
-    cursor: pointer; margin-top: 6px; transition: all .15s;
+    width: 100%; padding: 12px; border: none; border-radius: 8px;
+    background: #f8d7da; color: #721c24;
+    font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700;
+    cursor: pointer; margin-top: 0; transition: all .15s;
   }
-  .btn-delete:hover { background: #f8d7da; }
+  .btn-delete:hover { background: #e53e3e; color: white; }
   .err-msg { font-size: 13px; color: #c53030; text-align: center; margin-top: 4px; display: none; }
 
   /* ── MOT DE PASSE ── */
@@ -196,7 +196,7 @@
 
 <!-- ══ Modal modification ══ -->
 <div class="modal-overlay" id="modalModif">
-  <div class="modal-box" style="max-width:560px">
+  <div class="modal-box" style="max-width:560px;max-height:80vh;overflow-y:auto;">
     <div class="modal-head">
       <div class="modal-titre">✏️ Modifier la randonnée</div>
       <button class="modal-close" onclick="fermerModif()">✕ Fermer</button>
@@ -230,7 +230,9 @@
       <div><label>Remarques</label><textarea id="modifRemarques" placeholder="Décrivez les modifications…"></textarea></div>
       <div class="err-msg" id="modifErr">Erreur lors de la sauvegarde. Réessayez.</div>
       <button class="btn-save" onclick="sauvegarderModif()">💾 Enregistrer les modifications</button>
-      <button class="btn-delete" onclick="supprimerFiche()">🗑 Supprimer cette randonnée</button>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid #e8d8c4;">
+        <button class="btn-delete" onclick="supprimerFiche()">🗑 Supprimer définitivement cette randonnée</button>
+      </div>
     </div>
   </div>
 </div>
