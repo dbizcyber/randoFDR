@@ -244,6 +244,30 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let fiches = [];
 let idEnCours = null;
 
+/* ══ SYNC GOOGLE CALENDAR via Edge Function ══ */
+async function syncCalendar(action, ficheData) {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/functions/v1/dynamic-handler`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":  "application/json",
+          "apikey":        SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify({ action, fiche: ficheData })
+      }
+    );
+    const data = await res.json();
+    console.log("[Calendar sync]", action, data.success ? "✅" : "⚠️");
+    return data.success;
+  } catch(e) {
+    console.warn("[Calendar sync] Erreur:", e.message);
+    return false;
+  }
+}
+
 /* ══ IBP ══ */
 function ibpInfo(v) {
   const n = parseFloat(v);
@@ -501,6 +525,26 @@ async function sauvegarderModif() {
     const f = fiches.find(x => x.id === id);
     if (f) Object.assign(f, patch);
 
+    /* Sync Google Calendar (best-effort) */
+    const ficheActuelle = fiches.find(x => x.id === id) || {};
+    syncCalendar("calendarUpdate", {
+      dateRando:    patch.date_rando     || ficheActuelle.date_rando,
+      nomRando:     patch.nom_rando      || ficheActuelle.nom_rando,
+      animateur:    patch.animateur      || ficheActuelle.animateur,
+      heureRV:      patch.heure_rv       || ficheActuelle.heure_rv      || "",
+      parking:      patch.parking_covoit || ficheActuelle.parking_covoit || "",
+      parkingDepart:patch.parking_depart || ficheActuelle.parking_depart || "",
+      gps:          ficheActuelle.gps    || "",
+      distance:     patch.distance       || ficheActuelle.distance       || "",
+      denivele:     patch.denivele       || ficheActuelle.denivele       || "",
+      duree:        patch.duree          || ficheActuelle.duree          || "",
+      ibp:          ficheActuelle.ibp    || "",
+      effort:       ficheActuelle.effort || "",
+      technicite:   patch.technicite     || ficheActuelle.technicite     || "",
+      risque:       patch.risque         || ficheActuelle.risque         || "",
+      couts:        ficheActuelle.couts  || "",
+    });
+
     fermerModif();
     charger(); /* recharger les listes */
 
@@ -539,7 +583,17 @@ Cette action est irréversible.`)) return;
     if (!res.ok) throw new Error("HTTP " + res.status);
 
     /* Supprimer localement */
+    const ficheASuppr = fiches.find(x => x.id === id);
     fiches = fiches.filter(x => x.id !== id);
+
+    /* Sync Google Calendar (best-effort) */
+    if (ficheASuppr) {
+      syncCalendar("calendarDelete", {
+        dateRando: ficheASuppr.date_rando,
+        animateur: ficheASuppr.animateur || "",
+      });
+    }
+
     fermerModif();
     charger();
 
