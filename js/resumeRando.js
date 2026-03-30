@@ -47,6 +47,9 @@ const technicite = val("technicite","0")
 const risque = val("risque","0")
 const remarques = val("remarques","Non renseigné")
 const animateur = val("animateur","❌ Non renseigné")
+const selectAnim = document.getElementById("animateur")
+const tel = selectAnim?.selectedOptions[0]?.dataset?.tel || ""
+const animateurAvecTel = animateur && tel ? `${animateur}  📱 ${tel}` : animateur
 
 /* ── Pastille IBP ── */
 const ibpNum = parseFloat(ibp)
@@ -97,7 +100,7 @@ E: ${effort}, T: ${technicite}, R : ${risque}
 
 📌 Remarques et particularités : ${remarques}
 
-🚶‍♂️🚶🏻‍♀️Animateur-trice : ${animateur}
+🚶‍♂️🚶🏻‍♀️Animateur-trice : ${animateurAvecTel}
 
 Les paramètres de la randonnée sont donnés à titre indicatif uniquement. 
 Ils peuvent varier en fonction des applications GPS.
