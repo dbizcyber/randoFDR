@@ -49,7 +49,7 @@ function getValeur(id, isSpan = false) {
   if (!el) return "";
   if (isSpan && el.tagName !== "INPUT") {
     const v = el.textContent?.trim() || "";
-    return v === "—" ? "" : v;  // ← normaliser "—" en ""
+    return v === "—" ? "" : v;  /* normaliser "—" en "" pour la validation */
   }
   return el.value?.trim() || "";
 }
