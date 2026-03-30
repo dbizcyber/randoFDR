@@ -350,6 +350,22 @@ async function charger() {
   }
 }
 
+/* ══ RENDU LOCAL — sans rechargement réseau ══ */
+function renderLocal() {
+  const aujourd = new Date().toISOString().split("T")[0];
+  const avenir  = fiches.filter(f => f.date_rando && f.date_rando >= aujourd);
+  const passees = fiches.filter(f => !f.date_rando || f.date_rando < aujourd).reverse();
+
+  document.getElementById("listeAvenir").innerHTML =
+    avenir.length  ? avenir.map(renderLigne).join("")  : '<div class="empty">Aucune randonnée prévue.</div>';
+  document.getElementById("listePassees").innerHTML =
+    passees.length ? passees.map(renderLigne).join("") : '<div class="empty">Aucune randonnée passée.</div>';
+
+  const bodyAvenir = document.getElementById("body-avenir");
+  bodyAvenir.style.maxHeight = bodyAvenir.scrollHeight + "px";
+  setTimeout(() => bodyAvenir.style.maxHeight = "none", 320);
+}
+
 /* ══ MODAL DÉTAIL ══ */
 function voirDetail(id) {
   const f = fiches.find(x => x.id === id);
@@ -546,7 +562,7 @@ async function sauvegarderModif() {
     });
 
     fermerModif();
-    charger(); /* recharger les listes */
+    renderLocal(); /* mise à jour locale sans appel réseau */
 
   } catch(e) {
     console.error("[Modif] exception:", e.message);
@@ -595,7 +611,7 @@ Cette action est irréversible.`)) return;
     }
 
     fermerModif();
-    charger();
+    renderLocal(); /* mise à jour locale sans appel réseau */
 
   } catch(e) {
     console.error("[Suppr] exception:", e.message);
