@@ -428,6 +428,7 @@ function ouvrirModif(id) {
   if (!f) return;
 
   document.getElementById("modifId").value            = f.id;
+  console.log("[ouvrirModif] id=", f.id, "type=", typeof f.id, "modifId.value=", document.getElementById("modifId").value);
   document.getElementById("modifNom").value           = f.nom_rando      || "";
   document.getElementById("modifDate").value          = f.date_rando     || "";
   document.getElementById("modifParkingCovoit").value = f.parking_covoit || "";
@@ -451,8 +452,10 @@ document.getElementById("modalModif").addEventListener("click", function(e) {
 });
 
 async function sauvegarderModif() {
-  const id = Number(document.getElementById("modifId").value);
-  if (!id) { console.error("[Modif] id manquant"); return; }
+  /* Priorité à idEnCours (fiable) plutôt qu'au champ caché */
+  const id = idEnCours || Number(document.getElementById("modifId").value);
+  if (!id) { console.error("[Modif] id manquant — idEnCours:", idEnCours, "modifId:", document.getElementById("modifId").value); return; }
+  console.log("[Modif] id utilisé:", id);
 
   const patch = {
     nom_rando:      document.getElementById("modifNom").value.trim()           || null,
@@ -513,8 +516,9 @@ async function sauvegarderModif() {
 
 /* ══ SUPPRIMER UNE FICHE ══ */
 async function supprimerFiche() {
-  const id = Number(document.getElementById("modifId").value);
+  const id = idEnCours || Number(document.getElementById("modifId").value);
   if (!id) return;
+  console.log("[Suppr] id utilisé:", id);
 
   const nom = document.getElementById("modifNom").value || "cette randonnée";
   if (!confirm(`Supprimer définitivement "${nom}" ?
