@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -500,7 +500,7 @@ function renderTable() {
       <td>${ev.denivele ? "<span class='badge green'>"+ev.denivele+" m</span>" : "—"}</td>
       <td class="actions-cell">
         <button class="btn btn-edit"   onclick='openEdit(${ej})'>✏️ Modifier</button>
-        <button class="btn btn-delete" onclick='confirmDelete(${ev.rowIndex},"${(ev.nom||"").replace(/"/g,"&quot;")}">❌ Annuler</button>
+        <button class="btn btn-delete" onclick='confirmDelete(${ev.rowIndex},"${(ev.nom||"").replace(/"/g,"&quot;")}","${(ev.animateur||"").replace(/"/g,"&quot;")}",${JSON.stringify(toISO(ev.date))})'>❌ Annuler</button>
       </td>`;
     tbody.appendChild(tr);
   });
