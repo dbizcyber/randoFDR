@@ -28,7 +28,8 @@ async function lireGPX(event){
   const xml = parser.parseFromString(text,"text/xml")
   const points = [...xml.getElementsByTagName("trkpt")]
 
-  let distances=[], altitudes=[], slopes=[], totalDist=0
+  let distances=[], altitudes=[], slopes=[], totalDist=0, totalDplus=0
+  let tDebut=null, tFin=null  // timestamps GPX pour durée exacte
 
   for(let i=1;i<points.length;i++){
     const lat1=parseFloat(points[i-1].getAttribute("lat"))
@@ -42,11 +43,22 @@ async function lireGPX(event){
     const ele2 = parseFloat(e2.textContent)
     const dist = haversine(lat1,lon1,lat2,lon2)
     totalDist += dist
+    /* Cumul dénivelé positif */
+    if(ele2 - ele1 > 0) totalDplus += (ele2 - ele1)
     if(dist===0) continue
     const pente = ((ele2-ele1)/(dist*1000))*100
     distances.push(totalDist)
     altitudes.push(ele2)
     slopes.push(pente)
+  }
+
+  /* Timestamps GPX : lire premier et dernier point */
+  const allPts = Array.from(points)
+  const t0el = allPts[0]?.getElementsByTagName("time")?.[0]
+  const tNel = allPts[allPts.length-1]?.getElementsByTagName("time")?.[0]
+  if(t0el && tNel) {
+    tDebut = new Date(t0el.textContent)
+    tFin   = new Date(tNel.textContent)
   }
 
   /* sous-échantillonnage uniforme 300 pts */
@@ -58,8 +70,8 @@ async function lireGPX(event){
   /* 2. Canvas export fixe hors-écran */
   dessinerCanvasExport(d, a, s)
 
-  calculDuree(totalDist)
-  calculSimulation(totalDist)
+  calculDuree(totalDist, totalDplus, tDebut, tFin)
+  calculSimulation(totalDist, totalDplus)
 }
 
 /* ══════════════════════════════════════════
@@ -284,28 +296,44 @@ async function calculIBP(file){
   }
 }
 
+let ibpAccuclimb = 0  // D+ lissé retourné par l'API IBP
+
 function exploiterIBP(data){
   if(!data || !data.hiking) return
   const hike = data.hiking
   document.getElementById("distanceGPX").textContent = hike.totlengthkm
   document.getElementById("denivele").textContent    = hike.accuclimb
   document.getElementById("ibp").textContent         = hike.ibp
+  ibpAccuclimb = parseFloat(hike.accuclimb) || 0  // stocker D+ lissé IBP
   calculEffort(hike.ibp)
 }
 
-function calculDuree(distanceKm){
-  const vitesse = parseFloat(document.getElementById("vitesse").value)
-  if(!vitesse) return
-  const heures=distanceKm/vitesse
-  const h=Math.floor(heures), m=Math.round((heures-h)*60)
-  document.getElementById("dureeMarche").textContent=`${h}h${m}`
+function calculDuree(distanceKm, dplus=0, tDebut=null, tFin=null){
+  let h, m
+  if(tDebut && tFin && !isNaN(tDebut) && !isNaN(tFin) && tFin > tDebut) {
+    /* Durée exacte depuis les timestamps GPX — même résultat qu'IBPindex */
+    const dureeMin = (tFin - tDebut) / 60000
+    h = Math.floor(dureeMin / 60)
+    m = Math.round(dureeMin % 60)
+  } else {
+    /* Fallback Naismith si pas de timestamps
+       Priorité : D+ lissé IBP (plus précis) sinon D+ brut GPX */
+    const vitesse = parseFloat(document.getElementById("vitesse").value)
+    if(!vitesse) return
+    const dplusNaismith = ibpAccuclimb > 0 ? ibpAccuclimb : dplus
+    const heures = (distanceKm / vitesse) + (dplusNaismith / 300)
+    h = Math.floor(heures)
+    m = Math.round((heures - h) * 60)
+  }
+  document.getElementById("dureeMarche").textContent=`${h}h${String(m).padStart(2,'0')}`
 }
 
-function calculSimulation(distanceKm){
+function calculSimulation(distanceKm, dplus=0){
   const vitesse    = parseFloat(document.getElementById("vitesse").value)
   const heureDepart = document.getElementById("heureDepartMarche").value
   if(!vitesse || !heureDepart) return
-  const heures=distanceKm/vitesse
+  /* Formule Naismith : durée = distance/vitesse + D+/300m par heure */
+  const heures = (distanceKm / vitesse) + (dplus / 300)
   const h=Math.floor(heures), m=Math.round((heures-h)*60)
   const [hh,mm]=heureDepart.split(":").map(Number)
   let hA=hh+h, mA=mm+m
