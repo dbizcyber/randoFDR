@@ -1,5 +1,8 @@
 <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Planning Randonnées</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -272,8 +275,9 @@
 <div id="toast"></div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkOcGRb6QvmWYZsll4crnH4Al3sIXhfQHdd0YpR3_sB-X0tdP8lhXSPMMuh74UmJ22ag/exec";
-const BASE_URL   = "https://dbizcyber.github.io/randoFDR/data/";
+const SUPABASE_URL = "https://whlxbfnmyqdflmxosfse.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE";
+const BASE_URL     = "https://dbizcyber.github.io/randoFDR/data/";
 
 let animateurs = [];
 let randos     = [];
@@ -346,26 +350,15 @@ function niveauIBP(v) {
    ══════════════════════════════════════════ */
 async function loadData() {
   try {
-    const SUPABASE_URL = "https://whlxbfnmyqdflmxosfse.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndobHhiZm5teXFkZmxteG9zZnNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA5MTksImV4cCI6MjA4ODM1NjkxOX0.vf3sdnJRnnXyIx998fhPSIUPX0WS7KqDbvAwesCzOcE";
-
     const [a, r] = await Promise.all([
-      /* Animateurs depuis Supabase */
       fetch(`${SUPABASE_URL}/rest/v1/animateurs?select=nom,email&order=nom`, {
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`
-        }
+        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
       }).then(res => res.json()),
-
-      /* Randos depuis GitHub Pages (inchangé) */
       fetch(BASE_URL + 'randos.json').then(res => res.json())
     ]);
-
     animateurs = a.filter(x => x.nom && x.nom !== '');
     randos     = r;
     initAutocomplete();
-
   } catch(e) { console.error('Erreur chargement:', e); }
 }
 /* ══════════════════════════════════════════
@@ -443,14 +436,6 @@ function showToast(msg, isError = false) {
   setTimeout(() => t.className = '', 3500);
 }
 
-/* ══════════════════════════════════════════
-   APPEL APPS SCRIPT
-   ══════════════════════════════════════════ */
-async function callScript(params) {
-  const res = await fetch(SCRIPT_URL + '?' + new URLSearchParams(params).toString());
-  return res.json();
-}
-
 function setBusy(btnId, busy) {
   const btn = document.getElementById(btnId);
   if (!btn) return;
@@ -463,7 +448,7 @@ function setBusy(btnId, busy) {
    CRÉER
    ══════════════════════════════════════════ */
 async function creerRando() {
-  const date      = document.getElementById('date').value;        // ISO YYYY-MM-DD
+  const date      = document.getElementById('date').value;
   const nom       = document.getElementById('nom-input').value.trim();
   const animateur = document.getElementById('animateur-input').value.trim();
   const ibp       = document.getElementById('ibp').value.trim();
@@ -472,21 +457,38 @@ async function creerRando() {
   if (!date || !nom || !animateur) { showToast('Veuillez remplir les champs obligatoires (*)', true); return; }
   setBusy('btn-create', true);
   try {
-    const res = await callScript({ action:'add', date, nom, animateur, ibp, distance, denivele });
-    if (res.success) {
-      showToast('✅ Randonnée créée dans Sheets et Calendar !');
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/fiches`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'apikey':        SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer':        'return=minimal'
+      },
+      body: JSON.stringify({
+        date_rando: date,
+        nom_rando:  nom,
+        animateur:  animateur,
+        ibp:        ibp       ? parseFloat(ibp)       : null,
+        distance:   distance  ? parseFloat(distance)  : null,
+        denivele:   denivele  ? parseInt(denivele)     : null,
+        statut:     'publiée'
+      })
+    });
+    if (res.ok) {
+      showToast('✅ Randonnée créée dans Supabase et Calendar !');
       ['ibp','distance','denivele'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('nom-input').value = '';
       document.getElementById('animateur-input').value = '';
       document.getElementById('ibp-badge').className = 'ibp-badge';
-      // Date suivante auto : lundi ou jeudi suivant
       const last = new Date(date + 'T12:00:00');
       const dow  = last.getDay();
       const next = new Date(last);
       next.setDate(last.getDate() + (dow === 1 ? 3 : dow === 4 ? 4 : 3));
       document.getElementById('date').value = next.toISOString().split('T')[0];
     } else {
-      showToast('Erreur : ' + (res.error || 'inconnue'), true);
+      const txt = await res.text();
+      showToast('Erreur : ' + txt, true);
     }
   } catch(e) { showToast('Erreur réseau : ' + e.message, true); }
   setBusy('btn-create', false);
@@ -496,13 +498,13 @@ async function creerRando() {
    CHARGER LES ÉVÉNEMENTS
    ══════════════════════════════════════════ */
 async function loadEvents() {
-  setBusy('btn-load', true);
   try {
-    const res = await callScript({ action: 'list' });
-    allRows   = res.rows || res.events || [];
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/fiches?select=*&order=date_rando.asc`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    allRows = await res.json();
     renderTable();
   } catch(e) { showToast('Erreur réseau lors du chargement.', true); }
-  setBusy('btn-load', false);
 }
 
 /* ══════════════════════════════════════════
@@ -518,12 +520,11 @@ function renderTable() {
     return;
   }
 
-  // Tri sur la colonne active
   const sorted = [...allRows].sort((a, b) => {
     let va, vb;
     if (sortCol === 'date') {
-      va = toISO(a.date);
-      vb = toISO(b.date);
+      va = a.date_rando || '';
+      vb = b.date_rando || '';
     } else {
       va = (a.animateur || '').toLowerCase();
       vb = (b.animateur || '').toLowerCase();
@@ -534,26 +535,28 @@ function renderTable() {
   });
 
   sorted.forEach(ev => {
-    const tr  = document.createElement('tr');
-    const ej  = JSON.stringify(ev).replace(/'/g, "&#39;");
-    const dateAff = toDisplay(ev.date);        // → JJ/MM/AAAA garanti
-    const jour    = jourSemaine(ev.date);      // → "lundi", "jeudi", etc.
+    const tr      = document.createElement('tr');
+    const ej      = JSON.stringify(ev).replace(/'/g, "&#39;");
+    const dateAff = toDisplay(ev.date_rando);
+    const jour    = jourSemaine(ev.date_rando);
+    const statut  = ev.statut || 'publiée';
+    const annulee = statut === 'annulée';
 
-    // Cellule date : jour en vert + date
     const dateHtml = jour
       ? `<span class="date-cell"><span class="jour">${jour}</span><span class="date">${dateAff}</span></span>`
       : `<span class="date-cell"><span class="date">${dateAff || '—'}</span></span>`;
 
+    tr.style.opacity = annulee ? '0.5' : '1';
     tr.innerHTML = `
       <td>${dateHtml}</td>
-      <td><strong>${ev.nom || '—'}</strong></td>
+      <td><strong style="${annulee ? 'text-decoration:line-through' : ''}">${ev.nom_rando || '—'}</strong>${annulee ? ' <span style="color:#e53e3e;font-size:.75rem">❌ Annulée</span>' : ''}</td>
       <td>${ev.animateur || '—'}</td>
-      <td>${ev.ibp      ? '<span class="badge">'       + ev.ibp      + '</span>'     : '—'}</td>
-      <td>${ev.distance ? '<span class="badge green">'  + ev.distance + ' km</span>' : '—'}</td>
-      <td>${ev.denivele ? '<span class="badge green">'  + ev.denivele + ' m</span>'  : '—'}</td>
+      <td>${ev.ibp      ? '<span class="badge">'      + ev.ibp      + '</span>'     : '—'}</td>
+      <td>${ev.distance ? '<span class="badge green">' + ev.distance + ' km</span>' : '—'}</td>
+      <td>${ev.denivele ? '<span class="badge green">' + ev.denivele + ' m</span>'  : '—'}</td>
       <td class="actions-cell">
         <button class="btn btn-edit"   onclick='openEdit(${ej})'>✏️ Modifier</button>
-        <button class="btn btn-delete" onclick='confirmDelete(${ev.rowIndex},"${(ev.nom||'').replace(/"/g,'&quot;')}")'>❌ Annuler</button>
+        ${!annulee ? `<button class="btn btn-delete" onclick='confirmDelete(${ev.id},"${(ev.nom_rando||'').replace(/"/g,'&quot;')}","${(ev.animateur||'').replace(/"/g,'&quot;')}",${JSON.stringify(ev.date_rando)})'>❌ Annuler</button>` : ''}
       </td>`;
     tbody.appendChild(tr);
   });
@@ -593,23 +596,23 @@ function sortTable(col) {
    On renvoie ISO au script lors de la sauvegarde.
    ══════════════════════════════════════════ */
 function openEdit(ev) {
-  document.getElementById('edit-rowIndex').value  = ev.rowIndex;
-  document.getElementById('edit-date').value      = toISO(ev.date);
-  document.getElementById('edit-nom').value       = ev.nom            || '';
-  document.getElementById('edit-animateur').value = ev.animateur      || '';
-  document.getElementById('edit-heureRV').value   = ev.heureRV        || ev.heure_rv   || '';
-  document.getElementById('edit-parking').value   = ev.parking        || ev.parking_covoit || '';
-  document.getElementById('edit-ibp').value       = ev.ibp            || '';
-  document.getElementById('edit-duree').value     = ev.duree          || '';
-  document.getElementById('edit-distance').value  = ev.distance       || '';
-  document.getElementById('edit-denivele').value  = ev.denivele       || '';
-  document.getElementById('edit-statut').value    = ev.statut         || 'publiée';
-  document.getElementById('edit-remarques').value = ev.remarques      || '';
+  document.getElementById('edit-rowIndex').value  = ev.id;
+  document.getElementById('edit-date').value      = ev.date_rando      || '';
+  document.getElementById('edit-nom').value       = ev.nom_rando       || '';
+  document.getElementById('edit-animateur').value = ev.animateur       || '';
+  document.getElementById('edit-heureRV').value   = ev.heure_rv        || '';
+  document.getElementById('edit-parking').value   = ev.parking_covoit  || '';
+  document.getElementById('edit-ibp').value       = ev.ibp             || '';
+  document.getElementById('edit-duree').value     = ev.duree           || '';
+  document.getElementById('edit-distance').value  = ev.distance        || '';
+  document.getElementById('edit-denivele').value  = ev.denivele        || '';
+  document.getElementById('edit-statut').value    = ev.statut          || 'publiée';
+  document.getElementById('edit-remarques').value = ev.remarques       || '';
   document.getElementById('modal-edit').classList.add('open');
 }
 
 async function saveEdit() {
-  const rowIndex  = document.getElementById('edit-rowIndex').value;
+  const id        = document.getElementById('edit-rowIndex').value;
   const date      = document.getElementById('edit-date').value;
   const nom       = document.getElementById('edit-nom').value.trim();
   const animateur = document.getElementById('edit-animateur').value.trim();
@@ -624,32 +627,107 @@ async function saveEdit() {
   if (!date || !nom || !animateur) { showToast('Champs obligatoires manquants.', true); return; }
   setBusy('btn-save-edit', true);
   try {
-    const res = await callScript({
-      action: 'update', rowIndex, date, nom, animateur,
-      heureRV, parking, ibp, duree, distance, denivele, statut, remarques
+    const patch = {
+      date_rando:     date,
+      nom_rando:      nom,
+      animateur:      animateur,
+      heure_rv:       heureRV   || null,
+      parking_covoit: parking   || null,
+      ibp:            ibp       ? parseFloat(ibp)      : null,
+      duree:          duree     || null,
+      distance:       distance  ? parseFloat(distance) : null,
+      denivele:       denivele  ? parseInt(denivele)   : null,
+      statut:         statut,
+      remarques:      remarques || null,
+    };
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/fiches?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type':  'application/json',
+        'apikey':        SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer':        'return=minimal'
+      },
+      body: JSON.stringify(patch)
     });
-    if (res.success) {
-      showToast('✅ Événement modifié dans Sheets et Calendar !');
+    if (res.ok) {
+      /* Sync Google Calendar */
+      const ficheActuelle = allRows.find(x => x.id == id) || {};
+      syncCalendar('calendarUpdate', {
+        dateRando:     date,
+        dateRandoOld:  ficheActuelle.date_rando || date,
+        nomRando:      statut === 'annulée' ? `❌ ANNULÉE — ${nom}` : nom,
+        animateur:     animateur,
+        heureRV:       heureRV   || '',
+        parking:       parking   || '',
+        parkingDepart: ficheActuelle.parking_depart || '',
+        gps:           ficheActuelle.gps            || '',
+        distance:      distance  || '',
+        denivele:      denivele  || '',
+        duree:         duree     || '',
+        ibp:           ibp       || '',
+        effort:        ficheActuelle.effort     || '',
+        technicite:    ficheActuelle.technicite  || '',
+        risque:        ficheActuelle.risque      || '',
+        couts:         ficheActuelle.couts       || '',
+      });
+      showToast('✅ Événement modifié dans Supabase et Calendar !');
       closeModal('modal-edit');
       loadEvents();
-    } else showToast('Erreur : ' + (res.error || 'inconnue'), true);
+    } else {
+      const txt = await res.text();
+      showToast('Erreur : ' + txt, true);
+    }
   } catch(e) { showToast('Erreur réseau.', true); }
   setBusy('btn-save-edit', false);
+}
+
+/* Sync Calendar via Edge Function (best-effort) */
+async function syncCalendar(action, ficheData) {
+  try {
+    await fetch('https://whlxbfnmyqdflmxosfse.supabase.co/functions/v1/dynamic-handler', {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'apikey':        SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      },
+      body: JSON.stringify({ action, fiche: ficheData })
+    });
+  } catch(e) { console.warn('[Calendar sync] Erreur:', e.message); }
 }
 
 /* ══════════════════════════════════════════
    SUPPRIMER
    ══════════════════════════════════════════ */
-function confirmDelete(rowIndex, nom) {
-  if (!confirm('Annuler "' + nom + '" ?\nSera supprimé de Sheets ET de Google Calendar.')) return;
-  deleteEvent(rowIndex);
+function confirmDelete(id, nom, animateur, dateRando) {
+  if (!confirm('Annuler "' + nom + '" ?\nElle restera visible barrée dans le planning.')) return;
+  deleteEvent(id, nom, animateur, dateRando);
 }
 
-async function deleteEvent(rowIndex) {
+async function deleteEvent(id, nom, animateur, dateRando) {
   try {
-    const res = await callScript({ action:'delete', rowIndex });
-    if (res.success) { showToast('🗑️ Événement supprimé.'); loadEvents(); }
-    else showToast('Erreur : ' + (res.error || 'inconnue'), true);
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/fiches?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type':  'application/json',
+        'apikey':        SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer':        'return=minimal'
+      },
+      body: JSON.stringify({ statut: 'annulée' })
+    });
+    if (res.ok) {
+      /* Sync Calendar — marquer annulée */
+      syncCalendar('calendarUpdate', {
+        dateRando:    dateRando,
+        dateRandoOld: dateRando,
+        nomRando:     `❌ ANNULÉE — ${nom}`,
+        animateur:    animateur || '',
+      });
+      showToast('❌ Randonnée annulée.');
+      loadEvents();
+    } else showToast('Erreur lors de l\'annulation.', true);
   } catch(e) { showToast('Erreur réseau.', true); }
 }
 
