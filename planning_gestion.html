@@ -112,6 +112,12 @@
   .modal h3 { font-size: 1.1rem; color: #2d6a4f; margin-bottom: 20px; }
   .modal-actions { display: flex; gap: 10px; margin-top: 22px; justify-content: flex-end; }
 
+  .modal-confirm-icon { font-size: 2.6rem; margin-bottom: 12px; }
+  .modal-confirm-titre { font-size: 1.05rem; font-weight: 700; color: #c53030; margin-bottom: 14px; }
+  .modal-confirm-body { font-size: .88rem; color: #2d3748; line-height: 1.6; margin-bottom: 6px; }
+  .modal-confirm-warning { background: #fff5f5; border: 1px solid #fed7d7; border-radius: 8px; padding: 12px 14px; margin: 12px 0; font-size: .85rem; color: #742a2a; line-height: 1.55; }
+  .modal-confirm-note { font-size: .82rem; color: #718096; font-style: italic; margin-top: 8px; }
+
   .spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .empty-state { text-align: center; padding: 40px; color: #a0aec0; font-style: italic; font-size: .95rem; }
@@ -175,6 +181,13 @@
           <div class="autocomplete-list" id="nom-list"></div>
         </div>
       </div>
+      <div class="form-group full">
+        <label for="parking-input">Parking covoiturage</label>
+        <div class="autocomplete-wrap">
+          <input type="text" id="parking-input" placeholder="Tapez ou saisissez un parking…" autocomplete="off">
+          <div class="autocomplete-list" id="parking-list"></div>
+        </div>
+      </div>
       <div class="form-group">
         <label for="ibp">Indice IBP</label>
         <input type="number" id="ibp" placeholder="Ex : 45" min="0">
@@ -182,9 +195,9 @@
       </div>
       <div class="form-group"><!-- spacer --></div>
       <div class="form-group">
-        <label for="distance">Distance</label>
+        <label for="distance">Distance *</label>
         <div class="input-unit">
-          <input type="number" id="distance" placeholder="Ex : 18" min="0" step="0.1">
+          <input type="number" id="distance" placeholder="Ex : 18" min="0" step="0.1" required="">
           <span>km</span>
         </div>
       </div>
@@ -231,21 +244,71 @@
 
 <!-- ══ MODAL MODIFIER ══ -->
 <div class="modal-overlay" id="modal-edit">
-  <div class="modal">
+  <div class="modal" style="width:580px;max-height:88vh;overflow-y:auto">
     <h3>✏️ Modifier l'événement</h3>
     <input type="hidden" id="edit-rowIndex">
     <div class="form-grid">
       <div class="form-group"><label>Date *</label><input type="date" id="edit-date"></div>
-      <div class="form-group"><label>Animateur *</label><input type="text" id="edit-animateur"></div>
-      <div class="form-group full"><label>Nom de la randonnée *</label><input type="text" id="edit-nom"></div>
+      <div class="form-group">
+        <label>Animateur *</label>
+        <div class="autocomplete-wrap">
+          <input type="text" id="edit-animateur" placeholder="Tapez un nom…" autocomplete="off">
+          <div class="autocomplete-list" id="edit-animateur-list"></div>
+        </div>
+      </div>
+      <div class="form-group full">
+        <label>Nom de la randonnée *</label>
+        <div class="autocomplete-wrap">
+          <input type="text" id="edit-nom" placeholder="Tapez quelques lettres…" autocomplete="off">
+          <div class="autocomplete-list" id="edit-nom-list"></div>
+        </div>
+      </div>
+      <div class="form-group"><label>Heure RV</label><input type="time" id="edit-heureRV"></div>
+      <div class="form-group">
+        <label>Parking covoiturage</label>
+        <div class="autocomplete-wrap">
+          <input type="text" id="edit-parking" placeholder="Tapez ou saisissez…" autocomplete="off">
+          <div class="autocomplete-list" id="edit-parking-list"></div>
+        </div>
+      </div>
       <div class="form-group"><label>IBP</label><input type="number" id="edit-ibp" min="0"></div>
-      <div class="form-group"><!-- spacer --></div>
-      <div class="form-group"><label>Distance</label><div class="input-unit"><input type="number" id="edit-distance" min="0" step="0.1"><span>km</span></div></div>
+      <div class="form-group"><label>Durée</label><input type="text" id="edit-duree" placeholder="ex: 3h30"></div>
+      <div class="form-group"><label>Distance *</label><div class="input-unit"><input type="number" id="edit-distance" min="0" step="0.1" required=""><span>km</span></div></div>
       <div class="form-group"><label>Dénivelé +</label><div class="input-unit"><input type="number" id="edit-denivele" min="0" step="1"><span>m</span></div></div>
+      <div class="form-group">
+        <label>Statut</label>
+        <select id="edit-statut">
+          <option value="publiée">✅ Publiée</option>
+          <option value="modifiée">✏️ Modifiée</option>
+          <option value="annulée">❌ Annulée</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Remarques</label>
+        <textarea id="edit-remarques" style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.95rem;font-family:inherit;min-height:70px;resize:vertical" placeholder="Notes, modifications…"></textarea>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-cancel" onclick="closeModal('modal-edit')">Annuler</button>
       <button class="btn btn-primary" id="btn-save-edit" onclick="saveEdit()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL CONFIRMATION ANNULATION ══ -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal" style="max-width:460px;text-align:center">
+    <div class="modal-confirm-icon">⚠️</div>
+    <div class="modal-confirm-titre" id="confirm-titre"></div>
+    <div class="modal-confirm-body" id="confirm-body"></div>
+    <div class="modal-confirm-warning">
+      ❌ La mention <strong>"Annulée"</strong> sera affichée sur tous les points d'affichage :<br>
+      planning du site, Google Calendar, historique.
+    </div>
+    <div class="modal-confirm-note">Ce n'est pas une suppression — la fiche reste visible barrée.<br>Elle peut être remise en statut <strong>"Publiée"</strong> à tout moment.</div>
+    <div class="modal-actions" style="justify-content:center;margin-top:20px;gap:14px">
+      <button class="btn btn-cancel" onclick="closeModal('modal-confirm')">↩ Garder la rando</button>
+      <button class="btn btn-delete" id="btn-confirm-annuler">❌ Confirmer l'annulation</button>
     </div>
   </div>
 </div>
@@ -307,9 +370,10 @@ if (sessionStorage.getItem(SESSION_KEY) === "1") {
 
 let animateurs = [];
 let randos     = [];
+let parkings   = [];
 let allRows    = [];
 let sortCol    = "date";
-let sortDir    = "asc";
+let sortDir    = "desc";
 
 function initApp() {
   loadData();
@@ -355,14 +419,21 @@ function niveauIBP(v) {
 
 async function loadData() {
   try {
-    const [a, r] = await Promise.all([
+    const [a, r, p] = await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/animateurs?select=nom,email&order=nom`, {
         headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
       }).then(res => res.json()),
-      fetch(BASE_URL + "randos.json").then(res => res.json())
+      fetch(BASE_URL + "randos.json").then(res => res.json()),
+      fetch(BASE_URL + "parkings.js").then(res => res.text()).then(txt => {
+        /* parkings.js exporte un tableau JS — on extrait les valeurs entre crochets */
+        const m = txt.match(/\[([^\]]+)\]/s);
+        if (!m) return [];
+        return m[1].split(",").map(s => s.trim().replace(/^['"]|['"]$/g, "")).filter(Boolean);
+      })
     ]);
     animateurs = a.filter(x => x.nom && x.nom !== "");
     randos     = r;
+    parkings   = p;
     initAutocomplete();
   } catch(e) { console.error("Erreur chargement:", e); }
 }
@@ -370,6 +441,11 @@ async function loadData() {
 function initAutocomplete() {
   setupAutocomplete("animateur-input", "animateur-list", () => animateurs.map(a => a.nom));
   setupAutocomplete("nom-input",       "nom-list",       () => randos);
+  setupAutocomplete("parking-input",   "parking-list",   () => parkings);
+  /* Modal modification */
+  setupAutocomplete("edit-animateur",  "edit-animateur-list", () => animateurs.map(a => a.nom));
+  setupAutocomplete("edit-nom",        "edit-nom-list",       () => randos);
+  setupAutocomplete("edit-parking",    "edit-parking-list",   () => parkings);
 }
 function setupAutocomplete(inputId, listId, getItems) {
   const input = document.getElementById(inputId);
@@ -433,13 +509,15 @@ function setBusy(btnId, busy) {
 }
 
 async function creerRando() {
-  const date = document.getElementById("date").value;
-  const nom  = document.getElementById("nom-input").value.trim();
-  const anim = document.getElementById("animateur-input").value.trim();
-  const ibp  = document.getElementById("ibp").value.trim();
-  const dist = document.getElementById("distance").value.trim();
-  const den  = document.getElementById("denivele").value.trim();
+  const date    = document.getElementById("date").value;
+  const nom     = document.getElementById("nom-input").value.trim();
+  const anim    = document.getElementById("animateur-input").value.trim();
+  const parking = document.getElementById("parking-input").value.trim();
+  const ibp     = document.getElementById("ibp").value.trim();
+  const dist    = document.getElementById("distance").value.trim();
+  const den     = document.getElementById("denivele").value.trim();
   if (!date || !nom || !anim) { showToast("Veuillez remplir les champs obligatoires (*)", true); return; }
+  if (!dist) { showToast("La distance est obligatoire (*)", true); return; }
   setBusy("btn-create", true);
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/fiches`, {
@@ -451,13 +529,14 @@ async function creerRando() {
         "Prefer":        "return=minimal"
       },
       body: JSON.stringify({
-        date_rando: date,
-        nom_rando:  nom,
-        animateur:  anim,
-        ibp:        ibp  ? parseFloat(ibp)  : null,
-        distance:   dist ? parseFloat(dist) : null,
-        denivele:   den  ? parseInt(den)    : null,
-        statut:     "publiée"
+        date_rando:     date,
+        nom_rando:      nom,
+        animateur:      anim,
+        parking_covoit: parking || null,
+        ibp:            ibp  ? parseFloat(ibp)  : null,
+        distance:       dist ? parseFloat(dist) : null,
+        denivele:       den  ? parseInt(den)    : null,
+        statut:         "publiée"
       })
     });
     if (res.ok) {
@@ -465,6 +544,7 @@ async function creerRando() {
       ["ibp","distance","denivele"].forEach(id => document.getElementById(id).value = "");
       document.getElementById("nom-input").value = "";
       document.getElementById("animateur-input").value = "";
+      document.getElementById("parking-input").value = "";
       document.getElementById("ibp-badge").className = "ibp-badge";
       const last = new Date(date + "T12:00:00");
       const dow  = last.getDay();
@@ -549,26 +629,50 @@ function sortTable(col) {
 
 function openEdit(ev) {
   document.getElementById("edit-rowIndex").value  = ev.id;
-  document.getElementById("edit-date").value      = ev.date_rando || "";
-  document.getElementById("edit-nom").value       = ev.nom_rando  || "";
-  document.getElementById("edit-animateur").value = ev.animateur  || "";
-  document.getElementById("edit-ibp").value       = ev.ibp        || "";
-  document.getElementById("edit-distance").value  = ev.distance   || "";
-  document.getElementById("edit-denivele").value  = ev.denivele   || "";
+  document.getElementById("edit-date").value      = ev.date_rando      || "";
+  document.getElementById("edit-nom").value       = ev.nom_rando       || "";
+  document.getElementById("edit-animateur").value = ev.animateur       || "";
+  document.getElementById("edit-heureRV").value   = ev.heure_rv        || "";
+  document.getElementById("edit-parking").value   = ev.parking_covoit  || "";
+  document.getElementById("edit-ibp").value       = ev.ibp             || "";
+  document.getElementById("edit-duree").value     = ev.duree           || "";
+  document.getElementById("edit-distance").value  = ev.distance        || "";
+  document.getElementById("edit-denivele").value  = ev.denivele        || "";
+  document.getElementById("edit-statut").value    = ev.statut          || "publiée";
+  document.getElementById("edit-remarques").value = ev.remarques       || "";
   document.getElementById("modal-edit").classList.add("open");
 }
 
 async function saveEdit() {
-  const id   = document.getElementById("edit-rowIndex").value;
-  const date = document.getElementById("edit-date").value;
-  const nom  = document.getElementById("edit-nom").value.trim();
-  const anim = document.getElementById("edit-animateur").value.trim();
-  const ibp  = document.getElementById("edit-ibp").value.trim();
-  const dist = document.getElementById("edit-distance").value.trim();
-  const den  = document.getElementById("edit-denivele").value.trim();
+  const id        = document.getElementById("edit-rowIndex").value;
+  const date      = document.getElementById("edit-date").value;
+  const nom       = document.getElementById("edit-nom").value.trim();
+  const anim      = document.getElementById("edit-animateur").value.trim();
+  const heureRV   = document.getElementById("edit-heureRV").value.trim();
+  const parking   = document.getElementById("edit-parking").value.trim();
+  const ibp       = document.getElementById("edit-ibp").value.trim();
+  const duree     = document.getElementById("edit-duree").value.trim();
+  const dist      = document.getElementById("edit-distance").value.trim();
+  const den       = document.getElementById("edit-denivele").value.trim();
+  const statut    = document.getElementById("edit-statut").value;
+  const remarques = document.getElementById("edit-remarques").value.trim();
   if (!date || !nom || !anim) { showToast("Champs obligatoires manquants.", true); return; }
+  if (!dist) { showToast("La distance est obligatoire.", true); return; }
   setBusy("btn-save-edit", true);
   try {
+    const patch = {
+      date_rando:     date,
+      nom_rando:      nom,
+      animateur:      anim,
+      heure_rv:       heureRV  || null,
+      parking_covoit: parking  || null,
+      ibp:            ibp      ? parseFloat(ibp)  : null,
+      duree:          duree    || null,
+      distance:       dist     ? parseFloat(dist) : null,
+      denivele:       den      ? parseInt(den)    : null,
+      statut:         statut,
+      remarques:      remarques || null,
+    };
     const res = await fetch(`${SUPABASE_URL}/rest/v1/fiches?id=eq.${id}`, {
       method: "PATCH",
       headers: {
@@ -577,17 +681,29 @@ async function saveEdit() {
         "Authorization": `Bearer ${SUPABASE_KEY}`,
         "Prefer":        "return=minimal"
       },
-      body: JSON.stringify({
-        date_rando: date,
-        nom_rando:  nom,
-        animateur:  anim,
-        ibp:        ibp  ? parseFloat(ibp)  : null,
-        distance:   dist ? parseFloat(dist) : null,
-        denivele:   den  ? parseInt(den)    : null,
-        statut:     "modifiée"
-      })
+      body: JSON.stringify(patch)
     });
     if (res.ok) {
+      /* Sync Google Calendar */
+      const ficheActuelle = allRows.find(x => x.id == id) || {};
+      syncCalendar("calendarUpdate", {
+        dateRando:     date,
+        dateRandoOld:  ficheActuelle.date_rando || date,
+        nomRando:      statut === "annulée" ? `❌ ANNULÉE — ${nom}` : nom,
+        animateur:     anim,
+        heureRV:       heureRV   || "",
+        parking:       parking   || "",
+        parkingDepart: ficheActuelle.parking_depart || "",
+        gps:           ficheActuelle.gps            || "",
+        distance:      dist      || "",
+        denivele:      den       || "",
+        duree:         duree     || "",
+        ibp:           ibp       || "",
+        effort:        ficheActuelle.effort     || "",
+        technicite:    ficheActuelle.technicite  || "",
+        risque:        ficheActuelle.risque      || "",
+        couts:         ficheActuelle.couts       || "",
+      });
       showToast("✅ Événement modifié !");
       closeModal("modal-edit");
       loadEvents();
@@ -599,11 +715,20 @@ async function saveEdit() {
   setBusy("btn-save-edit", false);
 }
 
-function confirmDelete(id, nom) {
-  if (!confirm('Annuler "' + nom + '" ?\nElle restera visible barrée dans le planning.')) return;
-  deleteEvent(id);
+function confirmDelete(id, nom, animateur, dateRando) {
+  document.getElementById("confirm-titre").textContent = `Annuler "${nom}" ?`;
+  document.getElementById("confirm-body").textContent  = `Randonnée du ${toDisplay(dateRando)} — Animateur : ${animateur || "—"}`;
+  const btn = document.getElementById("btn-confirm-annuler");
+  /* Remplacer le listener précédent */
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+  newBtn.addEventListener("click", () => {
+    closeModal("modal-confirm");
+    deleteEvent(id, nom, animateur, dateRando);
+  });
+  document.getElementById("modal-confirm").classList.add("open");
 }
-async function deleteEvent(id) {
+async function deleteEvent(id, nom, animateur, dateRando) {
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/fiches?id=eq.${id}`, {
       method: "PATCH",
@@ -615,9 +740,32 @@ async function deleteEvent(id) {
       },
       body: JSON.stringify({ statut: "annulée" })
     });
-    if (res.ok) { showToast("❌ Randonnée annulée."); loadEvents(); }
-    else showToast("Erreur lors de l'annulation.", true);
+    if (res.ok) {
+      syncCalendar("calendarUpdate", {
+        dateRando:    dateRando,
+        dateRandoOld: dateRando,
+        nomRando:     `❌ ANNULÉE — ${nom}`,
+        animateur:    animateur || "",
+      });
+      showToast("❌ Randonnée annulée.");
+      loadEvents();
+    } else showToast("Erreur lors de l'annulation.", true);
   } catch(e) { showToast("Erreur réseau.", true); }
+}
+
+/* Sync Calendar via Edge Function (best-effort) */
+async function syncCalendar(action, ficheData) {
+  try {
+    await fetch(`${SUPABASE_URL}/functions/v1/dynamic-handler`, {
+      method: "POST",
+      headers: {
+        "Content-Type":  "application/json",
+        "apikey":        SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`
+      },
+      body: JSON.stringify({ action, fiche: ficheData })
+    });
+  } catch(e) { console.warn("[Calendar sync] Erreur:", e.message); }
 }
 
 function closeModal(id) { document.getElementById(id).classList.remove("open"); }
